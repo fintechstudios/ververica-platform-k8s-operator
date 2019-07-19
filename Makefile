@@ -1,6 +1,11 @@
 
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
+REGISTRY?=kong-docker-kubernetes-ingress-controller.bintray.io
+TAG?=0.1.0
+REPO_INFO=$(shell git config --get remote.origin.url)
+IMGNAME = kong-ingress-controller
+IMAGE = $(REGISTRY)/$(IMGNAME)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -59,14 +64,14 @@ generate: controller-gen
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: test
+docker-build: manager
 	docker build . -t ${IMG}
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 .PHONY: docker-push
-docker-push:
+docker-push: docker-push
 	docker push ${IMG}
 
 # find or download controller-gen
