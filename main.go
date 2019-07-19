@@ -38,6 +38,7 @@ var (
 func init() {
 
 	_ = ververicaplatformv1beta1.AddToScheme(scheme)
+	ververicaplatformv1beta1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -75,15 +76,25 @@ func main() {
 		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
 		UserAgent:     "VervericaPlatformK8sController/1.0.0/go",
 	})
+
 	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
 
-	err = (&controllers.DeploymentTargetReconciler{
-		Client:             mgr.GetClient(),
-		Log:                ctrl.Log.WithName("controllers").WithName("DeploymentTarget"),
+	err = (&controllers.VPNamespaceReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VPNamespace"),
 		VervericaAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DeploymentTarget")
+		setupLog.Error(err, "unable to create controller", "controller", "VPNamespace")
+		os.Exit(1)
+	}
+	err = (&controllers.VPDeploymentTargetReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VPDeploymentTarget"),
+		VervericaAPIClient: *ververicaAPIClient,
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "VPDeploymentTarget")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

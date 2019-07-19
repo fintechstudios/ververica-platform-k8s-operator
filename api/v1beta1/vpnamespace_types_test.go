@@ -28,10 +28,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("DeploymentTarget", func() {
+var _ = Describe("VPNamespace", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *DeploymentTarget
+		created, fetched *VPNamespace
 	)
 
 	BeforeEach(func() {
@@ -54,7 +54,7 @@ var _ = Describe("DeploymentTarget", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &DeploymentTarget{
+			created = &VPNamespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
@@ -63,7 +63,7 @@ var _ = Describe("DeploymentTarget", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &DeploymentTarget{}
+			fetched = &VPNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

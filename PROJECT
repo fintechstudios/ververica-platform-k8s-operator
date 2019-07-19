@@ -8,3 +8,9 @@ resources:
 - group: ververicaplatform
   version: v1beta1
   kind: DeploymentTarget
+- group: ververicaplatform
+  version: v1beta1
+  kind: VPNamespace
+- group: ververicaplatform
+  version: v1beta1
+  kind: VPDeploymentTarget

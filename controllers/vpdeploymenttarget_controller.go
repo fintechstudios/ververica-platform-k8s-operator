@@ -18,38 +18,38 @@ package controllers
 
 import (
 	"context"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
+	ververicaplatformapi "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	ververicaplatformapi "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
-// DeploymentTargetReconciler reconciles a DeploymentTarget object
-type DeploymentTargetReconciler struct {
+// VPDeploymentTargetReconciler reconciles a VPDeploymentTarget object
+type VPDeploymentTargetReconciler struct {
 	client.Client
-	Log                logr.Logger
+	Log logr.Logger
 	VervericaAPIClient ververicaplatformapi.APIClient
 }
 
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=deploymenttargets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=deploymenttargets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeploymenttargets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeploymenttargets/status,verbs=get;update;patch
 
 // Reconcile tries to make the current state more like the desired state
-func (r *DeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *VPDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("deploymenttarget", req.NamespacedName)
 
-	log.Info("Built api client", nil)
 	// your logic here
 	target, _, err := r.VervericaAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, "default", req.Name)
 
 	if err != nil {
 		// TODO: think about ignoring not-found errors, as they won't
 		// 		 be immediately solved by re-queueing
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 	log.Info("Found target", target)
 
@@ -57,8 +57,8 @@ func (r *DeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 }
 
 // SetupWithManager is a helper function to initial on manager boot
-func (r *DeploymentTargetReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *VPDeploymentTargetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ververicaplatformv1beta1.DeploymentTarget{}).
+		For(&ververicaplatformv1beta1.VPDeploymentTarget{}).
 		Complete(r)
 }

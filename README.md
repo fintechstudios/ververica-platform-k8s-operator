@@ -4,12 +4,24 @@ Makes Ververica Platform resources Kubernetes-Native!
 
 ## Supported Resources
 
-* DeploymentTargets
-* Deployments
+Since the namespaces of K8s and the Ververica Platform somewhat class, the 
+custom VP Resources will all be prefixed with `VP`.
+
+* `DeploymentTargets` -> `VPDeploymentTargets`
+* `Deployments` -> `VPDeployments`
+* `Namespaces` -> `VPNamespaces`
 
 ## Unsupported
 
-* Jobs
+* `Jobs`
+* `Events`
+* `Role Bindings`
+* `Roles`
+* `Cluster Role Bindings`
+* `Cluster Roles`
+* `Savepoints`
+* `Secret Values`
+* `Status`
 
 
 ## Development

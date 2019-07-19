@@ -23,40 +23,45 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// DeploymentTargetSpec defines the desired state of DeploymentTarget
-type DeploymentTargetSpec struct {
+// VPNamespaceSpec defines the desired state of VPNamespace
+type VPNamespaceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	metav1.TypeMeta `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 }
 
-// DeploymentTargetStatus defines the observed state of DeploymentTarget
-type DeploymentTargetStatus struct {
+// VPNamespaceStatus defines the observed state of VPNamespace
+type VPNamespaceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// A list of pointers to currently running jobs.
+	// +optional
+	State string `json:"state,omitempty"`
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
-// DeploymentTarget is the Schema for the deploymenttargets API
-type DeploymentTarget struct {
+// VPNamespace is the Schema for the vpnamespaces API
+type VPNamespace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   DeploymentTargetSpec   `json:"spec,omitempty"`
-	Status DeploymentTargetStatus `json:"status,omitempty"`
+	Spec   VPNamespaceSpec   `json:"spec,omitempty"`
+	Status VPNamespaceStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// DeploymentTargetList contains a list of DeploymentTarget
-type DeploymentTargetList struct {
+// VPNamespaceList contains a list of VPNamespace
+type VPNamespaceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []DeploymentTarget `json:"items"`
+	Items           []VPNamespace `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&DeploymentTarget{}, &DeploymentTargetList{})
+	SchemeBuilder.Register(&VPNamespace{}, &VPNamespaceList{})
 }
