@@ -1,0 +1,35 @@
+
+image:
+  name: golang:1.12-alpine
+
+# TODO: only do this once and cache the results
+before_script:
+  - go mod download
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - make
+
+docker-build:
+  stage: build
+  script:
+    - make docker-build
+
+lint:
+  stage: test
+  before_script:
+    - go mod download
+  script:
+    - go get -u golang.org/x/lint/golint
+    - make lint
+
+test:
+  stage: test
+  script:
+    - make test
+

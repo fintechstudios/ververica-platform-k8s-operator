@@ -1,0 +1,10 @@
+version: "2"
+domain: fintechstudios.com
+repo: github.com/fintechstudios/ververica-platform-k8s-controller
+resources:
+- group: ververicaplatform
+  version: v1beta1
+  kind: DeploymentTarget
+- group: ververicaplatform
+  version: v1beta1
+  kind: DeploymentTarget
