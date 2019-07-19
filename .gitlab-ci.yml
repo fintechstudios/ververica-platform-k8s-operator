@@ -1,6 +1,6 @@
 
 image:
-  name: golang:1.12-alpine
+  name: golang:1.12-stretch
 
 # TODO: only do this once and cache the results
 before_script:
