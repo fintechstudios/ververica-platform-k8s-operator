@@ -2,6 +2,9 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VPDeploymentTarget
 metadata:
   name: "dep-target"
-  test: "a"
 spec:
-  field: "b"
+  metadata:
+    namespace: "doc-ingestion"
+  spec:
+    kubernetes:
+      namespace: "flink"

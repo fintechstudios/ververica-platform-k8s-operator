@@ -34,14 +34,6 @@ var _ = Describe("VPNamespace", func() {
 		created, fetched *VPNamespace
 	)
 
-	BeforeEach(func() {
-		// Add any setup steps that needs to be executed before each test
-	})
-
-	AfterEach(func() {
-		// Add any teardown steps that needs to be executed after each test
-	})
-
 	// Add Tests for OpenAPI validation (or additonal CRD features) specified in
 	// your API definition.
 	// Avoid adding tests for vanilla CRUD operations because they would

@@ -58,7 +58,8 @@ var _ = Describe("VPDeploymentTarget", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())

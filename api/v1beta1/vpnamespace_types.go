@@ -23,11 +23,17 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// VPNamespaceMetadata represents all metadata from the VP API
 type VPNamespaceMetadata struct {
-	Name string `json:"name"` // TODO: Should this only be kept in the ObjectMeta?
+	// +optional
+	Name string `json:"name"`
+	// +optional
 	Id string `json:"id,omitempty"`
+	// +optional
 	CreatedAt *metav1.Timestamp `json:"createdAt,omitempty"`
+	// +optional
 	ModifiedAt *metav1.Timestamp `json:"modifiedAt,omitempty"`
+	// +optional
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
@@ -37,6 +43,7 @@ type VPNamespaceSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	// Kind and ApiVersion are mapped automatically
 	// Status is mapped to a subresource
+	// +optional
 	Metadata VPNamespaceMetadata `json:"metadata,omitempty"`
 }
 

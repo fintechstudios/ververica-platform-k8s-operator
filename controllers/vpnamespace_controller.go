@@ -35,11 +35,10 @@ import (
 // VPNamespaceReconciler reconciles a VPNamespace object
 type VPNamespaceReconciler struct {
 	client.Client
-	Log                logr.Logger
-	VervericaAPIClient vpAPI.APIClient
+	Log         logr.Logger
+	VPAPIClient vpAPI.APIClient
 }
 
-var FinalizerName = "finalizers.fintechstudios.com"
 
 // updateResource takes a k8s resource and a VP resource and merges them
 func (r *VPNamespaceReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VPNamespace, namespace *vpAPI.Namespace) error {
@@ -67,6 +66,7 @@ func (r *VPNamespaceReconciler) updateResource(req ctrl.Request, resource *verve
 	return nil
 }
 
+// getLogger creates a logger for the controller with the request name
 func (r *VPNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpnamespace", req.NamespacedName)
 }
@@ -81,7 +81,7 @@ func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request) (time.Duration, e
 	}
 
 	// create it
-	namespace, _, err := r.VervericaAPIClient.NamespacesApi.PostNamespace(ctx, &vpAPI.PostNamespaceOpts{
+	namespace, _, err := r.VPAPIClient.NamespacesApi.PostNamespace(ctx, &vpAPI.PostNamespaceOpts{
 		Body: optional.NewInterface(vpAPI.Namespace{
 			ApiVersion: "v1",
 			Metadata: &vpAPI.NamespaceMetadata{
@@ -125,7 +125,7 @@ func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (time.Duration, e
 	ctx := context.Background()
 	log := r.getLogger(req)
 	// Let's make sure it's deleted from the ververica platform
-	namespace, _, err := r.VervericaAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
+	namespace, _, err := r.VPAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
@@ -163,9 +163,8 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	if vpNamespace.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Not being deleted, add the finalizer
-		if !utils.ContainsString(vpNamespace.ObjectMeta.Finalizers, FinalizerName) {
+		if utils.AddFinalizerToObjectMeta(&vpNamespace.ObjectMeta) {
 			log.Info("Adding Finalizer")
-			vpNamespace.ObjectMeta.Finalizers = append(vpNamespace.ObjectMeta.Finalizers, FinalizerName)
 			if err := r.Update(ctx, &vpNamespace); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -183,14 +182,16 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		vpNamespace.ObjectMeta.Finalizers = utils.RemoveString(vpNamespace.ObjectMeta.Finalizers, FinalizerName)
-		if err := r.Update(ctx, &vpNamespace); err != nil {
-			return ctrl.Result{}, err
+		if utils.RemoveFinalizerFromObjectMeta(&vpNamespace.ObjectMeta) {
+			if err := r.Update(ctx, &vpNamespace); err != nil {
+				return ctrl.Result{}, err
+			}
 		}
+
 		return res, nil
 	}
 
-	namespace, _, err := r.VervericaAPIClient.NamespacesApi.GetNamespace(nil, req.Name)
+	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(nil, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it
