@@ -72,13 +72,12 @@ func (r *VPNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // handleCreate creates VP resources
-func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request) (*ctrl.Result, error) {
+func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request) (time.Duration, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
-	res := new(ctrl.Result)
 	var vpNamespace ververicaplatformv1beta1.VPNamespace
 	if err := r.Get(ctx, req.NamespacedName, &vpNamespace); err != nil {
-		return res, err
+		return 0, err
 	}
 
 	// create it
@@ -93,56 +92,55 @@ func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request) (*ctrl.Result, er
 
 	if err != nil {
 		log.Error(err, "Error creating VP namespace")
-		return res, err
+		return 0, err
 	}
 	log.Info("Created namespace", "namespace", namespace)
 
 	// Now update the k8s resource and status as well
 	if err := r.updateResource(req, &vpNamespace, &namespace); err != nil {
-		return res, err
+		return 0, err
 	}
 
-	return res, nil
+	return 0, nil
 }
 
 // handle update updates the k8s resource when it already exists in the VP
-func (r *VPNamespaceReconciler) handleUpdate(req ctrl.Request, namespace vpAPI.Namespace) (*ctrl.Result, error) {
+func (r *VPNamespaceReconciler) handleUpdate(req ctrl.Request, namespace vpAPI.Namespace) (time.Duration, error) {
 	ctx := context.Background()
-	res := new(ctrl.Result)
 	var vpNamespace ververicaplatformv1beta1.VPNamespace
 	if err := r.Get(ctx, req.NamespacedName, &vpNamespace); err != nil {
-		return res, err
+		return 0, err
 	}
 
 	// Now update the k8s resource and status as well
 	if err := r.updateResource(req, &vpNamespace, &namespace); err != nil {
-		return res, err
+		return 0, err
 	}
 
-	return res, nil
+	return 0, nil
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (*ctrl.Result, error) {
+func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (time.Duration, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
-	res := new(ctrl.Result)
 	// Let's make sure it's deleted from the ververica platform
 	namespace, _, err := r.VervericaAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
-		return res, utils.IgnoreNotFoundError(err)
+		return 0, utils.IgnoreNotFoundError(err)
 	}
 
 	log.Info("Deleting namespace", "name", namespace.Metadata.Id)
 
 	if namespace.Status.State == "MARKED_FOR_DELETION" {
-		// Requeue for 10 seconds to wait for the namespace to be deleted
-		res.RequeueAfter = time.Second * 10
+		// Requeue for 5 seconds to wait for the namespace to be deleted
+		log.Info("Requeueing deletion request for 5 seconds")
+		return time.Second * 5, nil
 	}
 
-	return res, nil
+	return 0, nil
 }
 
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpnamespaces,verbs=get;list;watch;create;update;patch;delete
@@ -159,8 +157,8 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if err := r.Get(ctx, req.NamespacedName, &vpNamespace); err != nil {
 		log.Info("Not Found event", "name", req.Name)
 		// If it is not stored, must make sure it is deleted from VP as well
-		res, err := r.handleDelete(req)
-		return *res, err // res is never nil
+		dur, err := r.handleDelete(req)
+		return utils.EventHandlerResponse(dur, err)
 	}
 
 	if vpNamespace.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -176,38 +174,36 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	} else {
 		// Being deleted
 		log.Info("Deletion event", "name", req.Name)
-		res, err := r.handleDelete(req)
-		if err != nil {
+		dur, err := r.handleDelete(req)
+		res, err := utils.EventHandlerResponse(dur, err)
+		// TODO: not super happy with this flow, but will keep thinking on it
+		if err != nil || res.RequeueAfter > 0 {
 			// if fail to delete the external dependency here, return with error
 			// so that it can be retried
-			return ctrl.Result{}, err
+			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		// TODO: remove this finalizer higher up or move the requeueing down
 		vpNamespace.ObjectMeta.Finalizers = utils.RemoveString(vpNamespace.ObjectMeta.Finalizers, FinalizerName)
 		if err := r.Update(ctx, &vpNamespace); err != nil {
 			return ctrl.Result{}, err
 		}
-		return *res, nil
+		return res, nil
 	}
 
 	namespace, _, err := r.VervericaAPIClient.NamespacesApi.GetNamespace(nil, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it
-			res, err := r.handleCreate(req)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			return *res, nil
+			dur, err := r.handleCreate(req)
+			return utils.EventHandlerResponse(dur, err)
 		}
 		// Other error, not good!
 		return ctrl.Result{}, err
 	}
 
 	log.Info("Update event", "vp namespace", namespace.Metadata.Name)
-	res, err := r.handleUpdate(req, namespace)
-	return *res, err
+	dur, err := r.handleUpdate(req, namespace)
+	return utils.EventHandlerResponse(dur, err)
 }
 
 // SetupWithManager is a helper function to initial on manager boot
