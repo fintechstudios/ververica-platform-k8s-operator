@@ -23,12 +23,21 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type VPNamespaceMetadata struct {
+	Name string `json:"name"` // TODO: Should this only be kept in the ObjectMeta?
+	Id string `json:"id,omitempty"`
+	CreatedAt *metav1.Timestamp `json:"createdAt,omitempty"`
+	ModifiedAt *metav1.Timestamp `json:"modifiedAt,omitempty"`
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+}
+
 // VPNamespaceSpec defines the desired state of VPNamespace
 type VPNamespaceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	metav1.TypeMeta `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	// Kind and ApiVersion are mapped automatically
+	// Status is mapped to a subresource
+	Metadata VPNamespaceMetadata `json:"metadata,omitempty"`
 }
 
 // VPNamespaceStatus defines the observed state of VPNamespace
@@ -43,13 +52,16 @@ type VPNamespaceStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
+// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
+// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
+// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 
 // VPNamespace is the Schema for the vpnamespaces API
 type VPNamespace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   VPNamespaceSpec   `json:"spec,omitempty"`
+	Spec VPNamespaceSpec `json:"spec,omitempty"`
 	Status VPNamespaceStatus `json:"status,omitempty"`
 }
 

@@ -1,28 +1,45 @@
 # Ververica Platform Controller
 
-Makes Ververica Platform resources Kubernetes-Native! 
+Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
+for the 
 
 ## Supported Resources
 
-Since the namespaces of K8s and the Ververica Platform somewhat class, the 
+Since the resources names of K8s and the Ververica Platform somewhat class, the 
 custom VP Resources will all be prefixed with `VP`.
 
-* `DeploymentTargets` -> `VPDeploymentTargets`
-* `Deployments` -> `VPDeployments`
-* `Namespaces` -> `VPNamespaces`
+* `DeploymentTarget` -> `VPDeploymentTarget`
+* `Deployment` -> `VPDeployment`
+* `Namespace` -> `VPNamespace`
 
 ## Unsupported
 
-* `Jobs`
-* `Events`
-* `Role Bindings`
-* `Roles`
-* `Cluster Role Bindings`
-* `Cluster Roles`
-* `Savepoints`
-* `Secret Values`
+* `Job`
+* `Event`
+* `Role Binding`
+* `Role`
+* `Cluster Role Binding`
+* `Cluster Role`
+* `Savepoint`
+* `Secret Value`
 * `Status`
 
+
+### `VPNamespace`
+
+Schema:
+```yaml
+apiVersion: ververicaplatform.fintechstudios.com/v1beta1
+kind: VPNamespace
+metadata:
+  name: String # Required
+  id: UUID String # Dynamic
+  createdAt: Timestamp # Dynamic
+  modifiedAt: Timestamp  # Dynamic
+  resourceVersion: Integer # Dynamic
+status:
+  state: String # Dynamic
+```
 
 ## Development
 
