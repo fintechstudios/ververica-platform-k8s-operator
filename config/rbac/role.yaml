@@ -21,14 +21,6 @@ rules:
 - apiGroups:
   - ververicaplatform.fintechstudios.com
   resources:
-  - vpdeploymenttargets/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ververicaplatform.fintechstudios.com
-  resources:
   - vpnamespaces
   verbs:
   - create

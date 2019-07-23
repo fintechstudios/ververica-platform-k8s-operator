@@ -19,10 +19,9 @@ package controllers
 import (
 	"context"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
-	"time"
-
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -30,14 +29,28 @@ import (
 )
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VPDeploymentTargetReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VPDeploymentTarget, namespace *vpAPI.DeploymentTarget) error {
+func (r *VPDeploymentTargetReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VPDeploymentTarget, depTarget *vpAPI.DeploymentTarget) error {
 	ctx := context.Background()
 
-	if err := r.Update(ctx, resource); err != nil {
-		return err
+	resource.Name = depTarget.Metadata.Name
+	resource.Spec.Metadata = ververicaplatformv1beta1.VPDeploymentTargetMetadata{
+		Name:            depTarget.Metadata.Name,
+		Namespace:       depTarget.Metadata.Namespace,
+		Id:              depTarget.Metadata.Id,
+		CreatedAt:       &metav1.Time{Time: depTarget.Metadata.CreatedAt},
+		ModifiedAt:      &metav1.Time{Time: depTarget.Metadata.ModifiedAt},
+		ResourceVersion: depTarget.Metadata.ResourceVersion,
+		Labels:          depTarget.Metadata.Labels,
+		Annotations:     depTarget.Metadata.Annotations,
 	}
 
-	if err := r.Status().Update(ctx, resource); err != nil {
+	resource.Spec.Spec = ververicaplatformv1beta1.VPDeploymentTargetSpec{
+		Kubernetes: ververicaplatformv1beta1.VPKubernetesTarget{
+			Namespace: depTarget.Spec.Kubernetes.Namespace,
+		},
+	}
+
+	if err := r.Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -50,49 +63,79 @@ func (r *VPDeploymentTargetReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // handleCreate creates VP resources
-func (r *VPDeploymentTargetReconciler) handleCreate(req ctrl.Request) (time.Duration, error) {
-	//ctx := context.Background()
-	//log := r.getLogger(req)
-	//var vpDepTarget ververicaplatformv1beta1.VPDeploymentTarget
-	//if err := r.Get(ctx, req.NamespacedName, &vpDepTarget); err != nil {
-	//	return 0, err
-	//}
-	//
-	//var namespace string
-	//if vpDepTarget.Spec.Metadata.Namespace != "" {
-	//	namespace = vpDepTarget.Spec.Metadata.Namespace
-	//} else {
-	//	namespace = "default"
-	//}
-
+func (r *VPDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VPDeploymentTarget) (ctrl.Result, error) {
+	ctx := context.Background()
+	log := r.getLogger(req)
+	namespace := utils.GetNamespaceOrDefault(&vpDepTarget.Spec.Metadata.Namespace)
+	depTarget := vpAPI.DeploymentTarget{
+		ApiVersion: "v1",
+		Metadata: &vpAPI.DeploymentTargetMetadata{
+			Name:        req.Name,
+			Namespace:   vpDepTarget.Spec.Metadata.Namespace,
+			Labels:      vpDepTarget.Spec.Metadata.Labels,
+			Annotations: vpDepTarget.Spec.Metadata.Annotations,
+		},
+		Spec: &vpAPI.DeploymentTargetSpec{
+			// Perhaps take this from the req as well?
+			Kubernetes: &vpAPI.KubernetesTarget{Namespace: vpDepTarget.Spec.Spec.Kubernetes.Namespace},
+			// TODO: add deployment patch set, etc
+		},
+	}
 	// create it
-	//depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.CreateDeploymentTarget(ctx, namespace, &vpAPI.DeploymentTarget{
-	//	ApiVersion: "v1",
-	//	Metadata: &vpAPI.DeploymentTargetMetadata{
-	//		Name: req.Name,
-	//		Labels: vpDepTarget.Spec.Metadata.Labels,
-	//		Annotations: vpDepTarget.Spec.Metadata.Annotations,
-	//	},
-	//})
-	//
-	//if err != nil {
-	//	log.Error(err, "Error creating VP namespace")
-	//	return 0, err
-	//}
-	//log.Info("Created namespace", "namespace", namespace)
-	//
-	//// Now update the k8s resource and status as well
-	//if err := r.updateResource(req, &vpDepTarget, &depTarget); err != nil {
-	//	return 0, err
-	//}
+	_, err := r.VPAPIClient.
+		DeploymentTargetsApi.
+		CreateDeploymentTarget(ctx, namespace, depTarget)
 
-	return 0, nil
+	if err != nil {
+		log.Error(err, "Error creating VP Deployment Target")
+		return ctrl.Result{}, err
+	}
+
+	// TODO: the depTarget data is already in the res, but for some reason need to un-marshal it
+	// 		 most likely a problem with the Swagger
+	depTarget, _, err = r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, req.Name)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Created depTarget", "depTarget", depTarget)
+
+	// Now update the k8s resource and status as well
+	if err := r.updateResource(req, &vpDepTarget, &depTarget); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
 }
 
+// handleUpdate updates the k8s resource when it already exists in the VP
+// updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
+func (r *VPDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VPDeploymentTarget, depTarget vpAPI.DeploymentTarget) (ctrl.Result, error)  {
+	// Now update the k8s resource
+	err := r.updateResource(req, &vpDepTarget, &depTarget)
+	return ctrl.Result{}, err
+}
+
+
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VPDeploymentTargetReconciler) handleDelete(req ctrl.Request) (time.Duration, error) {
-	// Cannot be deleted if there are still associated deployments
-	return 0, nil
+func (r *VPDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VPDeploymentTarget) (ctrl.Result, error) {
+	ctx := context.Background()
+	log := r.getLogger(req)
+
+	// Let's make sure it's deleted from the ververica platform
+	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, vpDepTarget.Spec.Metadata.Namespace, req.Name)
+
+	if err != nil {
+		// If it's already gone, great!
+		// TODO: think about adding a wait time if the error
+		//		 is about deployments still being attached to the dep target,
+		// 		 as perhaps they're still in the deletion process
+		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
+	}
+
+	log.Info("Deleting Deployment Target", "name", depTarget.Metadata.Name)
+	// Should happen instantaneously
+	return ctrl.Result{}, nil
 }
 
 // VPDeploymentTargetReconciler reconciles a VPDeploymentTarget object
@@ -103,7 +146,6 @@ type VPDeploymentTargetReconciler struct {
 }
 
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeploymenttargets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeploymenttargets/status,verbs=get;update;patch
 
 // Reconcile tries to make the current state more like the desired state
 func (r *VPDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -111,6 +153,7 @@ func (r *VPDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	log := r.getLogger(req)
 
 	var vpDepTarget ververicaplatformv1beta1.VPDeploymentTarget
+	// If it's gone, it's gone!
 	if err := r.Get(ctx, req.NamespacedName, &vpDepTarget); err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
@@ -126,12 +169,8 @@ func (r *VPDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	} else {
 		// Being deleted
 		log.Info("Deletion event", "name", req.Name)
-		dur, err := r.handleDelete(req)
-		res, err := utils.EventHandlerResponse(dur, err)
-		// TODO: not super happy with this flow, but will keep thinking on it
-		if err != nil || res.RequeueAfter > 0 {
-			// if fail to delete the external dependency here, return with error
-			// so that it can be retried
+		res, err := r.handleDelete(req, vpDepTarget)
+		if utils.IsRequeueResponse(res, err) {
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
@@ -144,7 +183,19 @@ func (r *VPDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 		return res, nil
 	}
 
-	return ctrl.Result{}, nil
+	namespace := utils.GetNamespaceOrDefault(&vpDepTarget.Spec.Metadata.Namespace)
+	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, req.Name)
+	if err != nil {
+		if utils.IsNotFoundError(err) {
+			// Not found, let's create it
+			return r.handleCreate(req, vpDepTarget)
+		}
+		// Other error, not good!
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Update event")
+	return r.handleUpdate(req, vpDepTarget, depTarget)
 }
 
 // SetupWithManager is a helper function to initial on manager boot
