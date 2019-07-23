@@ -4,7 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | [optional] [default to null]
-**CreatedAt** | **int64** |  | [optional] [default to null]
+**CreatedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
 **DeploymentId** | **string** |  | [optional] [default to null]
 **JobId** | **string** |  | [optional] [default to null]
 **ResourceVersion** | **int32** |  | [optional] [default to null]

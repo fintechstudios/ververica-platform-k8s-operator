@@ -234,13 +234,13 @@ func (in *VPNamespaceMetadata) DeepCopyInto(out *VPNamespaceMetadata) {
 	*out = *in
 	if in.CreatedAt != nil {
 		in, out := &in.CreatedAt, &out.CreatedAt
-		*out = new(v1.Timestamp)
-		**out = **in
+		*out = new(v1.Time)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ModifiedAt != nil {
 		in, out := &in.ModifiedAt, &out.ModifiedAt
-		*out = new(v1.Timestamp)
-		**out = **in
+		*out = new(v1.Time)
+		(*in).DeepCopyInto(*out)
 	}
 }
 

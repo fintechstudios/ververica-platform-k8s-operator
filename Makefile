@@ -87,6 +87,6 @@ endif
 
 
 # Update the Swagger Client API
-.PHONY: update-swagger-codegen
-update-swagger-codegen:
+.PHONY: swagger-gen
+swagger-gen:
 	./hack/update-swagger-codegen.sh

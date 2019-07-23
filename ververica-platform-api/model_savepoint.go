@@ -10,9 +10,9 @@
 package ververicaplatformapi
 
 type Savepoint struct {
-	Kind       string             `json:"kind,omitempty"`
-	ApiVersion string             `json:"apiVersion,omitempty"`
-	Metadata   *SavepointMetadata `json:"metadata"`
-	Status     *SavepointStatus   `json:"status"`
-	Spec       *SavepointSpec     `json:"spec"`
+	Kind string `json:"kind,omitempty"`
+	ApiVersion string `json:"apiVersion,omitempty"`
+	Metadata *SavepointMetadata `json:"metadata"`
+	Status *SavepointStatus `json:"status"`
+	Spec *SavepointSpec `json:"spec"`
 }

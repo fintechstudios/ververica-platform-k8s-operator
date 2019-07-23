@@ -10,6 +10,6 @@
 package ververicaplatformapi
 
 type DeploymentTargetSpec struct {
-	Kubernetes         *KubernetesTarget `json:"kubernetes"`
-	DeploymentPatchSet *JsonNode         `json:"deploymentPatchSet,omitempty"`
+	Kubernetes *KubernetesTarget `json:"kubernetes"`
+	DeploymentPatchSet []JsonPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }

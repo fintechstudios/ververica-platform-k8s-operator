@@ -9,13 +9,17 @@
 
 package ververicaplatformapi
 
+import (
+	"time"
+)
+
 type SecretValueMetadata struct {
-	Id              string            `json:"id,omitempty"`
-	Name            string            `json:"name"`
-	Namespace       string            `json:"namespace,omitempty"`
-	CreatedAt       int64             `json:"createdAt,omitempty"`
-	ModifiedAt      int64             `json:"modifiedAt,omitempty"`
-	ResourceVersion int32             `json:"resourceVersion,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty"`
-	Annotations     map[string]string `json:"annotations,omitempty"`
+	Id string `json:"id,omitempty"`
+	Name string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }

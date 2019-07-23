@@ -39,18 +39,17 @@ type VPNamespaceReconciler struct {
 	VPAPIClient vpAPI.APIClient
 }
 
-
 // updateResource takes a k8s resource and a VP resource and merges them
 func (r *VPNamespaceReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VPNamespace, namespace *vpAPI.Namespace) error {
 	ctx := context.Background()
 
 	resource.Name = namespace.Metadata.Name
-
+	//time.Parse(time.RFC3339, namespace.Metadata.CreatedAt)
 	resource.Spec.Metadata = ververicaplatformv1beta1.VPNamespaceMetadata{
 		Name:            namespace.Metadata.Name,
 		Id:              namespace.Metadata.Id,
-		CreatedAt:       &metav1.Timestamp{Seconds: namespace.Metadata.CreatedAt},
-		ModifiedAt:      &metav1.Timestamp{Seconds: namespace.Metadata.ModifiedAt},
+		CreatedAt:       &metav1.Time{Time: namespace.Metadata.CreatedAt},
+		ModifiedAt:      &metav1.Time{Time: namespace.Metadata.ModifiedAt},
 		ResourceVersion: namespace.Metadata.ResourceVersion,
 	}
 	resource.Status.State = namespace.Status.State
@@ -121,7 +120,7 @@ func (r *VPNamespaceReconciler) handleUpdate(req ctrl.Request, namespace vpAPI.N
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (time.Duration, error) {
+func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
 	// Let's make sure it's deleted from the ververica platform
@@ -129,7 +128,7 @@ func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (time.Duration, e
 
 	if err != nil {
 		// If it's already gone, great!
-		return 0, utils.IgnoreNotFoundError(err)
+		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
 	log.Info("Deleting namespace", "name", namespace.Metadata.Id)
@@ -137,10 +136,10 @@ func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (time.Duration, e
 	if namespace.Status.State == "MARKED_FOR_DELETION" {
 		// Requeue for 5 seconds to wait for the namespace to be deleted
 		log.Info("Requeueing deletion request for 5 seconds")
-		return time.Second * 5, nil
+		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 
-	return 0, nil
+	return ctrl.Result{}, nil
 }
 
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpnamespaces,verbs=get;list;watch;create;update;patch;delete
@@ -157,8 +156,8 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if err := r.Get(ctx, req.NamespacedName, &vpNamespace); err != nil {
 		log.Info("Not Found event", "name", req.Name)
 		// If it is not stored, must make sure it is deleted from VP as well
-		dur, err := r.handleDelete(req)
-		return utils.EventHandlerResponse(dur, err)
+		res, err := r.handleDelete(req)
+		return res, err
 	}
 
 	if vpNamespace.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -173,12 +172,11 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	} else {
 		// Being deleted
 		log.Info("Deletion event", "name", req.Name)
-		dur, err := r.handleDelete(req)
-		res, err := utils.EventHandlerResponse(dur, err)
+		res, err := r.handleDelete(req)
 		// TODO: not super happy with this flow, but will keep thinking on it
-		if err != nil || res.RequeueAfter > 0 {
-			// if fail to delete the external dependency here, return with error
-			// so that it can be retried
+		if err != nil || res.RequeueAfter > 0 || res.Requeue {
+			// if fail to delete the external dependency here,
+			// requeue so that it can be retried
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer

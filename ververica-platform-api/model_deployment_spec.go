@@ -10,12 +10,12 @@
 package ververicaplatformapi
 
 type DeploymentSpec struct {
-	State                        string                        `json:"state"`
-	UpgradeStrategy              *DeploymentUpgradeStrategy    `json:"upgradeStrategy"`
-	RestoreStrategy              *DeploymentRestoreStrategy    `json:"restoreStrategy,omitempty"`
-	StartFromSavepoint           *DeploymentStartFromSavepoint `json:"startFromSavepoint,omitempty"`
-	DeploymentTargetId           string                        `json:"deploymentTargetId"`
-	MaxSavepointCreationAttempts int32                         `json:"maxSavepointCreationAttempts,omitempty"`
-	MaxJobCreationAttempts       int32                         `json:"maxJobCreationAttempts,omitempty"`
-	Template                     *DeploymentTemplate           `json:"template"`
+	State string `json:"state"`
+	UpgradeStrategy *DeploymentUpgradeStrategy `json:"upgradeStrategy"`
+	RestoreStrategy *DeploymentRestoreStrategy `json:"restoreStrategy,omitempty"`
+	StartFromSavepoint *DeploymentStartFromSavepoint `json:"startFromSavepoint,omitempty"`
+	DeploymentTargetId string `json:"deploymentTargetId"`
+	MaxSavepointCreationAttempts int32 `json:"maxSavepointCreationAttempts,omitempty"`
+	MaxJobCreationAttempts int32 `json:"maxJobCreationAttempts,omitempty"`
+	Template *DeploymentTemplate `json:"template"`
 }

@@ -30,9 +30,9 @@ type VPNamespaceMetadata struct {
 	// +optional
 	Id string `json:"id,omitempty"`
 	// +optional
-	CreatedAt *metav1.Timestamp `json:"createdAt,omitempty"`
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	// +optional
-	ModifiedAt *metav1.Timestamp `json:"modifiedAt,omitempty"`
+	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
 	// +optional
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }

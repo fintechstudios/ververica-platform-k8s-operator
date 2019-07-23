@@ -9,7 +9,5 @@
 
 package ververicaplatformapi
 
-type JobStatus struct {
-	State string `json:"state,omitempty"`
-	Failure *Failure `json:"failure,omitempty"`
+type Any struct {
 }

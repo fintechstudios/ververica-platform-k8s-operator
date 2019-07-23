@@ -9,11 +9,15 @@
 
 package ververicaplatformapi
 
+import (
+	"time"
+)
+
 type ClusterRoleBindingMetadata struct {
-	Id              string            `json:"id,omitempty"`
-	Name            string            `json:"name"`
-	CreatedAt       int64             `json:"createdAt,omitempty"`
-	ModifiedAt      int64             `json:"modifiedAt,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty"`
-	ResourceVersion int32             `json:"resourceVersion,omitempty"`
+	Id string `json:"id,omitempty"`
+	Name string `json:"name"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }

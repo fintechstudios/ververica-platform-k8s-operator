@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type SecretValue struct {
-	Kind       string               `json:"kind,omitempty"`
-	ApiVersion string               `json:"apiVersion,omitempty"`
-	Metadata   *SecretValueMetadata `json:"metadata"`
-	Spec       *SecretValueSpec     `json:"spec"`
+	Kind string `json:"kind,omitempty"`
+	ApiVersion string `json:"apiVersion,omitempty"`
+	Metadata *SecretValueMetadata `json:"metadata"`
+	Spec *SecretValueSpec `json:"spec"`
 }
