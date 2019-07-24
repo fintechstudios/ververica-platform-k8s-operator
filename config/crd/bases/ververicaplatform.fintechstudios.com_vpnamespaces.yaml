@@ -21,14 +21,14 @@ spec:
     type: date
   group: ververicaplatform.fintechstudios.com
   names:
-    kind: VPNamespace
+    kind: VpNamespace
     plural: vpnamespaces
   scope: ""
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: VPNamespace is the Schema for the vpnamespaces API
+      description: VpNamespace is the Schema for the vpnamespaces API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -43,7 +43,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: VPNamespaceSpec defines the desired state of VPNamespace
+          description: VpNamespaceSpec defines the desired state of VpNamespace
           properties:
             metadata:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -67,10 +67,9 @@ spec:
               type: object
           type: object
         status:
-          description: VPNamespaceStatus defines the observed state of VPNamespace
+          description: VpNamespaceStatus defines the observed state of VpNamespace
           properties:
             state:
-              description: A list of pointers to currently running jobs.
               type: string
           type: object
       type: object

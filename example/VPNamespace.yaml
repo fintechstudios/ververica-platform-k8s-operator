@@ -1,4 +1,0 @@
-apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VPNamespace
-metadata:
-  name: "doc-ingestion"

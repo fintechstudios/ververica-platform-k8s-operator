@@ -105,7 +105,6 @@ Class | Method | HTTP request | Description
  - [EventMetadata](docs/EventMetadata.md)
  - [EventSpec](docs/EventSpec.md)
  - [Failure](docs/Failure.md)
- - [Iterable](docs/Iterable.md)
  - [IterableRoleBindingSubject](docs/IterableRoleBindingSubject.md)
  - [IterableRoleRule](docs/IterableRoleRule.md)
  - [Job](docs/Job.md)

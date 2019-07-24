@@ -28,10 +28,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("VPNamespace", func() {
+var _ = Describe("VpNamespace", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *VPNamespace
+		created, fetched *VpNamespace
 	)
 
 	// Add Tests for OpenAPI validation (or additonal CRD features) specified in
@@ -46,7 +46,7 @@ var _ = Describe("VPNamespace", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &VPNamespace{
+			created = &VpNamespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
@@ -55,7 +55,7 @@ var _ = Describe("VPNamespace", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &VPNamespace{}
+			fetched = &VpNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

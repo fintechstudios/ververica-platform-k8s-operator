@@ -2103,9 +2103,6 @@
         }
       }
     },
-    "Iterable": {
-      "type": "object"
-    },
     "IterableRoleBindingSubject": {
       "type": "object"
     },
@@ -2219,8 +2216,33 @@
     },
     "Artifact": {
       "type": "object",
+      "required": [
+        "kind",
+        "jarUri"
+      ],
       "properties": {
         "kind": {
+          "type": "string",
+          "enum": [
+            "JAR"
+          ]
+        },
+        "jarUri": {
+          "type": "string"
+        },
+        "mainArgs": {
+          "type": "string"
+        },
+        "entryClass": {
+          "type": "string"
+        },
+        "flinkVersion": {
+          "type": "string"
+        },
+        "flinkImageRegistry": {
+          "type": "string"
+        },
+        "flinkImageTag": {
           "type": "string"
         }
       }
@@ -2292,7 +2314,15 @@
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "LATEST_SAVEPOINT",
+            "LATEST_STATE",
+            "NONE"
+          ]
+        },
+        "allowNonRestoredState": {
+          "type": "boolean"
         }
       }
     },
@@ -2345,7 +2375,11 @@
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "NONE",
+            "LATEST"
+          ]
         }
       }
     },
@@ -2433,7 +2467,12 @@
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "STATELESS",
+            "STATEFUL",
+            "NONE"
+          ]
         }
       }
     },

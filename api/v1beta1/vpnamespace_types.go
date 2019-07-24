@@ -23,8 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// VPNamespaceMetadata represents all metadata from the VP API
-type VPNamespaceMetadata struct {
+// VpNamespaceMetadata represents all metadata from the VP API
+type VpNamespaceMetadata struct {
 	// +optional
 	Name string `json:"name"`
 	// +optional
@@ -37,22 +37,21 @@ type VPNamespaceMetadata struct {
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
-// VPNamespaceSpec defines the desired state of VPNamespace
-type VPNamespaceSpec struct {
+// VpNamespaceSpec defines the desired state of VpNamespace
+type VpNamespaceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// Kind and ApiVersion are mapped automatically
 	// Status is mapped to a subresource
 	// +optional
-	Metadata VPNamespaceMetadata `json:"metadata,omitempty"`
+	Metadata VpNamespaceMetadata `json:"metadata,omitempty"`
 }
 
-// VPNamespaceStatus defines the observed state of VPNamespace
-type VPNamespaceStatus struct {
+// VpNamespaceStatus defines the observed state of VpNamespace
+type VpNamespaceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// A list of pointers to currently running jobs.
 	// +optional
 	State string `json:"state,omitempty"`
 }
@@ -64,23 +63,23 @@ type VPNamespaceStatus struct {
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 
-// VPNamespace is the Schema for the vpnamespaces API
-type VPNamespace struct {
+// VpNamespace is the Schema for the vpnamespaces API
+type VpNamespace struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec VPNamespaceSpec `json:"spec,omitempty"`
-	Status VPNamespaceStatus `json:"status,omitempty"`
+	Spec              VpNamespaceSpec   `json:"spec,omitempty"`
+	Status            VpNamespaceStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// VPNamespaceList contains a list of VPNamespace
-type VPNamespaceList struct {
+// VpNamespaceList contains a list of VpNamespace
+type VpNamespaceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []VPNamespace `json:"items"`
+	Items           []VpNamespace `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&VPNamespace{}, &VPNamespaceList{})
+	SchemeBuilder.Register(&VpNamespace{}, &VpNamespaceList{})
 }

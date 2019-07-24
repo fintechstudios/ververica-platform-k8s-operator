@@ -1,6 +1,6 @@
 package utils
 
-// Helper functions to check and remove string from a slice of strings.
+// ContainsString checks if a string is contained in a slice.
 func ContainsString(slice []string, s string) bool {
 	for _, item := range slice {
 		if item == s {

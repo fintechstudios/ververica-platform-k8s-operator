@@ -1,7 +1,4 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VPNamespace
+kind: VpNamespace
 metadata:
-  name: vpnamespace-sample
-spec:
-  # Add fields here
-  foo: bar
+  name: doc-ingestion

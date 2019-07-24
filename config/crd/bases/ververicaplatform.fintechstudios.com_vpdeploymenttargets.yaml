@@ -24,13 +24,13 @@ spec:
     type: date
   group: ververicaplatform.fintechstudios.com
   names:
-    kind: VPDeploymentTarget
+    kind: VpDeploymentTarget
     plural: vpdeploymenttargets
   scope: ""
   subresources: {}
   validation:
     openAPIV3Schema:
-      description: VPDeploymentTarget is the Schema for the vpdeploymenttargets API
+      description: VpDeploymentTarget is the Schema for the vpdeploymenttargets API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -45,7 +45,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: VPDeploymentTargetObjectSpec defines the desired state of VPDeploymentTarget
+          description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
           properties:
             metadata:
               description: VPDeploymentMetadata represents all metadata from the VP
@@ -97,7 +97,7 @@ spec:
                     type: object
                   type: array
                 kubernetes:
-                  description: VPKubernetesTarget allows a user to configure k8s specific
+                  description: VpKubernetesTarget allows a user to configure k8s specific
                     options
                   properties:
                     namespace:

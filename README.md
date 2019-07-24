@@ -11,11 +11,11 @@ Built for Ververica Platform `1.4.1`, API Version 1.
 ## Supported Resources
 
 Since the resources names of K8s and the Ververica Platform somewhat class, the 
-custom VP Resources will all be prefixed with `VP`.
+custom VP Resources will all be prefixed with `Vp`.
 
-* `DeploymentTarget` -> `VPDeploymentTarget`
-* `Deployment` -> `VPDeployment`
-* `Namespace` -> `VPNamespace`
+* `DeploymentTarget` -> `VpDeploymentTarget`
+* `Deployment` -> `VpDeployment`
+* `Namespace` -> `VpNamespace`
 
 ## Unsupported
 
@@ -33,12 +33,12 @@ custom VP Resources will all be prefixed with `VP`.
 To avoid naming conflicts, and for simplicity, and VP `metadata` and `spec` fields
 are nested under the top-level `spec` field of the K8s resource.
 
-### `VPNamespace`
+### `VpNamespace`
 
 Schema:
 ```yaml
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VPNamespace
+kind: VpNamespace
 metadata:
   name: String # Required
 spec:
@@ -52,14 +52,14 @@ status:
   state: String # Dynamic
 ```
 
-### `VPDeploymentTarget`
+### `VpDeploymentTarget`
 
 Currently, can only handle `string` values for deployment JSON Patches.
 
 Schema:
 ```yaml
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VPDeploymentTarget
+kind: VpDeploymentTarget
 metadata:
   name: # String
 spec:
@@ -75,6 +75,9 @@ spec:
     deploymentPatchSet: JsonPatch[] # Optional, see: http://jsonpatch.com/
 ```
 
+### `VpDeploymentTarget`
+
+
 ## Development
 
 Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder),
@@ -86,22 +89,41 @@ Also built as a Go 1.11 module - no vendor files here.
 System Pre-requisites:
 - `go` >= 1.12
 - `kubebuilder` >= 2.0.0-beta.0
+- `kustomize` >= v3.0.1
 - `docker`
+- [`minikube`](https://github.com/kubernetes/minikube) or similar
+
 
 ### Ververica Platform API
 
-The API Client is auto-generated using the 
+The API Client is auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
+
+#### Pre-Generation Changes
 
 The original Swagger file was taken from their live API documentation (available at `${VP_URL}/api/swagger`),
-but they are still using Swagger 2.0 and the docs don't exactly match their API, which
-makes the generated client incorrect.
+but the docs don't exactly match their API, which makes the generated client incorrect.
 
 Main changes necessary:
 * Timestamps are returned as ISO8601 strings, not numbers
 * `DeploymentTarget.deploymentPatchSet` is a JSON Patch Array, not a JsonNode
+* `Artifact` needs many other fields
+* `DeploymentUpgradeStrategy` needs choices
+* `DeploymentRestoreStrategy` needs choices and `allowNonRestoredState` option
+* `DeploymentStartFromSavepoint` needs choices
 
-Another annoying thing about the swagger-codegen is that the `optional` package is missing
-from many of the imports in the generated code, as must be added manually.
+#### Post-Generation Changes
+
+The `optional` package is missing from many of the imports in the generated code, as must be added manually.
+
+```go
+package ververicaplatformapi
+
+import (
+	// ...
+    "github.com/antihax/optional"
+    // ...
+)
+```
 
 There is also a bug that cannot handle an empty Swagger type to represent any type, so
 you must manually change [`model_any.go`](./ververica-platform-api/model_any.go) to:
@@ -129,3 +151,10 @@ Some known issues + places to improve:
 * It might make sense to have a 1-1 mapping between K8s namespaces and names and VP namespaces and names, but 
 will there ever be more than on VP running in a cluster?
 * Improvements on the Swagger API generator / moving that to OpenAPI V3.
+* Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
+
+
+## Acknowledgements
+
+Other OSS that influenced this project:
+* [Kong Ingress Controller](https://github.com/Kong/kubernetes-ingress-controller)

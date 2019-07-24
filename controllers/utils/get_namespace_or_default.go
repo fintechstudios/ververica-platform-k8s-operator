@@ -1,11 +1,12 @@
 package utils
 
 
-var defaultNamespace = "default"
+const defaultNamespace = "default"
 
-func GetNamespaceOrDefault(namespace *string) string {
-	if namespace == nil || len(*namespace) == 0 {
+// GetNamespaceOrDefault will return either the given namespace, if valid, or the default Ververica Platform namespace
+func GetNamespaceOrDefault(namespace string) string {
+	if len(namespace) == 0 {
 		return defaultNamespace
 	}
-	return *namespace
+	return namespace
 }
