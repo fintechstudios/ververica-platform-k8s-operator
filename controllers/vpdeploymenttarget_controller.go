@@ -67,6 +67,14 @@ func (r *VPDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	ctx := context.Background()
 	log := r.getLogger(req)
 	namespace := utils.GetNamespaceOrDefault(&vpDepTarget.Spec.Metadata.Namespace)
+	// TODO: load this from
+	patchSet := []vpAPI.JsonPatchGeneric{
+		{
+			Op: "add",
+			Path: "/a",
+			Value: "",
+		},
+	}
 	depTarget := vpAPI.DeploymentTarget{
 		ApiVersion: "v1",
 		Metadata: &vpAPI.DeploymentTargetMetadata{
@@ -78,7 +86,7 @@ func (r *VPDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 		Spec: &vpAPI.DeploymentTargetSpec{
 			// Perhaps take this from the req as well?
 			Kubernetes: &vpAPI.KubernetesTarget{Namespace: vpDepTarget.Spec.Spec.Kubernetes.Namespace},
-			// TODO: add deployment patch set, etc
+			DeploymentPatchSet: patchSet,
 		},
 	}
 	// create it

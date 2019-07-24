@@ -13,6 +13,6 @@ package ververicaplatformapi
 type JsonPatchGeneric struct {
 	Op string `json:"op"`
 	Path string `json:"path"`
-	Value *Any `json:"value,omitempty"`
+	Value Any `json:"value,omitempty"`
 	From string `json:"from,omitempty"`
 }

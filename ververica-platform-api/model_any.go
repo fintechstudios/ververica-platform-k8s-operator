@@ -9,5 +9,4 @@
 
 package ververicaplatformapi
 
-type Any struct {
-}
+type Any interface {}

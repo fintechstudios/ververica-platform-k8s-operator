@@ -23,8 +23,20 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type JsonPatchGeneric struct {
+	Op string `json:"op"`
+	Path string `json:"path"`
+	// TODO: support any type of JSON as an interface
+	// 		 https://github.com/kubernetes-sigs/kubebuilder/issues/528
+	// +optional
+	Value string `json:"value,omitempty"`
+	// +optional
+	From string `json:"from,omitempty"`
+}
+
 // VPDeploymentMetadata represents all metadata from the VP API
 type VPDeploymentTargetMetadata struct {
+	// Taken from the K8s resource
 	// +optional
 	Name string `json:"name,omitempty"`
 	// +optional
@@ -51,7 +63,8 @@ type VPKubernetesTarget struct {
 
 type VPDeploymentTargetSpec struct {
 	Kubernetes         VPKubernetesTarget `json:"kubernetes"`
-	// TODO: add deployment patch set
+	// +optional
+	DeploymentPatchSet []JsonPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }
 
 // VPDeploymentTargetObjectSpec defines the desired state of VPDeploymentTarget
@@ -78,6 +91,8 @@ type VPDeploymentTarget struct {
 
 	Spec VPDeploymentTargetObjectSpec `json:"spec,omitempty"`
 }
+
+// TODO: think about adding a status that keeps track of all the deployments with this target
 
 // +kubebuilder:object:root=true
 
