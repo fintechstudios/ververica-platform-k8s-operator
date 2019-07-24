@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"io/ioutil"
+	"time"
 
 	"encoding/json"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
@@ -82,12 +83,6 @@ func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *verv
 		Labels:          deployment.Metadata.Labels,
 		Annotations:     deployment.Metadata.Annotations,
 	}
-	//
-	//resource.Spec.Spec = ververicaplatformv1beta1.VpDeploymentTargetSpec{
-	//	Kubernetes: ververicaplatformv1beta1.VpKubernetesTarget{
-	//		Namespace: deployment.Spec.Kubernetes.Namespace,
-	//	},
-	//}
 
 	if err := r.Update(ctx, resource); err != nil {
 		return err
@@ -101,7 +96,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	ctx := context.Background()
 	log := r.getLogger(req)
 
-	// TODO: must make this idempotent
+	// TODO: must make this idempotent - one deployment by name per namespace?
 
 	// TODO: redo this to take advantage of marshalling
 	//vpJson, err := json.Marshal(vpDeployment)
@@ -263,10 +258,29 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 	// First must make sure the deployment is canceled, then must delete it
 
 	// Let's make sure it's deleted from the ververica platform
-	deployment, _, err := r.VPAPIClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, vpDeployment.Spec.Metadata.Namespace, req.Name)
+	deployment, _, err := r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id)
 
 	if err != nil {
 		// If it's already gone, great!
+		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
+	}
+
+	if deployment.Status.State != "CANCELLED" {
+		log.Info("Must first cancel Deployment", "name", deployment.Metadata.Name)
+		deployment.Status.State = "CANCELLED"
+		deployment, _, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id, deployment)
+
+		if err != nil {
+			return ctrl.Result{}, utils.IgnoreNotFoundError(err)
+		}
+
+		err = r.updateResource(req, &vpDeployment, &deployment)
+		// Can take a while to shut down
+		return ctrl.Result{RequeueAfter:time.Minute * 1}, err
+	}
+
+	deployment, _, err = r.VPAPIClient.DeploymentsApi.DeleteDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id)
+	if err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 

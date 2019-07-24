@@ -7,7 +7,7 @@ spec:
     namespace: doc-ingestion
   spec:
     state: RUNNING
-    deploymentTargetName: dep-target
+    deploymentTargetName: dep-target # TODO: maybe move this to the top-level spec?
     upgradeStrategy:
       kind: STATELESS
     restoreStrategy:
