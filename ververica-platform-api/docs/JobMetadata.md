@@ -4,8 +4,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | [optional] [default to null]
-**CreatedAt** | **int64** |  | [optional] [default to null]
-**ModifiedAt** | **int64** |  | [optional] [default to null]
+**CreatedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
+**ModifiedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
 **TerminatedAt** | **int64** |  | [optional] [default to null]
 **DeploymentId** | **string** |  | [optional] [default to null]
 **Annotations** | **map[string]string** |  | [optional] [default to null]

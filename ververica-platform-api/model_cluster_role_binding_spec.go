@@ -11,5 +11,5 @@ package ververicaplatformapi
 
 type ClusterRoleBindingSpec struct {
 	Subjects *IterableRoleBindingSubject `json:"subjects"`
-	RoleRef  *ClusterRoleBindingRoleRef  `json:"roleRef"`
+	RoleRef *ClusterRoleBindingRoleRef `json:"roleRef"`
 }

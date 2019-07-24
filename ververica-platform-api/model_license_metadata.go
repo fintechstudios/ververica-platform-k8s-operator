@@ -9,8 +9,12 @@
 
 package ververicaplatformapi
 
+import (
+	"time"
+)
+
 type LicenseMetadata struct {
-	Id          string            `json:"id,omitempty"`
-	CreatedAt   int64             `json:"createdAt,omitempty"`
+	Id string `json:"id,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 }

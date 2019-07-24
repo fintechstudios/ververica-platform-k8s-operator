@@ -20,15 +20,18 @@ set -o nounset
 set -o pipefail
 
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")
-CWD="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
+PROJECT_DIR="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
 SWAGGER_FILE=ververica-platform-swagger.json
+SWAGGER_IGNORE_FILE=.swagger-codegen-ignore
 CONFIG_FILE=swagger-gen-config.json
 OUT_DIR=ververica-platform-api
 
-rm -rf ${CWD}/${OUT_DIR}
+rm -rf ${PROJECT_DIR}/${OUT_DIR}
+mkdir ${PROJECT_DIR}/${OUT_DIR}
+cp ${PROJECT_DIR}/${SWAGGER_IGNORE_FILE} ${PROJECT_DIR}/${OUT_DIR}
 
 docker run --rm \
-    -v ${CWD}:/local:rw \
+    -v ${PROJECT_DIR}:/local:rw \
     --user $(id -u):$(id -g) \
     swaggerapi/swagger-codegen-cli generate \
     -i /local/${SWAGGER_FILE} \

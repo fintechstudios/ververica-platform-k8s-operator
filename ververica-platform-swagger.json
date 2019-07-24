@@ -1921,6 +1921,7 @@
     }
   },
   "definitions": {
+    "Any": {},
     "ApiToken": {
       "type": "object",
       "required": [
@@ -1955,12 +1956,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -2050,12 +2051,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -2163,12 +2164,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -2262,12 +2263,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -2447,6 +2448,36 @@
         },
         "valueFrom": {
           "$ref": "#/definitions/JsonNode"
+        }
+      }
+    },
+    "JsonPatchGeneric": {
+      "description": "Since Swagger 2 doesn't have oneOf support, this definition should fit all JSON Patch objects.",
+      "type": "object",
+      "required": [
+        "op",
+        "path"
+      ],
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "add",
+            "remove",
+            "replace",
+            "copy",
+            "move",
+            "test"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/definitions/Any"
+        },
+        "from": {
+          "type": "string"
         }
       }
     },
@@ -2690,12 +2721,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -2725,7 +2756,10 @@
           "$ref": "#/definitions/KubernetesTarget"
         },
         "deploymentPatchSet": {
-          "$ref": "#/definitions/JsonNode"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonPatchGeneric"
+          }
         }
       }
     },
@@ -2782,8 +2816,8 @@
           "format": "uuid"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "deploymentId": {
           "type": "string",
@@ -2926,12 +2960,12 @@
           "format": "uuid"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "terminatedAt": {
           "type": "integer",
@@ -3074,12 +3108,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "resourceVersion": {
           "type": "integer",
@@ -3157,12 +3191,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -3288,12 +3322,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "labels": {
           "type": "object",
@@ -3354,12 +3388,12 @@
           "format": "uuid"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "deploymentId": {
           "type": "string",
@@ -3466,12 +3500,12 @@
           "type": "string"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "modifiedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "resourceVersion": {
           "type": "integer",
@@ -3548,8 +3582,8 @@
           "format": "uuid"
         },
         "createdAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         },
         "annotations": {
           "type": "object",

@@ -80,18 +80,18 @@ func main() {
 	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
 
 	err = (&controllers.VPNamespaceReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("VPNamespace"),
-		VervericaAPIClient: *ververicaAPIClient,
+		Client:      mgr.GetClient(),
+		Log:         ctrl.Log.WithName("controllers").WithName("VPNamespace"),
+		VPAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VPNamespace")
 		os.Exit(1)
 	}
 	err = (&controllers.VPDeploymentTargetReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("VPDeploymentTarget"),
-		VervericaAPIClient: *ververicaAPIClient,
+		Client:      mgr.GetClient(),
+		Log:         ctrl.Log.WithName("controllers").WithName("VPDeploymentTarget"),
+		VPAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VPDeploymentTarget")

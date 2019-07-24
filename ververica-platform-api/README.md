@@ -75,6 +75,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [Any](docs/Any.md)
  - [ApiToken](docs/ApiToken.md)
  - [ApiTokenMetadata](docs/ApiTokenMetadata.md)
  - [ApiTokenSpec](docs/ApiTokenSpec.md)
@@ -113,6 +114,7 @@ Class | Method | HTTP request | Description
  - [JobSpec](docs/JobSpec.md)
  - [JobStatus](docs/JobStatus.md)
  - [JsonNode](docs/JsonNode.md)
+ - [JsonPatchGeneric](docs/JsonPatchGeneric.md)
  - [KubernetesOptions](docs/KubernetesOptions.md)
  - [KubernetesTarget](docs/KubernetesTarget.md)
  - [License](docs/License.md)

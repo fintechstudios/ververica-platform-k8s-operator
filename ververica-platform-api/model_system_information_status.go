@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type SystemInformationStatus struct {
-	JvmVersion          string               `json:"jvmVersion,omitempty"`
+	JvmVersion string `json:"jvmVersion,omitempty"`
 	RevisionInformation *RevisionInformation `json:"revisionInformation,omitempty"`
-	ResourceQuota       *ResourceQuota       `json:"resourceQuota,omitempty"`
-	License             *License             `json:"license,omitempty"`
+	ResourceQuota *ResourceQuota `json:"resourceQuota,omitempty"`
+	License *License `json:"license,omitempty"`
 }

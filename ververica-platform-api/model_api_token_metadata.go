@@ -9,9 +9,13 @@
 
 package ververicaplatformapi
 
+import (
+	"time"
+)
+
 type ApiTokenMetadata struct {
-	Id         string `json:"id,omitempty"`
-	Name       string `json:"name"`
-	CreatedAt  int64  `json:"createdAt,omitempty"`
-	ModifiedAt int64  `json:"modifiedAt,omitempty"`
+	Id string `json:"id,omitempty"`
+	Name string `json:"name"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
 }

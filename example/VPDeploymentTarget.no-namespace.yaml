@@ -1,0 +1,7 @@
+apiVersion: ververicaplatform.fintechstudios.com/v1beta1
+kind: VPDeploymentTarget
+metadata:
+  name: "dep-target2"
+spec:
+  kubernetes:
+    namespace: "flink"
