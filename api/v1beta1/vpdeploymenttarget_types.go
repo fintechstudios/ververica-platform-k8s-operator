@@ -80,6 +80,7 @@ type VPDeploymentTargetObjectSpec struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
+// +kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.metadata.namespace"
 // +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"

@@ -10,6 +10,9 @@ spec:
   - JSONPath: .spec.metadata.id
     name: Id
     type: string
+  - JSONPath: .spec.metadata.namespace
+    name: Namespace
+    type: string
   - JSONPath: .spec.metadata.resourceVersion
     name: ResourceVersion
     type: integer
@@ -65,6 +68,7 @@ spec:
                   format: date-time
                   type: string
                 name:
+                  description: Taken from the K8s resource
                   type: string
                 namespace:
                   type: string
@@ -74,6 +78,24 @@ spec:
               type: object
             spec:
               properties:
+                deploymentPatchSet:
+                  items:
+                    properties:
+                      from:
+                        type: string
+                      op:
+                        type: string
+                      path:
+                        type: string
+                      value:
+                        description: "TODO: support any type of JSON as an interface
+                          \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528"
+                        type: string
+                    required:
+                    - op
+                    - path
+                    type: object
+                  type: array
                 kubernetes:
                   description: VPKubernetesTarget allows a user to configure k8s specific
                     options

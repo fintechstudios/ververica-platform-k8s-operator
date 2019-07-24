@@ -67,14 +67,19 @@ func (r *VPDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	ctx := context.Background()
 	log := r.getLogger(req)
 	namespace := utils.GetNamespaceOrDefault(&vpDepTarget.Spec.Metadata.Namespace)
-	// TODO: load this from
-	patchSet := []vpAPI.JsonPatchGeneric{
-		{
-			Op: "add",
-			Path: "/a",
-			Value: "",
-		},
+
+	patchSet := make([]vpAPI.JsonPatchGeneric, len(vpDepTarget.Spec.Spec.DeploymentPatchSet))
+	for i, patch := range vpDepTarget.Spec.Spec.DeploymentPatchSet {
+		patchSet[i] = vpAPI.JsonPatchGeneric{
+			Op: patch.Op,
+			Path: patch.Path,
+			From: patch.From,
+			Value: patch.Value,
+		}
 	}
+
+
+
 	depTarget := vpAPI.DeploymentTarget{
 		ApiVersion: "v1",
 		Metadata: &vpAPI.DeploymentTargetMetadata{

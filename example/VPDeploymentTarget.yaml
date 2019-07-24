@@ -8,3 +8,16 @@ spec:
   spec:
     kubernetes:
       namespace: "flink"
+    deploymentPatchSet:
+      - op: add
+        path: "/spec/template/spec/flinkConfiguration/high-availability"
+        value: "zookeeper"
+      - op: add
+        path: "/spec/template/spec/flinkConfiguration/high-availability.zookeeper.quorum"
+        value: "zookeeper-0.zookeeper-headless.flink.svc.cluster.local:2181,zookeeper-1.zookeeper-headless.flink.svc.cluster.local:2181,zookeeper-2.zookeeper-headless.flink.svc.cluster.local:2181"
+      - op: add
+        path: "/spec/template/spec/logging/log4jLoggers/com.fintechstudios"
+        value: "DEBUG"
+      - op: add
+        path: "/metadata/labels/high-availability"
+        value: "true"

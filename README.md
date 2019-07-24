@@ -126,5 +126,6 @@ Some known issues + places to improve:
 * The nesting of `metadata` and `spec` is a little wonky.
 * Polling the VP API for updates to Deployments, Jobs, etc would be excellent.
 * Adding more `status` subresources to link everything together would also be most excellent.
-* It might make sense to have a 1-1 mapping between K8s namespaces and names and VP namespaces and names.
+* It might make sense to have a 1-1 mapping between K8s namespaces and names and VP namespaces and names, but 
+will there ever be more than on VP running in a cluster?
 * Improvements on the Swagger API generator / moving that to OpenAPI V3.
