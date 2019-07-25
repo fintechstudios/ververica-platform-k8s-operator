@@ -103,7 +103,7 @@ func (r *VpDeploymentReconciler) getJobIdsForDeployment(ctx context.Context, nam
 	return ids, nil
 }
 
-// updateResource takes a k8s resource and a VP resource and syncs them in k8s
+// updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
 func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
 	ctx := context.Background()
 
@@ -126,11 +126,11 @@ func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *verv
 	}
 	resource.Status.State = state
 
-	if err = r.Status().Update(ctx, resource); err != nil {
+	if err = r.Update(ctx, resource); err != nil {
 		return err
 	}
 
-	if err = r.Update(ctx, resource); err != nil {
+	if err = r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -216,7 +216,8 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, err
 	}
 
-	// Patches with no changes to the spec should be idempotent
+	// Patches with no changes to the spec should not trigger
+	// another transition but will bump the resource version
 	updatedDep, res, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, namespace, currentDeployment.Metadata.Id, desiredDeployment)
 
 	if res != nil && res.StatusCode == 400 {
@@ -242,13 +243,14 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 		newIds := make([]string, len(jobIds))
 		copy(newIds, jobIds)
 		vpDeployment.Status.JobIds = newIds
-		if err = r.updateResource(req, &vpDeployment, &updatedDep); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
 	}
 
-	// Otherwise, same info - NO REQUEUE LOOPING PLEASE
+	// Don't trigger a full update - should figure out how to truly make this idempotent
+	// and still store all the fun stuff in K8s
+	if err = r.Status().Update(ctx, &vpDeployment); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 

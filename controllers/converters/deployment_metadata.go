@@ -10,9 +10,13 @@ import (
 
 //DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
 func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (ververicaplatformv1beta1.VpDeploymentMetadata, error) {
-	metadataJSON, err := json.Marshal(deploymentMetadata)
-	// now unmarshal it into the platform model
 	var vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata
+	metadataJSON, err := json.Marshal(deploymentMetadata)
+	if err != nil {
+		return vpDeploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
+	}
+
+	// now unmarshal it into the platform model
 	if err = json.Unmarshal(metadataJSON, &vpDeploymentMetadata); err != nil {
 		return vpDeploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
 	}
@@ -22,9 +26,13 @@ func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (ve
 
 // DeploymentMetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
 func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata) (vpAPI.DeploymentMetadata, error) {
-	vpMetadataJSON, err := json.Marshal(vpDeploymentMetadata)
-	// now unmarshal it into the platform model
 	var deploymentMetadata vpAPI.DeploymentMetadata
+	vpMetadataJSON, err := json.Marshal(vpDeploymentMetadata)
+	if err != nil {
+		return deploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
+	}
+
+	// now unmarshal it into the platform model
 	if err = json.Unmarshal(vpMetadataJSON, &deploymentMetadata); err != nil {
 		return deploymentMetadata, errors.New("cannot encode Deployment Metadata: " + err.Error())
 	}

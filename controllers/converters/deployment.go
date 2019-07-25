@@ -24,5 +24,14 @@ func DeploymentFromNative(vpDeployment ververicaplatformv1beta1.VpDeployment) (v
 	deployment.Metadata = &deploymentMeta
 	deployment.Spec = &deploymentSpec
 
+	if len(vpDeployment.Status.State) > 0 {
+		state, err := DeploymentStateFromNative(vpDeployment.Status.State)
+		if err != nil {
+			return deployment, err
+		}
+
+		deployment.Status = &vpAPI.DeploymentStatus{State: state}
+	}
+
 	return deployment, nil
 }

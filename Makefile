@@ -56,8 +56,8 @@ fmt:
 
 # Lint the code, but not the generated!
 .PHONY: lint
-lint: vet
-	golangci-lint run controllers api/*
+lint:
+	golangci-lint run
 
 # Run go vet against code, excluding the generated VP api
 .PHONY: vet

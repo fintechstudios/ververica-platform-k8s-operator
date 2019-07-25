@@ -23,3 +23,20 @@ func DeploymentStateToNative(state string) (ververicaplatformv1beta1.DeploymentS
 	}
 }
 
+// DeploymentStateFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
+func DeploymentStateFromNative(vpState ververicaplatformv1beta1.DeploymentState) (string, error) {
+	switch vpState {
+	case ververicaplatformv1beta1.CancelledState:
+		return string(ververicaplatformv1beta1.CancelledState), nil
+	case ververicaplatformv1beta1.RunningState:
+		return string(ververicaplatformv1beta1.RunningState), nil
+	case ververicaplatformv1beta1.TransitioningState:
+		return string(ververicaplatformv1beta1.TransitioningState), nil
+	case ververicaplatformv1beta1.SuspendedState:
+		return string(ververicaplatformv1beta1.SuspendedState), nil
+	case ververicaplatformv1beta1.FailedState:
+		return string(ververicaplatformv1beta1.FailedState), nil
+	default:
+		return "", errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FAILED")
+	}
+}
