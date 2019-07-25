@@ -117,6 +117,7 @@ Main changes necessary:
 * `DeploymentUpgradeStrategy` needs choices
 * `DeploymentRestoreStrategy` needs choices and `allowNonRestoredState` option
 * `DeploymentStartFromSavepoint` needs choices
+* `POST /namespaces/{namespace}/deployments` needs a `201` response with a `Deployment` in the body
 
 #### Post-Generation Changes
 
@@ -132,6 +133,15 @@ import (
 )
 ```
 
+Effected files:
+- `api_api_tokens.go`
+- `api_events.go`
+- `api_jobs.go`
+- `api_namespaces.go`
+- `api_savepoints.go`
+
+
+
 There is also a bug that cannot handle an empty Swagger type to represent any type, so
 you must manually change [`model_any.go`](./ververica-platform-api/model_any.go) to:
 
@@ -140,6 +150,8 @@ package ververicaplatformapi
 
 type Any interface {}
 ```
+
+You'll also have to change any usages of this type in `structs` to be embedded, instead of by pointer ref.
 
 Is this all better than creating an API Client from scratch? Yes. Can I still complain about it? TBD. 
 

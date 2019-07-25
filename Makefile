@@ -57,7 +57,7 @@ fmt:
 # Lint the code, but not the generated!
 .PHONY: lint
 lint: vet
-	go list ./... | grep -v ververica-platform-api | xargs -L1 golint -set_exit_status
+	golangci-lint run controllers api/*
 
 # Run go vet against code, excluding the generated VP api
 .PHONY: vet

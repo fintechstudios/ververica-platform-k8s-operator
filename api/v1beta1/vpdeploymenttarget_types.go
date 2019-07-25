@@ -23,7 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-type JsonPatchGeneric struct {
+// JSONPatchGeneric is a generic JSON-Patch object
+type JSONPatchGeneric struct {
 	Op string `json:"op"`
 	Path string `json:"path"`
 	// TODO: support any type of JSON as an interface
@@ -34,7 +35,7 @@ type JsonPatchGeneric struct {
 	From string `json:"from,omitempty"`
 }
 
-// VPDeploymentMetadata represents all metadata from the VP API
+// VpDeploymentTargetMetadata represents all metadata from the VP API
 type VpDeploymentTargetMetadata struct {
 	// Taken from the K8s resource
 	// +optional
@@ -42,7 +43,7 @@ type VpDeploymentTargetMetadata struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 	// +optional
-	Id string `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// +optional
 	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	// +optional
@@ -61,10 +62,11 @@ type VpKubernetesTarget struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+// VpDeploymentTargetSpec allows a users to set defaults for deployments and configure K8s
 type VpDeploymentTargetSpec struct {
 	Kubernetes VpKubernetesTarget `json:"kubernetes"`
 	// +optional
-	DeploymentPatchSet []JsonPatchGeneric `json:"deploymentPatchSet,omitempty"`
+	DeploymentPatchSet []JSONPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }
 
 // VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget

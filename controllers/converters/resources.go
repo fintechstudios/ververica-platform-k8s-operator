@@ -8,7 +8,7 @@ import (
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
-// ResourceToNative
+// ResourcesToNative maps Ververica Platform API resources to native K8s  ones
 func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]ververicaplatformv1beta1.VpResourceSpec, error) {
 	vpResources := make(map[string]ververicaplatformv1beta1.VpResourceSpec)
 	for k, v := range resources {
@@ -24,7 +24,7 @@ func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]verv
 	return vpResources, nil
 }
 
-// ResourcesFromNative
+// ResourcesFromNative maps native K8s resources to Ververica Platform API ones
 func ResourcesFromNative(vpResources map[string]ververicaplatformv1beta1.VpResourceSpec) (map[string]vpAPI.ResourceSpec, error) {
 	resources := make(map[string]vpAPI.ResourceSpec)
 	for k, v := range vpResources {

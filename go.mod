@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
 	github.com/go-logr/logr v0.1.0
+	github.com/golangci/golangci-lint v1.17.1 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect

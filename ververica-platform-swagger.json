@@ -593,6 +593,12 @@
         "responses": {
           "default": {
             "description": "successful operation"
+          },
+          "201": {
+            "description": "successful creation",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
           }
         }
       }

@@ -28,7 +28,7 @@ type VpNamespaceMetadata struct {
 	// +optional
 	Name string `json:"name"`
 	// +optional
-	Id string `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// +optional
 	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	// +optional

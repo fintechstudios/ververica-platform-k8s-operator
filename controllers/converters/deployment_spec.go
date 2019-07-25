@@ -21,10 +21,10 @@ func DeploymentSpecToNative(deploymentSpec vpAPI.DeploymentSpec) (ververicaplatf
 	}
 
 
-	specJson, err := json.Marshal(deploymentSpec)
+	specJSON, err := json.Marshal(deploymentSpec)
 	// now unmarshal it into the platform model
 	var vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec
-	if err = json.Unmarshal(specJson, &vpDeploymentSpec); err != nil {
+	if err = json.Unmarshal(specJSON, &vpDeploymentSpec); err != nil {
 		return vpDeploymentSpec, errors.New("cannot encode VpDeployment spec: " + err.Error())
 	}
 
@@ -46,10 +46,10 @@ func DeploymentSpecFromNative(vpDeploymentSpec ververicaplatformv1beta1.VpDeploy
 		vpDeploymentSpec.Template.Spec.Resources = nil
 	}
 
-	vpSpecJson, err := json.Marshal(vpDeploymentSpec)
+	vpSpecJSON, err := json.Marshal(vpDeploymentSpec)
 	// now unmarshal it into the platform model
 	var deploymentSpec vpAPI.DeploymentSpec
-	if err = json.Unmarshal(vpSpecJson, &deploymentSpec); err != nil {
+	if err = json.Unmarshal(vpSpecJSON, &deploymentSpec); err != nil {
 		return deploymentSpec, errors.New("cannot encode Deployment spec: " + err.Error())
 	}
 

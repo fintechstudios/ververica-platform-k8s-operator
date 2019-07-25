@@ -46,7 +46,7 @@ func (r *VpNamespaceReconciler) updateResource(req ctrl.Request, resource *verve
 	resource.Name = namespace.Metadata.Name
 	resource.Spec.Metadata = ververicaplatformv1beta1.VpNamespaceMetadata{
 		Name:            namespace.Metadata.Name,
-		Id:              namespace.Metadata.Id,
+		ID:              namespace.Metadata.Id,
 		CreatedAt:       &metav1.Time{Time: namespace.Metadata.CreatedAt},
 		ModifiedAt:      &metav1.Time{Time: namespace.Metadata.ModifiedAt},
 		ResourceVersion: namespace.Metadata.ResourceVersion,
@@ -173,7 +173,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return res, nil
 	}
 
-	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(nil, req.Name)
+	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(ctx, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it

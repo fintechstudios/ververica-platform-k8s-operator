@@ -16,7 +16,8 @@ spec:
     maxJobCreationAttempts: 4
     template:
       metadata:
-        annotations: {}
+        annotations:
+          test: "true"
       spec:
         artifact:
           kind: JAR
@@ -31,7 +32,7 @@ spec:
         numberOfTaskManagers: 1
         resources:
           jobmanager:
-            cpu: "1.5"
+            cpu: "1"
             memory: 1g
           taskmanager:
             memory: 1.5g

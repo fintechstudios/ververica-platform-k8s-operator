@@ -537,6 +537,13 @@ spec:
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
+            jobIds:
+              description: JobIds is a list of job ids created for the deployment
+                We can also think about adding the full Job objects to a list as well,
+                if the information there seems useful
+              items:
+                type: string
+              type: array
             state:
               description: DeploymentState Only one of the following states may be
                 specified.

@@ -28,6 +28,7 @@ var (
 	buildDate         = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
 )
 
+// Version is a simple representation of the current application and runtime version
 type Version struct {
 	ControllerVersion string `json:"controllerVersion"`
 	GitCommit         string `json:"gitCommit"`
@@ -37,6 +38,8 @@ type Version struct {
 	GoArch            string `json:"goArch"`
 }
 
+
+// GetVersion constructs the current version
 func GetVersion() Version {
 	return Version{
 		ControllerVersion: controllerVersion,
@@ -48,6 +51,7 @@ func GetVersion() Version {
 	}
 }
 
+// ToString gets a simple string representation of the version
 func (v Version) ToString() string {
 	return fmt.Sprintf("%#v", v)
 }

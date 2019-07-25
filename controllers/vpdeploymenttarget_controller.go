@@ -45,7 +45,7 @@ func (r *VpDeploymentTargetReconciler) updateResource(req ctrl.Request, resource
 	resource.Spec.Metadata = ververicaplatformv1beta1.VpDeploymentTargetMetadata{
 		Name:            depTarget.Metadata.Name,
 		Namespace:       depTarget.Metadata.Namespace,
-		Id:              depTarget.Metadata.Id,
+		ID:              depTarget.Metadata.Id,
 		CreatedAt:       &metav1.Time{Time: depTarget.Metadata.CreatedAt},
 		ModifiedAt:      &metav1.Time{Time: depTarget.Metadata.ModifiedAt},
 		ResourceVersion: depTarget.Metadata.ResourceVersion,
@@ -118,7 +118,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 
 	// TODO: the depTarget data is already in the res, but for some reason need to un-marshal it
 	// 		 most likely a problem with the Swagger
-	body, err := ioutil.ReadAll(res.Body)
+	body, _ := ioutil.ReadAll(res.Body)
 	_ = res.Body.Close()
 	var createdDepTarget vpAPI.DeploymentTarget
 	if err := json.Unmarshal(body, &createdDepTarget); err != nil {

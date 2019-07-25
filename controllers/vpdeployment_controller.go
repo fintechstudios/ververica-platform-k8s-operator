@@ -19,11 +19,10 @@ package controllers
 import (
 	"context"
 	"errors"
+	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
-	"io/ioutil"
 	"time"
 
-	"encoding/json"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
@@ -45,10 +44,10 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpdeployment", req.NamespacedName)
 }
 
-func (r *VpDeploymentReconciler) getDeploymentTargetId(resource ververicaplatformv1beta1.VpDeployment) (string, error) {
-	if len(resource.Spec.Spec.DeploymentTargetId) > 0 {
+func (r *VpDeploymentReconciler) getDeploymentTargetID(resource ververicaplatformv1beta1.VpDeployment) (string, error) {
+	if len(resource.Spec.Spec.DeploymentTargetID) > 0 {
 		// an id has been set, just return it
-		return resource.Spec.Spec.DeploymentTargetId, nil
+		return resource.Spec.Spec.DeploymentTargetID, nil
 	}
 	name := resource.Spec.DeploymentTargetName
 	if len(name) == 0 {
@@ -83,7 +82,25 @@ func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namesp
 		}
 	}
 
-	return nil, nil // no errors but not found
+	// no errors but not found
+	// TODO: consider making this into a not-found error, so we could pass back the struct and not a pointer
+	return nil, nil
+}
+
+func (r *VpDeploymentReconciler) getJobIdsForDeployment(ctx context.Context, namespace string, depID string) ([]string, error) {
+	jobs, _, err := r.VPAPIClient.JobsApi.GetJobs(ctx, namespace, &vpAPI.GetJobsOpts{
+		DeploymentId: optional.NewInterface(depID),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, len(jobs.Items))
+	for i, job := range jobs.Items {
+		ids[i] = job.Metadata.Id
+	}
+	return ids, nil
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s
@@ -103,17 +120,17 @@ func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *verv
 	}
 	resource.Spec.Spec = spec
 
-	status, err := converters.DeploymentStatusToNative(*deployment.Status)
+	state, err := converters.DeploymentStateToNative(deployment.Status.State)
 	if err != nil {
 		return err
 	}
-	resource.Status = status
+	resource.Status.State = state
 
-	if err = r.Update(ctx, resource); err != nil {
+	if err = r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
-	if err = r.Status().Update(ctx, resource); err != nil {
+	if err = r.Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -138,24 +155,13 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, errors.New("deployment names must be unique per namespace")
 	}
 
-	deploymentSpec, err := converters.DeploymentSpecFromNative(vpDeployment.Spec.Spec)
+	deployment, err := converters.DeploymentFromNative(vpDeployment)
+
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	deploymentMeta, err := converters.DeploymentMetadataFromNative(vpDeployment.Spec.Metadata)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	deployment := vpAPI.Deployment{
-		Kind:       "Deployment",
-		ApiVersion: "v1",
-		Spec:       &deploymentSpec,
-		Metadata:   &deploymentMeta,
-	}
-
-	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetId(vpDeployment)
+	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetID(vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -163,7 +169,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	deployment.Metadata.Name = req.Name
 
 	// create it
-	res, err := r.VPAPIClient.
+	createdDep, res, err := r.VPAPIClient.
 		DeploymentsApi.
 		CreateDeployment(ctx, namespace, deployment)
 
@@ -177,17 +183,16 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, err
 	}
 
-	// TODO: the dep data is already in the res, but for some reason need to un-marshal it
-	// 		 most likely a problem with the Swagger
-	body, err := ioutil.ReadAll(res.Body)
-	_ = res.Body.Close()
-	var createdDep vpAPI.Deployment
-	if err := json.Unmarshal(body, &createdDep); err != nil {
-		// Should be updated the next time through
+	log.Info("Created deployment", "deployment", createdDep)
+
+	// Get the jobs for the new deployment
+	jobIds, err := r.getJobIdsForDeployment(ctx, namespace, createdDep.Metadata.Id)
+
+	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	log.Info("Created deployment", "deployment", createdDep)
+	// Set the initial job ids
+	vpDeployment.Status.JobIds = jobIds
 
 	// Now update the k8s resource and status as well
 	if err := r.updateResource(req, &vpDeployment, &createdDep); err != nil {
@@ -200,12 +205,19 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 // handleUpdate updates the k8s resource when it already exists in the VP
 // it also patches the deployment in the Ververica Platform, which could trigger a state transition
 // which we should wait for
-func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ververicaplatformv1beta1.VpDeployment, deployment vpAPI.Deployment) (ctrl.Result, error) {
+func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ververicaplatformv1beta1.VpDeployment, currentDeployment vpAPI.Deployment) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
-	log.Info("Patching the VP Deployment")
+	log.Info("Patching VP Deployment")
+
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	deployment, res, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, namespace, deployment.Metadata.Id, deployment)
+	desiredDeployment, err := converters.DeploymentFromNative(vpDeployment)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Patches with no changes to the spec should be idempotent
+	updatedDep, res, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, namespace, currentDeployment.Metadata.Id, desiredDeployment)
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
@@ -217,9 +229,27 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, err
 	}
 
-	// Now update the k8s resource
-	err = r.updateResource(req, &vpDeployment, &deployment)
-	return ctrl.Result{}, err
+	// Potentially, see jobs?
+	jobIds, err := r.getJobIdsForDeployment(ctx, namespace, updatedDep.Metadata.Id)
+
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	log.Info("Fetched jobs", "jobsCount", len(jobIds))
+
+	if len(vpDeployment.Status.JobIds) != len(jobIds) {
+		// a new job has been created! Update the K8s ref!
+		newIds := make([]string, len(jobIds))
+		copy(newIds, jobIds)
+		vpDeployment.Status.JobIds = newIds
+		if err = r.updateResource(req, &vpDeployment, &updatedDep); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
+
+	// Otherwise, same info - NO REQUEUE LOOPING PLEASE
+	return ctrl.Result{}, nil
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
@@ -256,9 +286,9 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
-	// If the desired state is not cancelled, we're not good - must cancel and then wait
 	// If the desired state is cancelled, we're good - just have to wait
 	if deployment.Status.State != string(ververicaplatformv1beta1.CancelledState) {
+		// If the desired state is not cancelled, we're not good - must cancel and then wait
 		if deployment.Spec.State != string(ververicaplatformv1beta1.CancelledState) {
 			// must cancel it
 			log.Info("Cancelling Deployment")
@@ -288,6 +318,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments/status,verbs=get;update;patch
 
+// Reconcile is the main reconciliation loop handler
 func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
@@ -342,8 +373,10 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		}
 
 		// no id, but hasn't
-		log.Info("No id set for deployment")
-		return r.handleUpdate(req, vpDeployment, *deployment)
+		log.Info("No id set for deployment", "deployment", *deployment)
+		// Update in k8s but don't patch - should be handled by the update loop
+		err = r.updateResource(req, &vpDeployment, deployment)
+		return ctrl.Result{}, err
 	}
 
 	deployment, _, err := r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, id)
@@ -360,6 +393,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	return r.handleUpdate(req, vpDeployment, deployment)
 }
 
+// SetupWithManager hooks the reconciler into the main manager
 func (r *VpDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ververicaplatformv1beta1.VpDeployment{}).

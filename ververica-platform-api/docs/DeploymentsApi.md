@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 
 # **CreateDeployment**
-> CreateDeployment(ctx, namespace, body)
+> Deployment CreateDeployment(ctx, namespace, body)
 Create a deployment
 
 
@@ -27,7 +27,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**Deployment**](Deployment.md)
 
 ### Authorization
 

@@ -96,6 +96,7 @@ type VpResourceSpec struct {
 	Memory *string `json:"memory,omitempty"`
 }
 
+// VpLogging configures various loggers
 type VpLogging struct {
 	// +optional
 	Log4jLoggers map[string]string `json:"log4jLoggers,omitempty"`
@@ -147,6 +148,7 @@ type VpJsonNode struct {
 	Null bool `json:"null,omitempty"`
 }
 
+// VpVolumeAndMount joins a volume and how it is mounted
 type VpVolumeAndMount struct {
 	// +optional
 	Name *string `json:"name,omitempty"`
@@ -156,6 +158,7 @@ type VpVolumeAndMount struct {
 	VolumeMount *VpJsonNode `json:"volumeMount,omitempty"`
 }
 
+// VpEnvVar allows users to specify environment variables for jobs
 type VpEnvVar struct {
 	// +optional
 	Name *string `json:"name,omitempty"`
@@ -165,11 +168,12 @@ type VpEnvVar struct {
 	ValueFrom *VpJsonNode `json:"valueFrom,omitempty"`
 }
 
+// VpLocalObjectReference is the Ververica Platform local object reference for secrets
 type VpLocalObjectReference struct {
 	Name string `json:"name"`
 }
 
-// VpPods
+// VpPods are the K8s specific options
 type VpPods struct {
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
@@ -189,12 +193,12 @@ type VpPods struct {
 	ImagePullSecrets []VpLocalObjectReference `json:"imagePullSecrets,omitempty"`
 }
 
-// VpKubernetesOptions
+// VpKubernetesOptions allows users to configure K8s pods for Deployments
 type VpKubernetesOptions struct {
 	Pods *VpPods `json:"pods,omitempty"`
 }
 
-// VpDeploymentTemplateSpec
+// VpDeploymentTemplateSpec is the base spec for Deployment jobs
 type VpDeploymentTemplateSpec struct {
 	Artifact *VpArtifact `json:"artifact"`
 	// +optional
@@ -211,7 +215,7 @@ type VpDeploymentTemplateSpec struct {
 	Kubernetes *VpKubernetesOptions `json:"kubernetes,omitempty"`
 }
 
-// VpDeploymentTemplate
+// VpDeploymentTemplate is the template for Deployment jobs
 type VpDeploymentTemplate struct {
 	// +optional
 	Metadata *VpDeploymentTemplateMetadata `json:"metadata,omitempty"`
@@ -219,18 +223,18 @@ type VpDeploymentTemplate struct {
 	Spec *VpDeploymentTemplateSpec `json:"spec"`
 }
 
-
-// DeploymentState
+// DeploymentState is the enum of all possible deployment states
 // Only one of the following states may be specified.
 // +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED
 type DeploymentState string
 
+// All the allowed DeploymentStates
 const (
-	CancelledState DeploymentState = "CANCELLED" // non-US spelling
-	RunningState DeploymentState = "RUNNING"
+	CancelledState     DeploymentState = "CANCELLED" // non-US spelling intentional
+	RunningState       DeploymentState = "RUNNING"
 	TransitioningState DeploymentState = "TRANSITIONING"
-	SuspendedState DeploymentState = "SUSPENDED"
-	FailedState DeploymentState = "FAILED"
+	SuspendedState     DeploymentState = "SUSPENDED"
+	FailedState        DeploymentState = "FAILED"
 )
 
 // VpDeploymentSpec is the spec in the Ververica Platform
@@ -243,7 +247,7 @@ type VpDeploymentSpec struct {
 	// +optional
 	StartFromSavepoint *VpDeploymentStartFromSavepoint `json:"startFromSavepoint,omitempty"`
 	// +optional
-	DeploymentTargetId string `json:"deploymentTargetId,omitempty"`
+	DeploymentTargetID string `json:"deploymentTargetId,omitempty"`
 	// +optional
 	MaxSavepointCreationAttempts *int32 `json:"maxSavepointCreationAttempts,omitempty"`
 	// +optional
@@ -259,7 +263,7 @@ type VpDeploymentObjectSpec struct {
 
 	// VP
 	Metadata VpDeploymentMetadata `json:"metadata"`
-	Spec VpDeploymentSpec `json:"spec"`
+	Spec     VpDeploymentSpec     `json:"spec"`
 
 	// DeploymentTargetName is an extension on the VP API
 	// Must provide a spec.deploymentTargetId if not set
@@ -274,6 +278,12 @@ type VpDeploymentStatus struct {
 
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
+
+	// JobIds is a list of job ids created for the deployment
+	// We can also think about adding the full Job objects to a list as well,
+	// if the information there seems useful
+	// +optional
+	JobIds  []string         `json:"jobIds,omitempty"`
 }
 
 // +kubebuilder:object:root=true
