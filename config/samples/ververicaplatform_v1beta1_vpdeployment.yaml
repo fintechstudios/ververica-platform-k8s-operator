@@ -1,0 +1,49 @@
+apiVersion: ververicaplatform.fintechstudios.com/v1beta1
+kind: VpDeployment
+metadata:
+  name: deployment
+spec:
+  deploymentTargetName: dep-target
+  metadata:
+    namespace: doc-ingestion
+  spec:
+    state: RUNNING
+    upgradeStrategy:
+      kind: STATELESS
+    restoreStrategy:
+      kind: NONE
+    maxSavepointCreationAttempts: 4
+    maxJobCreationAttempts: 4
+    template:
+      metadata:
+        annotations:
+          test: "true"
+      spec:
+        artifact:
+          kind: JAR
+          jarUri: http://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.8.0/flink-examples-streaming_2.11-1.8.0-TopSpeedWindowing.jar
+          mainArgs: --windowSize 10 --windowUnit minutes
+          entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
+          flinkVersion: "1.8"
+          flinkImageRegistry: registry.platform.data-artisans.net/dist
+          flinkImageRepository: flink
+          flinkImageTag: 1.8.0-stream2-scala_2.11
+        parallelism: 1
+        numberOfTaskManagers: 1
+        resources:
+          jobmanager:
+            cpu: "1.5"
+            memory: 1g
+          taskmanager:
+            memory: 1.5g
+        flinkConfiguration:
+          high-availability.storageDir:  s3://flink/haState
+          taskmanager.numberOfTaskSlots: "1"
+        logging:
+          log4jLoggers:
+            "com.fintechstudios": DEBUG
+        kubernetes:
+          pods:
+            annotations:
+              "iam.amazonaws.com/role": k8s-flink-job
+

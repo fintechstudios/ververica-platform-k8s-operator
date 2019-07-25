@@ -1,11 +1,12 @@
 package utils
 
+// DefaultNamespace is the default namespace of the Ververica Platform
+const DefaultNamespace = "default"
 
-var defaultNamespace = "default"
-
-func GetNamespaceOrDefault(namespace *string) string {
-	if namespace == nil || len(*namespace) == 0 {
-		return defaultNamespace
+// GetNamespaceOrDefault will return either the given namespace, if valid, or the default Ververica Platform namespace
+func GetNamespaceOrDefault(namespace string) string {
+	if len(namespace) == 0 {
+		return DefaultNamespace
 	}
-	return *namespace
+	return namespace
 }

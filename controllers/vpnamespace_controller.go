@@ -32,21 +32,21 @@ import (
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 )
 
-// VPNamespaceReconciler reconciles a VPNamespace object
-type VPNamespaceReconciler struct {
+// VpNamespaceReconciler reconciles a VpNamespace object
+type VpNamespaceReconciler struct {
 	client.Client
 	Log         logr.Logger
 	VPAPIClient vpAPI.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VPNamespaceReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VPNamespace, namespace *vpAPI.Namespace) error {
+func (r *VpNamespaceReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpNamespace, namespace *vpAPI.Namespace) error {
 	ctx := context.Background()
 
 	resource.Name = namespace.Metadata.Name
-	resource.Spec.Metadata = ververicaplatformv1beta1.VPNamespaceMetadata{
+	resource.Spec.Metadata = ververicaplatformv1beta1.VpNamespaceMetadata{
 		Name:            namespace.Metadata.Name,
-		Id:              namespace.Metadata.Id,
+		ID:              namespace.Metadata.Id,
 		CreatedAt:       &metav1.Time{Time: namespace.Metadata.CreatedAt},
 		ModifiedAt:      &metav1.Time{Time: namespace.Metadata.ModifiedAt},
 		ResourceVersion: namespace.Metadata.ResourceVersion,
@@ -65,12 +65,12 @@ func (r *VPNamespaceReconciler) updateResource(req ctrl.Request, resource *verve
 }
 
 // getLogger creates a logger for the controller with the request name
-func (r *VPNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
+func (r *VpNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpnamespace", req.NamespacedName)
 }
 
 // handleCreate creates VP resources
-func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VPNamespace) (ctrl.Result, error) {
+func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
 
@@ -99,14 +99,14 @@ func (r *VPNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace verve
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VPNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VPNamespace, namespace vpAPI.Namespace) (ctrl.Result, error)  {
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error)  {
 	// Now update the k8s resource and status as well
 	err := r.updateResource(req, &vpNamespace, &namespace)
 	return ctrl.Result{}, err
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, error) {
+func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
 	// Let's make sure it's deleted from the ververica platform
@@ -133,13 +133,13 @@ func (r *VPNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpnamespaces/status,verbs=get;update;patch
 
 // Reconcile tries to make the current state more like the desired state
-func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
 
 	// otherwise, let's check if it exists in the cluster
 	// If so, it's been deleted
-	var vpNamespace ververicaplatformv1beta1.VPNamespace
+	var vpNamespace ververicaplatformv1beta1.VpNamespace
 	if err := r.Get(ctx, req.NamespacedName, &vpNamespace); err != nil {
 		log.Info("Not Found event", "name", req.Name)
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -173,7 +173,7 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return res, nil
 	}
 
-	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(nil, req.Name)
+	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(ctx, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it
@@ -188,8 +188,8 @@ func (r *VPNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 }
 
 // SetupWithManager is a helper function to initial on manager boot
-func (r *VPNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *VpNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ververicaplatformv1beta1.VPNamespace{}).
+		For(&ververicaplatformv1beta1.VpNamespace{}).
 		Complete(r)
 }

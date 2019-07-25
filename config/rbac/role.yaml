@@ -9,6 +9,26 @@ rules:
 - apiGroups:
   - ververicaplatform.fintechstudios.com
   resources:
+  - vpdeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
+  - vpdeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
   - vpdeploymenttargets
   verbs:
   - create

@@ -23,7 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-type JsonPatchGeneric struct {
+// JSONPatchGeneric is a generic JSON-Patch object
+type JSONPatchGeneric struct {
 	Op string `json:"op"`
 	Path string `json:"path"`
 	// TODO: support any type of JSON as an interface
@@ -34,15 +35,15 @@ type JsonPatchGeneric struct {
 	From string `json:"from,omitempty"`
 }
 
-// VPDeploymentMetadata represents all metadata from the VP API
-type VPDeploymentTargetMetadata struct {
+// VpDeploymentTargetMetadata represents all metadata from the VP API
+type VpDeploymentTargetMetadata struct {
 	// Taken from the K8s resource
 	// +optional
 	Name string `json:"name,omitempty"`
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 	// +optional
-	Id string `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// +optional
 	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	// +optional
@@ -55,27 +56,28 @@ type VPDeploymentTargetMetadata struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
-// VPKubernetesTarget allows a user to configure k8s specific options
-type VPKubernetesTarget struct {
+// VpKubernetesTarget allows a user to configure k8s specific options
+type VpKubernetesTarget struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }
 
-type VPDeploymentTargetSpec struct {
-	Kubernetes         VPKubernetesTarget `json:"kubernetes"`
+// VpDeploymentTargetSpec allows a users to set defaults for deployments and configure K8s
+type VpDeploymentTargetSpec struct {
+	Kubernetes VpKubernetesTarget `json:"kubernetes"`
 	// +optional
-	DeploymentPatchSet []JsonPatchGeneric `json:"deploymentPatchSet,omitempty"`
+	DeploymentPatchSet []JSONPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }
 
-// VPDeploymentTargetObjectSpec defines the desired state of VPDeploymentTarget
-type VPDeploymentTargetObjectSpec struct {
+// VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
+type VpDeploymentTargetObjectSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	Metadata VPDeploymentTargetMetadata `json:"metadata,omitempty"`
+	Metadata VpDeploymentTargetMetadata `json:"metadata,omitempty"`
 	// +optional
-	Spec VPDeploymentTargetSpec `json:"spec,omitempty"`
+	Spec VpDeploymentTargetSpec `json:"spec,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -85,25 +87,25 @@ type VPDeploymentTargetObjectSpec struct {
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 
-// VPDeploymentTarget is the Schema for the vpdeploymenttargets API
-type VPDeploymentTarget struct {
+// VpDeploymentTarget is the Schema for the vpdeploymenttargets API
+type VpDeploymentTarget struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec VPDeploymentTargetObjectSpec `json:"spec,omitempty"`
+	Spec VpDeploymentTargetObjectSpec `json:"spec,omitempty"`
 }
 
-// TODO: think about adding a status that keeps track of all the deployments with this target
+// TODO: think about adding a field / status that keeps track of all the deployments with this target
 
 // +kubebuilder:object:root=true
 
-// VPDeploymentTargetList contains a list of VPDeploymentTarget
-type VPDeploymentTargetList struct {
+// VpDeploymentTargetList contains a list of VpDeploymentTarget
+type VpDeploymentTargetList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []VPDeploymentTarget `json:"items"`
+	Items           []VpDeploymentTarget `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&VPDeploymentTarget{}, &VPDeploymentTargetList{})
+	SchemeBuilder.Register(&VpDeploymentTarget{}, &VpDeploymentTargetList{})
 }

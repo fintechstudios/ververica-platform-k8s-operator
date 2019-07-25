@@ -1,13 +1,20 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
-REGISTRY?=kong-docker-kubernetes-ingress-controller.bintray.io
+IMG?= controller:latest
+REGISTRY?=fts
 TAG?=0.1.0
+PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
+VERSION_PKG=$(PKG)/controllers/version/version
+GIT_COMMIT=$(shell git rev-parse HEAD)
 REPO_INFO=$(shell git config --get remote.origin.url)
-IMGNAME = kong-ingress-controller
-IMAGE = $(REGISTRY)/$(IMGNAME)
+BUILD=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+IMGNAME=ververica-platform-k8s-controller
+IMAGE=$(REGISTRY)/$(IMGNAME)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS?="crd:trivialVersions=true"
+
+LD_FLAGS="-X $(VERSION_PKG).controllerVersion=$(TAG) -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).buildDate=$(BUILD)"
+
 
 all: manager
 
@@ -19,12 +26,12 @@ test: generate manifests
 # Build manager binary
 .PHONY: manager
 manager: generate
-	go build -o bin/manager main.go
+	go build -ldflags $(LD_FLAGS) -o bin/manager main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
 run: generate
-	go run ./main.go
+	go run -ldflags $(LD_FLAGS) ./main.go
 
 # Install CRDs into a cluster
 .PHONY: install
@@ -49,8 +56,8 @@ fmt:
 
 # Lint the code, but not the generated!
 .PHONY: lint
-lint: vet
-	go list ./... | grep -v ververica-platform-api | xargs -L1 golint -set_exit_status
+lint:
+	golangci-lint run
 
 # Run go vet against code, excluding the generated VP api
 .PHONY: vet

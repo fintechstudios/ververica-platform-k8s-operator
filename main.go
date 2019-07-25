@@ -19,6 +19,8 @@ import (
 	"flag"
 	"os"
 
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/version"
+
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
 	ververicaplatformapi "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
@@ -36,9 +38,7 @@ var (
 )
 
 func init() {
-
 	_ = ververicaplatformv1beta1.AddToScheme(scheme)
-	ververicaplatformv1beta1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -56,6 +56,7 @@ func main() {
 			"The URL to the Ververica Platform API, without a trailing slash.")
 	)
 	flag.Parse()
+
 	setupLog.Info("Watching namespace", "namespace", watchNamespace)
 
 	ctrl.SetLogger(zap.Logger(*enableDebugMode))
@@ -64,11 +65,14 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: *metricsAddr,
 		LeaderElection:     *enableLeaderElection,
+		Namespace:          *watchNamespace,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+	setupLog.Info("Starting Ververica Platform K8s controller",
+		"version", version.GetVersion().ToString())
 
 	// Build the Ververica Platform API Client
 	ververicaAPIClient := ververicaplatformapi.NewAPIClient(&ververicaplatformapi.Configuration{
@@ -79,22 +83,30 @@ func main() {
 
 	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
 
-	err = (&controllers.VPNamespaceReconciler{
+	err = (&controllers.VpNamespaceReconciler{
 		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VPNamespace"),
+		Log:         ctrl.Log.WithName("controllers").WithName("VpNamespace"),
 		VPAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "VPNamespace")
+		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
 		os.Exit(1)
 	}
-	err = (&controllers.VPDeploymentTargetReconciler{
+	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VPDeploymentTarget"),
+		Log:         ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
 		VPAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "VPDeploymentTarget")
+		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
+		os.Exit(1)
+	}
+	if err = (&controllers.VpDeploymentReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VpDeployment"),
+		VPAPIClient: *ververicaAPIClient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
