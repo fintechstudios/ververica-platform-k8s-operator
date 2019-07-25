@@ -19,11 +19,17 @@ spec:
   - JSONPath: .spec.metadata.modifiedAt
     name: Modified
     type: date
-  - JSONPath: .spec.metadata.spec.artifact.flinkVersion
+  - JSONPath: .status.state
+    name: State
+    type: date
+  - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
     name: FlinkVersion
     type: string
-  - JSONPath: .spec.metadata.spec.artifact.flinkImageTag
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
     name: FlinkImageTag
+    type: string
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
+    name: FlinkImageRegistry
     type: string
   group: ververicaplatform.fintechstudios.com
   names:
@@ -51,9 +57,12 @@ spec:
         spec:
           description: VpDeploymentObjectSpec defines the desired state of VpDeployment
           properties:
+            deploymentTargetName:
+              description: DeploymentTargetName is an extension on the VP API Must
+                provide a spec.deploymentTargetId if not set
+              type: string
             metadata:
-              description: VpDeploymentMetadata represents all metadata from the VP
-                API
+              description: VP
               properties:
                 annotations:
                   additionalProperties:
@@ -85,9 +94,6 @@ spec:
               properties:
                 deploymentTargetId:
                   type: string
-                deploymentTargetName:
-                  description: DeploymentTargetName is an extension on the VP API
-                  type: string
                 maxJobCreationAttempts:
                   format: int32
                   type: integer
@@ -111,6 +117,14 @@ spec:
                       type: string
                   type: object
                 state:
+                  description: DeploymentState Only one of the following states may
+                    be specified.
+                  enum:
+                  - CANCELLED
+                  - RUNNING
+                  - TRANSITIONING
+                  - SUSPENDED
+                  - FAILED
                   type: string
                 template:
                   description: VpDeploymentTemplate
@@ -527,8 +541,19 @@ spec:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
             state:
+              description: DeploymentState Only one of the following states may be
+                specified.
+              enum:
+              - CANCELLED
+              - RUNNING
+              - TRANSITIONING
+              - SUSPENDED
+              - FAILED
               type: string
           type: object
+      required:
+      - metadata
+      - spec
       type: object
   versions:
   - name: v1beta1

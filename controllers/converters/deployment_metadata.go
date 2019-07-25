@@ -1,0 +1,33 @@
+package converters
+
+import (
+	"encoding/json"
+	"errors"
+
+	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+)
+
+//DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
+func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (ververicaplatformv1beta1.VpDeploymentMetadata, error) {
+	MetadataJson, err := json.Marshal(deploymentMetadata)
+	// now unmarshal it into the platform model
+	var vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata
+	if err = json.Unmarshal(MetadataJson, &vpDeploymentMetadata); err != nil {
+		return vpDeploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
+	}
+
+	return vpDeploymentMetadata, nil
+}
+
+// DeploymentMetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
+func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata) (vpAPI.DeploymentMetadata, error) {
+	vpMetadataJson, err := json.Marshal(vpDeploymentMetadata)
+	// now unmarshal it into the platform model
+	var deploymentMetadata vpAPI.DeploymentMetadata
+	if err = json.Unmarshal(vpMetadataJson, &deploymentMetadata); err != nil {
+		return deploymentMetadata, errors.New("cannot encode Deployment Metadata: " + err.Error())
+	}
+
+	return deploymentMetadata, nil
+}

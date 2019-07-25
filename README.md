@@ -88,11 +88,18 @@ Also built as a Go 1.11 module - no vendor files here.
 
 System Pre-requisites:
 - `go` >= 1.12
+- `make`
 - `kubebuilder` >= 2.0.0-beta.0
 - `kustomize` >= v3.0.1
 - `docker`
 - [`minikube`](https://github.com/kubernetes/minikube) or similar
 
+
+### `make` Scripts
+
+- `make`
+- `make install`
+- `make docker-build`
 
 ### Ververica Platform API
 
@@ -152,7 +159,7 @@ Some known issues + places to improve:
 will there ever be more than on VP running in a cluster?
 * Improvements on the Swagger API generator / moving that to OpenAPI V3.
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
-
+* Various `TODO`s should give us a place to start!
 
 ## Acknowledgements
 

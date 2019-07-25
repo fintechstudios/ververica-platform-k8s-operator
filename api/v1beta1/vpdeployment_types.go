@@ -19,7 +19,6 @@ package v1beta1
 import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/apimachinery/pkg/runtime"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -220,9 +219,23 @@ type VpDeploymentTemplate struct {
 	Spec *VpDeploymentTemplateSpec `json:"spec"`
 }
 
+
+// DeploymentState
+// Only one of the following states may be specified.
+// +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED
+type DeploymentState string
+
+const (
+	CancelledState DeploymentState = "CANCELLED" // non-US spelling
+	RunningState DeploymentState = "RUNNING"
+	TransitioningState DeploymentState = "TRANSITIONING"
+	SuspendedState DeploymentState = "SUSPENDED"
+	FailedState DeploymentState = "FAILED"
+)
+
 // VpDeploymentSpec is the spec in the Ververica Platform
 type VpDeploymentSpec struct {
-	State string `json:"state"`
+	State DeploymentState `json:"state"`
 
 	UpgradeStrategy *VpDeploymentUpgradeStrategy `json:"upgradeStrategy"`
 	// +optional
@@ -237,11 +250,6 @@ type VpDeploymentSpec struct {
 	MaxJobCreationAttempts *int32 `json:"maxJobCreationAttempts,omitempty"`
 
 	Template *VpDeploymentTemplate `json:"template"`
-
-	// DeploymentTargetName is an extension on the VP API
-	// Must provide a DeploymentTargetId if not set
-	// +optional
-	DeploymentTargetName string `json:"deploymentTargetName,omitempty"`
 }
 
 // VpDeploymentObjectSpec defines the desired state of VpDeployment
@@ -249,8 +257,14 @@ type VpDeploymentObjectSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Metadata *VpDeploymentMetadata `json:"metadata"`
-	Spec *VpDeploymentSpec `json:"spec"`
+	// VP
+	Metadata VpDeploymentMetadata `json:"metadata"`
+	Spec VpDeploymentSpec `json:"spec"`
+
+	// DeploymentTargetName is an extension on the VP API
+	// Must provide a spec.deploymentTargetId if not set
+	// +optional
+	DeploymentTargetName string `json:"deploymentTargetName,omitempty"`
 }
 
 // VpDeploymentStatus defines the observed state of VpDeployment
@@ -259,7 +273,7 @@ type VpDeploymentStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	State string `json:"state,omitempty"`
+	State DeploymentState `json:"state,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -268,15 +282,17 @@ type VpDeploymentStatus struct {
 // +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
-// +kubebuilder:printcolumn:name="FlinkVersion",type="string",JSONPath=".spec.metadata.spec.artifact.flinkVersion"
-// +kubebuilder:printcolumn:name="FlinkImageTag",type="string",JSONPath=".spec.metadata.spec.artifact.flinkImageTag"
+// +kubebuilder:printcolumn:name="State",type="date",JSONPath=".status.state"
+// +kubebuilder:printcolumn:name="FlinkVersion",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
+// +kubebuilder:printcolumn:name="FlinkImageTag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
+// +kubebuilder:printcolumn:name="FlinkImageRegistry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"
 
 // VpDeployment is the Schema for the vpdeployments API
 type VpDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   VpDeploymentObjectSpec `json:"spec,omitempty"`
+	Spec   VpDeploymentObjectSpec `json:"spec"`
 	Status VpDeploymentStatus     `json:"status,omitempty"`
 }
 

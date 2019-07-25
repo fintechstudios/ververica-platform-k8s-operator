@@ -19,20 +19,18 @@ package controllers
 import (
 	"context"
 	"errors"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	"io/ioutil"
 	"time"
 
 	"encoding/json"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 )
 
 // VpDeploymentReconciler reconciles a VpDeployment object
@@ -47,19 +45,19 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpdeployment", req.NamespacedName)
 }
 
-func (r *VpDeploymentReconciler) getDeploymentTargetId(resource *ververicaplatformv1beta1.VpDeployment) (string, error) {
+func (r *VpDeploymentReconciler) getDeploymentTargetId(resource ververicaplatformv1beta1.VpDeployment) (string, error) {
 	if len(resource.Spec.Spec.DeploymentTargetId) > 0 {
 		// an id has been set, just return it
 		return resource.Spec.Spec.DeploymentTargetId, nil
 	}
-	name := resource.Spec.Spec.DeploymentTargetName
+	name := resource.Spec.DeploymentTargetName
 	if len(name) == 0 {
-		return "", errors.New("must set spec.spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
+		return "", errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 	}
 
 	ctx := context.Background()
 	namespace := utils.GetNamespaceOrDefault(resource.Spec.Metadata.Namespace)
-	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, resource.Spec.Spec.DeploymentTargetName)
+	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, resource.Spec.DeploymentTargetName)
 
 	if err != nil {
 		return "", err
@@ -68,23 +66,54 @@ func (r *VpDeploymentReconciler) getDeploymentTargetId(resource *ververicaplatfo
 	return depTarget.Metadata.Id, nil
 }
 
-// updateResource takes a k8s resource and a VP resource and merges them
+func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namespace string, name string) (*vpAPI.Deployment, error) {
+	if len(name) == 0 {
+		return nil, errors.New("name must not be empty")
+	}
+
+	deploymentsList, _, err := r.VPAPIClient.DeploymentsApi.GetDeployments(ctx, namespace, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, deployment := range deploymentsList.Items {
+		if deployment.Metadata.Name == name {
+			return &deployment, nil
+		}
+	}
+
+	return nil, nil // no errors but not found
+}
+
+// updateResource takes a k8s resource and a VP resource and syncs them in k8s
 func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
 	ctx := context.Background()
 
-	resource.Name = deployment.Metadata.Name
-	resource.Spec.Metadata = &ververicaplatformv1beta1.VpDeploymentMetadata{
-		Name:            deployment.Metadata.Name,
-		Namespace:       deployment.Metadata.Namespace,
-		Id:              deployment.Metadata.Id,
-		CreatedAt:       &metav1.Time{Time: deployment.Metadata.CreatedAt},
-		ModifiedAt:      &metav1.Time{Time: deployment.Metadata.ModifiedAt},
-		ResourceVersion: deployment.Metadata.ResourceVersion,
-		Labels:          deployment.Metadata.Labels,
-		Annotations:     deployment.Metadata.Annotations,
+	metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
+
+	if err != nil {
+		return err
+	}
+	resource.Spec.Metadata = metadata
+
+	spec, err := converters.DeploymentSpecToNative(*deployment.Spec)
+	if err != nil {
+		return err
+	}
+	resource.Spec.Spec = spec
+
+	status, err := converters.DeploymentStatusToNative(*deployment.Status)
+	if err != nil {
+		return err
+	}
+	resource.Status = status
+
+	if err = r.Update(ctx, resource); err != nil {
+		return err
 	}
 
-	if err := r.Update(ctx, resource); err != nil {
+	if err = r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -96,122 +125,47 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	ctx := context.Background()
 	log := r.getLogger(req)
 
-	// TODO: must make this idempotent - one deployment by name per namespace?
+	// See if there already exists a deployment by that name
+	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	dep, err := r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
 
-	// TODO: redo this to take advantage of marshalling
-	//vpJson, err := json.Marshal(vpDeployment)
-	//log.Info(string(vpJson))
-	//vpSpecJson, err := json.Marshal(vpDeployment.Spec)
-	//log.Info(string(vpSpecJson))
-
-	vpTemplate := vpDeployment.Spec.Spec.Template
-	vpArtifact := vpTemplate.Spec.Artifact
-	vpPods := vpTemplate.Spec.Kubernetes.Pods
-	templateResources := make(map[string]vpAPI.ResourceSpec)
-	for k, v := range vpTemplate.Spec.Resources {
-		res := vpAPI.ResourceSpec{}
-		if v.Memory != nil {
-			res.Memory = *v.Memory
-		}
-		res.Cpu = float64(v.Cpu.MilliValue()) / 1000 // convert back to a plain float
-		templateResources[k] = res
+	if err != nil {
+		log.Error(err, "while fetching deployments list")
+		return ctrl.Result{}, err
 	}
 
-	templatePods := vpAPI.Pods{
-		Annotations:  vpPods.Annotations,
-		NodeSelector: vpPods.NodeSelector,
+	if dep != nil && dep.Metadata.Name == vpDeployment.Name {
+		return ctrl.Result{}, errors.New("deployment names must be unique per namespace")
 	}
 
-	templateSpec := vpAPI.DeploymentTemplateSpec{
-		Artifact: &vpAPI.Artifact{
-			Kind:               vpArtifact.Kind,
-			JarUri:             vpArtifact.JarUri,
-			MainArgs:           vpArtifact.MainArgs,
-			EntryClass:         vpArtifact.EntryClass,
-			FlinkVersion:       vpArtifact.FlinkVersion,
-			FlinkImageRegistry: vpArtifact.FlinkImageRegistry,
-			FlinkImageTag:      vpArtifact.FlinkImageTag,
-		},
-		Resources:          templateResources,
-		FlinkConfiguration: vpTemplate.Spec.FlinkConfiguration,
-		Logging: &vpAPI.Logging{
-			Log4jLoggers: vpTemplate.Spec.Logging.Log4jLoggers,
-		},
-		Kubernetes: &vpAPI.KubernetesOptions{
-			Pods: &templatePods,
-		},
-	}
-
-	if vpTemplate.Spec.Parallelism != nil {
-		templateSpec.Parallelism = *vpTemplate.Spec.Parallelism
-	}
-
-	if vpTemplate.Spec.NumberOfTaskManagers != nil {
-		templateSpec.NumberOfTaskManagers = *vpTemplate.Spec.NumberOfTaskManagers
-	}
-
-	templateAnnotations := vpAPI.DeploymentTemplateMetadata{
-		Annotations: vpDeployment.Spec.Spec.Template.Metadata.Annotations,
-	}
-
-	template := vpAPI.DeploymentTemplate{
-		Metadata: &templateAnnotations,
-		Spec:     &templateSpec,
-	}
-
-	depTargetId, err := r.getDeploymentTargetId(&vpDeployment)
-
+	deploymentSpec, err := converters.DeploymentSpecFromNative(vpDeployment.Spec.Spec)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	depSpec := &vpAPI.DeploymentSpec{
-		DeploymentTargetId: depTargetId,
-		State:              vpDeployment.Spec.Spec.State,
-		UpgradeStrategy: &vpAPI.DeploymentUpgradeStrategy{
-			Kind: vpDeployment.Spec.Spec.UpgradeStrategy.Kind,
-		},
-		RestoreStrategy: &vpAPI.DeploymentRestoreStrategy{
-			Kind:                  vpDeployment.Spec.Spec.RestoreStrategy.Kind,
-			AllowNonRestoredState: vpDeployment.Spec.Spec.RestoreStrategy.AllowNonRestoredState,
-		},
-		Template: &template,
+	deploymentMeta, err := converters.DeploymentMetadataFromNative(vpDeployment.Spec.Metadata)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
-	if vpDeployment.Spec.Spec.MaxSavepointCreationAttempts != nil {
-		depSpec.MaxSavepointCreationAttempts = *vpDeployment.Spec.Spec.MaxSavepointCreationAttempts
-	}
-
-	if vpDeployment.Spec.Spec.MaxJobCreationAttempts != nil {
-		depSpec.MaxJobCreationAttempts = *vpDeployment.Spec.Spec.MaxJobCreationAttempts
-	}
-
-	if vpDeployment.Spec.Spec.StartFromSavepoint != nil {
-		depSpec.StartFromSavepoint = &vpAPI.DeploymentStartFromSavepoint{
-			Kind: vpDeployment.Spec.Spec.StartFromSavepoint.Kind,
-		}
-	} else {
-		depSpec.StartFromSavepoint = &vpAPI.DeploymentStartFromSavepoint{
-			Kind: "NONE",
-		}
-	}
-
-	dep := vpAPI.Deployment{
+	deployment := vpAPI.Deployment{
+		Kind:       "Deployment",
 		ApiVersion: "v1",
-		Metadata: &vpAPI.DeploymentMetadata{
-			Name:        req.Name,
-			Namespace:   vpDeployment.Spec.Metadata.Namespace,
-			Labels:      vpDeployment.Spec.Metadata.Labels,
-			Annotations: vpDeployment.Spec.Metadata.Annotations,
-		},
-		Spec: depSpec,
+		Spec:       &deploymentSpec,
+		Metadata:   &deploymentMeta,
 	}
+
+	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetId(vpDeployment)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	deployment.Metadata.Name = req.Name
 
 	// create it
-	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	res, err := r.VPAPIClient.
 		DeploymentsApi.
-		CreateDeployment(ctx, namespace, dep)
+		CreateDeployment(ctx, namespace, deployment)
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
@@ -229,6 +183,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	_ = res.Body.Close()
 	var createdDep vpAPI.Deployment
 	if err := json.Unmarshal(body, &createdDep); err != nil {
+		// Should be updated the next time through
 		return ctrl.Result{}, err
 	}
 
@@ -258,28 +213,52 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 	// First must make sure the deployment is canceled, then must delete it
 
 	// Let's make sure it's deleted from the ververica platform
-	deployment, _, err := r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id)
+	// must make sure the namespace and id are set, or will return a list of deployments...
+	var namespace = utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+
+	var (
+		deployment vpAPI.Deployment
+		err        error
+	)
+	if len(vpDeployment.Spec.Metadata.Id) > 0 {
+		deployment, _, err = r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, vpDeployment.Spec.Metadata.Id)
+	} else {
+		// TODO: this can definitely be cleaned up
+		depPtr, err := r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if depPtr == nil {
+			return ctrl.Result{}, nil
+		}
+		deployment = *depPtr
+	}
 
 	if err != nil {
 		// If it's already gone, great!
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
-	if deployment.Status.State != "CANCELLED" {
-		log.Info("Must first cancel Deployment", "name", deployment.Metadata.Name)
-		deployment.Status.State = "CANCELLED"
-		deployment, _, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id, deployment)
+	// If the desired state is not cancelled, we're not good - must cancel and then wait
+	// If the desired state is cancelled, we're good - just have to wait
+	if deployment.Status.State != string(ververicaplatformv1beta1.CancelledState) {
+		if deployment.Spec.State != string(ververicaplatformv1beta1.CancelledState) {
+			// must cancel it
+			log.Info("Cancelling Deployment")
+			deployment.Spec.State = string(ververicaplatformv1beta1.CancelledState)
+			deployment, _, err = r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id, deployment)
 
-		if err != nil {
-			return ctrl.Result{}, utils.IgnoreNotFoundError(err)
+			if err != nil {
+				return ctrl.Result{}, utils.IgnoreNotFoundError(err)
+			}
 		}
-
+		// Just have to wait now
 		err = r.updateResource(req, &vpDeployment, &deployment)
-		// Can take a while to shut down
-		return ctrl.Result{RequeueAfter:time.Minute * 1}, err
+		// Can take a while to tear down
+		return ctrl.Result{RequeueAfter: time.Second * 30}, err
 	}
 
-	deployment, _, err = r.VPAPIClient.DeploymentsApi.DeleteDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id)
+	deployment, _, err = r.VPAPIClient.DeploymentsApi.DeleteDeployment(ctx, namespace, deployment.Metadata.Id)
 	if err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
@@ -330,10 +309,20 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	id := vpDeployment.Spec.Metadata.Id
 	if len(id) == 0 {
-		log.Info("Create event")
-		// Creation, as no id has yet been set
-		// TODO: should we check if one already exists by name in the VP and update if so?
-		return r.handleCreate(req, vpDeployment)
+		deployment, err := r.getDeploymentByName(ctx, namespace, req.Name)
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if deployment == nil {
+			log.Info("Create event")
+			return r.handleCreate(req, vpDeployment)
+		}
+
+		// no id, but hasn't
+		log.Info("No id set for deployment")
+		return r.handleUpdate(req, vpDeployment, *deployment)
 	}
 
 	deployment, _, err := r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, id)

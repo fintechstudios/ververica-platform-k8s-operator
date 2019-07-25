@@ -93,7 +93,7 @@ type VpDeploymentTarget struct {
 	Spec VpDeploymentTargetObjectSpec `json:"spec,omitempty"`
 }
 
-// TODO: think about adding a status that keeps track of all the deployments with this target
+// TODO: think about adding a field / status that keeps track of all the deployments with this target
 
 // +kubebuilder:object:root=true
 

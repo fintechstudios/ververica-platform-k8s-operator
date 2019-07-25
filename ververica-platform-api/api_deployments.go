@@ -298,7 +298,7 @@ DeploymentsApiService List all deployments
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace
  * @param optional nil or *GetDeploymentsOpts - Optional Parameters:
-     * @param "LabelSelector" (optional.String) - 
+ * @param "LabelSelector" (optional.String) -
 
 @return ResourceListDeployment
 */

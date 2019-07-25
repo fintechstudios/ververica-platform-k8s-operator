@@ -3,11 +3,11 @@ kind: VpDeployment
 metadata:
   name: deployment
 spec:
+  deploymentTargetName: dep-target
   metadata:
     namespace: doc-ingestion
   spec:
-    state: RUNNING
-    deploymentTargetName: dep-target # TODO: maybe move this to the top-level spec?
+    state: SUSPENDED
     upgradeStrategy:
       kind: STATELESS
     restoreStrategy:
@@ -35,7 +35,9 @@ spec:
             memory: 1g
           taskmanager:
             memory: 1.5g
-        flinkConfiguration: {}
+        flinkConfiguration:
+          high-availability.storageDir:  s3://flink/haState
+          taskmanager.numberOfTaskSlots: "1"
         logging:
           log4jLoggers:
             "com.fintechstudios": DEBUG
