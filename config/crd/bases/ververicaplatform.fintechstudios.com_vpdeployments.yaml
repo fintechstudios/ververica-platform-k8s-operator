@@ -19,9 +19,6 @@ spec:
   - JSONPath: .spec.metadata.modifiedAt
     name: Modified
     type: date
-  - JSONPath: .status.state
-    name: State
-    type: date
   - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
     name: FlinkVersion
     type: string

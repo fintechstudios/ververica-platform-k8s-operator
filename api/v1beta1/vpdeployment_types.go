@@ -282,7 +282,6 @@ type VpDeploymentStatus struct {
 // +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
-// +kubebuilder:printcolumn:name="State",type="date",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="FlinkVersion",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
 // +kubebuilder:printcolumn:name="FlinkImageTag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
 // +kubebuilder:printcolumn:name="FlinkImageRegistry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"

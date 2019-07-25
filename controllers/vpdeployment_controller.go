@@ -173,7 +173,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	}
 
 	if err != nil {
-		log.Error(err, "Error creating VP Deployment Target")
+		log.Error(err, "Error creating VP Deployment")
 		return ctrl.Result{}, err
 	}
 
@@ -198,10 +198,27 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-// updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
+// it also patches the deployment in the Ververica Platform, which could trigger a state transition
+// which we should wait for
 func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ververicaplatformv1beta1.VpDeployment, deployment vpAPI.Deployment) (ctrl.Result, error) {
+	ctx := context.Background()
+	log := r.getLogger(req)
+	log.Info("Patching the VP Deployment")
+	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	deployment, res, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, namespace, deployment.Metadata.Id, deployment)
+
+	if res != nil && res.StatusCode == 400 {
+		// Bad Request, should not requeue
+		return ctrl.Result{Requeue: false}, err
+	}
+
+	if err != nil {
+		log.Error(err, "Error patching VP Deployment")
+		return ctrl.Result{}, err
+	}
+
 	// Now update the k8s resource
-	err := r.updateResource(req, &vpDeployment, &deployment)
+	err = r.updateResource(req, &vpDeployment, &deployment)
 	return ctrl.Result{}, err
 }
 
@@ -286,6 +303,10 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		if utils.AddFinalizerToObjectMeta(&vpDeployment.ObjectMeta) {
 			log.Info("Adding Finalizer")
 			if err := r.Update(ctx, &vpDeployment); err != nil {
+				return ctrl.Result{}, err
+			}
+
+			if err := r.Get(ctx, req.NamespacedName, &vpDeployment); err != nil {
 				return ctrl.Result{}, err
 			}
 		}

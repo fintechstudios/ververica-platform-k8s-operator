@@ -7,7 +7,7 @@ spec:
   metadata:
     namespace: doc-ingestion
   spec:
-    state: SUSPENDED
+    state: RUNNING
     upgradeStrategy:
       kind: STATELESS
     restoreStrategy:
