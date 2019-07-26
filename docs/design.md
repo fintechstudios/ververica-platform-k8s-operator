@@ -36,3 +36,9 @@ kubectl delete -f ./config/samples
 # as their dependents wait to finish deletion
 ```
 
+## Resource Deletion
+
+All managed resources are appended with a finalizer. When the resource
+is deleted in K8s, we wait until the resource is removed from the Ververica Platform
+to remove the finalizer, allowing K8s to know something has not yet
+finished cleaning up. 
