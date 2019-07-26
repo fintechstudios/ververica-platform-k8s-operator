@@ -8,6 +8,9 @@ the tooling (currently) does not have as good support and I just learned how to 
 
 Built for Ververica Platform `1.4.1`, API Version 1.
 
+[More about the Ververica Platform](https://www.ververica.com/platform-overview)  
+[Ververica Platform Docs](https://docs.ververica.com/)
+
 ## Supported Resources
 
 Since the resources names of K8s and the Ververica Platform somewhat class, the 

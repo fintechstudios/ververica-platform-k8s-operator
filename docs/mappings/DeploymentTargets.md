@@ -3,6 +3,8 @@
 Somewhat more difficult than, namespaces, as arbitrary JSON doesn't 
 seem to play nice with the K8s code generators.
 
+[Official Ververica Docs](https://docs.ververica.com/application_manager/deployments/deployment_targets.html)
+
 ## Ververica Platform Definition
 
 ```yaml

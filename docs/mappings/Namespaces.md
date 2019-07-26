@@ -3,6 +3,8 @@
 Like K8s, the Ververica Platform also has the concept of namespaces.
 These were the easiest to map over.
 
+[Official Ververica Platform Docs](https://docs.ververica.com/application_manager/namespaces.html)
+
 ## Ververica Platform Definition
 
 ```yaml
