@@ -33,55 +33,14 @@ custom VP Resources will all be prefixed with `Vp`.
 To avoid naming conflicts, and for simplicity, and VP `metadata` and `spec` fields
 are nested under the top-level `spec` field of the K8s resource.
 
-### `VpNamespace`
-
-Schema:
-```yaml
-apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VpNamespace
-metadata:
-  name: String # Required
-spec:
-  metadata:
-    name: String # Dynamic
-    id: UUID String # Dynamic
-    createdAt: Timestamp # Dynamic
-    modifiedAt: Timestamp  # Dynamic
-    resourceVersion: Integer # Dynamic
-status:
-  state: String # Dynamic
-```
-
-### `VpDeploymentTarget`
-
-Currently, can only handle `string` values for deployment JSON Patches.
-
-Schema:
-```yaml
-apiVersion: ververicaplatform.fintechstudios.com/v1beta1
-kind: VpDeploymentTarget
-metadata:
-  name: # String
-spec:
-  metadata:
-    namespace: String # defaults to "default"
-    id: UUID String # Dynamic
-    createdAt: Timestamp # Dynamic
-    modifiedAt: Timestamp  # Dynamic
-    resourceVersion: Integer # Dynamic
-  spec:
-    kubernetes: # Required
-      namespace: String # Optional
-    deploymentPatchSet: JsonPatch[] # Optional, see: http://jsonpatch.com/
-```
-
-### `VpDeploymentTarget`
-
+Look in [docs/mappings](./docs/mappings) for information on each supported resource.
 
 ## Development
 
-Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder),
-which requires `kustomize`.
+Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
+
+More on the design of the controller and its resources can be found
+in [docs/design.md](./docs/design.md).
 
 
 Also built as a Go 1.11 module - no vendor files here.

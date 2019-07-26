@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"errors"
-	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	"time"
 
@@ -85,22 +84,6 @@ func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namesp
 	// no errors but not found
 	// TODO: consider making this into a not-found error, so we could pass back the struct and not a pointer
 	return nil, nil
-}
-
-func (r *VpDeploymentReconciler) getJobIdsForDeployment(ctx context.Context, namespace string, depID string) ([]string, error) {
-	jobs, _, err := r.VPAPIClient.JobsApi.GetJobs(ctx, namespace, &vpAPI.GetJobsOpts{
-		DeploymentId: optional.NewInterface(depID),
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]string, len(jobs.Items))
-	for i, job := range jobs.Items {
-		ids[i] = job.Metadata.Id
-	}
-	return ids, nil
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
@@ -185,15 +168,6 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 
 	log.Info("Created deployment", "deployment", createdDep)
 
-	// Get the jobs for the new deployment
-	jobIds, err := r.getJobIdsForDeployment(ctx, namespace, createdDep.Metadata.Id)
-
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-	// Set the initial job ids
-	vpDeployment.Status.JobIds = jobIds
-
 	// Now update the k8s resource and status as well
 	if err := r.updateResource(req, &vpDeployment, &createdDep); err != nil {
 		return ctrl.Result{}, err
@@ -229,20 +203,10 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 		log.Error(err, "Error patching VP Deployment")
 		return ctrl.Result{}, err
 	}
-
-	// Potentially, see jobs?
-	jobIds, err := r.getJobIdsForDeployment(ctx, namespace, updatedDep.Metadata.Id)
+	vpDeployment.Status.State, err = converters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {
 		return ctrl.Result{}, err
-	}
-	log.Info("Fetched jobs", "jobsCount", len(jobIds))
-
-	if len(vpDeployment.Status.JobIds) != len(jobIds) {
-		// a new job has been created! Update the K8s ref!
-		newIds := make([]string, len(jobIds))
-		copy(newIds, jobIds)
-		vpDeployment.Status.JobIds = newIds
 	}
 
 	// Don't trigger a full update - should figure out how to truly make this idempotent
