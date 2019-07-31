@@ -1,13 +1,18 @@
 image:
   name: golang:1.12-stretch
 
-# TODO: only do this once and cache the results
+
+variables:
+  GO111MODULE: "on"
+
+# TODO: only do this once into a vendor dir and cache the results
 before_script:
   - go mod download
 
 stages:
-  - build
-  - test
+  - test # build and test the code, lint, etc.
+  - build # build the docker image
+  - deploy # release the docker image to registry
 
 build:
   stage: build
@@ -29,19 +34,11 @@ build:
 
 lint:
   stage: test
-  before_script:
-    - go mod download
   script:
-    - go get -u golang.org/x/lint/golint
     - make lint
 
 test:
   stage: test
-  variables:
-    GO111MODULE: "on"
-  before_script:
-    - go get sigs.k8s.io/kind@v0.4.0
-    - kind create cluster
   script:
     - make test
 
