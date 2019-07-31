@@ -1,7 +1,7 @@
 # Deployments
 
 Somewhat more difficult than, namespaces, as arbitrary JSON doesn't 
-seem to play nice with the K8s code generators.
+seem to play nicely with the K8s code generators.
 
 [Official Ververica Docs](https://docs.ververica.com/application_manager/deployments/deployments/index.html)
 
@@ -102,7 +102,7 @@ status:
 ```
 
 The main changes from the Ververica Platform are:
-- resource CPU must be a Quantity string
+- resource CPU must be a `Quantity` string, though this should normally just mean you must quote your value
 - You can specify a `spec.deploymentTargetName` instead of an ID 
 
 You can find an example in [config/samples/ververicaplatform_v1beta1_vpdeployment.yaml](../../config/samples/ververicaplatform_v1beta1_vpdeployment.yaml).

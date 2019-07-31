@@ -15,13 +15,16 @@ CRD_OPTIONS?="crd:trivialVersions=true"
 
 LD_FLAGS="-X $(VERSION_PKG).controllerVersion=$(TAG) -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).buildDate=$(BUILD)"
 
+# TODO - make this dynamic based on env var
+KUBECONFIG=./.kubeconfig
+
 
 all: manager
 
 # Run tests
 .PHONY: test
 test: generate manifests
-	go test ./api/... ./controllers/... -coverprofile cover.out
+	go test -ldflags $(LD_FLAGS) ./api/... ./controllers/... -coverprofile cover.out
 
 # Build manager binary
 .PHONY: manager
@@ -36,13 +39,23 @@ run: generate
 # Install CRDs into a cluster
 .PHONY: install
 install: manifests
-	kubectl apply -f config/crd/bases
+	kubectl --kubeconfig $(KUBECONFIG) apply -f config/crd/bases
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 .PHONY: deploy
-deploy: manifests
-	kubectl apply -f config/crd/bases
-	kustomize build config/default | kubectl apply -f -
+deploy: install
+	kustomize build config/default | kubectl --kubeconfig $(KUBECONFIG) apply -f -
+
+# find or download controller-gen
+# download controller-gen if necessary
+.PHONY: controller-gen
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.0-beta.4
+CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
@@ -58,11 +71,6 @@ fmt:
 .PHONY: lint
 lint:
 	golangci-lint run
-
-# Run go vet against code, excluding the generated VP api
-.PHONY: vet
-vet:
-	go list ./... | grep -v ververica-platform-api | xargs go vet -v
 
 # Generate code
 .PHONY: generate
@@ -81,19 +89,17 @@ docker-build: manager
 docker-push: docker-push
 	docker push ${IMG}
 
-# find or download controller-gen
-# download controller-gen if necessary
-.PHONY: controller-gen
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.0-beta.4
-CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
-
-
 # Update the Swagger Client API
 .PHONY: swagger-gen
 swagger-gen:
 	./hack/update-swagger-codegen.sh
+
+# Create a test cluster using Kind
+.PHONY: test-cluster-create
+test-cluster-create:
+	kind create cluster
+
+# Store the current test cluster's config locally
+.PHONE: test-cluster-store-config
+test-cluster-store-config:
+	kind get kubeconfig > $(KUBECONFIG)

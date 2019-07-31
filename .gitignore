@@ -22,3 +22,6 @@ bin
 *.swp
 *.swo
 *~
+
+# Dynamic config for testing
+.kubeconfig
