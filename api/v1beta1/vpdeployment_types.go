@@ -283,6 +283,8 @@ type VpDeploymentStatus struct {
 	// 		- list of Jobs
 	//		- list of Events
 	//		- list of K8s Pods created
+	//		- resource version
+	//		- potentially all dynamic data
 }
 
 // +kubebuilder:object:root=true
