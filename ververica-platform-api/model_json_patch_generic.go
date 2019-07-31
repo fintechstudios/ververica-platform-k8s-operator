@@ -11,8 +11,8 @@ package ververicaplatformapi
 
 // Since Swagger 2 doesn't have oneOf support, this definition should fit all JSON Patch objects.
 type JsonPatchGeneric struct {
-	Op string `json:"op"`
-	Path string `json:"path"`
-	Value Any `json:"value,omitempty"`
-	From string `json:"from,omitempty"`
+	Op    string `json:"op"`
+	Path  string `json:"path"`
+	Value Any    `json:"value,omitempty"`
+	From  string `json:"from,omitempty"`
 }

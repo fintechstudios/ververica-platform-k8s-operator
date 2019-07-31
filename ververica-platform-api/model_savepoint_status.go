@@ -10,6 +10,6 @@
 package ververicaplatformapi
 
 type SavepointStatus struct {
-	State string `json:"state"`
+	State   string   `json:"state"`
 	Failure *Failure `json:"failure,omitempty"`
 }

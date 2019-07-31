@@ -10,7 +10,7 @@
 package ververicaplatformapi
 
 type SystemInformation struct {
-	Status *SystemInformationStatus `json:"status,omitempty"`
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
+	Status     *SystemInformationStatus `json:"status,omitempty"`
+	Kind       string                   `json:"kind,omitempty"`
+	ApiVersion string                   `json:"apiVersion,omitempty"`
 }

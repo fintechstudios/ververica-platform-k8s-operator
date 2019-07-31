@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type ResourceListEvent struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *ResourceListMetadata `json:"metadata,omitempty"`
-	Items []Event `json:"items,omitempty"`
+	Kind       string                `json:"kind,omitempty"`
+	ApiVersion string                `json:"apiVersion,omitempty"`
+	Metadata   *ResourceListMetadata `json:"metadata,omitempty"`
+	Items      []Event               `json:"items,omitempty"`
 }

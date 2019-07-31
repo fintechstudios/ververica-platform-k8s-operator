@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type Namespace struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *NamespaceMetadata `json:"metadata"`
-	Status *NamespaceStatus `json:"status,omitempty"`
+	Kind       string             `json:"kind,omitempty"`
+	ApiVersion string             `json:"apiVersion,omitempty"`
+	Metadata   *NamespaceMetadata `json:"metadata"`
+	Status     *NamespaceStatus   `json:"status,omitempty"`
 }

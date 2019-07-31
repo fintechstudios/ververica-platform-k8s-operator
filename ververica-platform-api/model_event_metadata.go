@@ -14,11 +14,11 @@ import (
 )
 
 type EventMetadata struct {
-	Id string `json:"id,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	DeploymentId string `json:"deploymentId,omitempty"`
-	JobId string `json:"jobId,omitempty"`
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
-	Name string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	Id              string    `json:"id,omitempty"`
+	CreatedAt       time.Time `json:"createdAt,omitempty"`
+	DeploymentId    string    `json:"deploymentId,omitempty"`
+	JobId           string    `json:"jobId,omitempty"`
+	ResourceVersion int32     `json:"resourceVersion,omitempty"`
+	Name            string    `json:"name,omitempty"`
+	Namespace       string    `json:"namespace,omitempty"`
 }
