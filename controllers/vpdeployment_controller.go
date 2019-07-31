@@ -178,7 +178,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 
 // handleUpdate updates the k8s resource when it already exists in the VP
 // it also patches the deployment in the Ververica Platform, which could trigger a state transition
-// which we should wait for
+// which we should wait for, if possible
 func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ververicaplatformv1beta1.VpDeployment, currentDeployment vpAPI.Deployment) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)

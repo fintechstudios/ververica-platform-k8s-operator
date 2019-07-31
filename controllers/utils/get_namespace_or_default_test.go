@@ -1,18 +1,16 @@
 package utils
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
+var _ = Describe("GetNamespaceOrDefault", func() {
+	It("should return the default namespace given an empty string", func() {
+		Expect(GetNamespaceOrDefault("")).To(Equal(DefaultNamespace))
+	})
 
-func TestGetNamespaceOrDefault(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	Expect(GetNamespaceOrDefault("")).To(Equal(DefaultNamespace))
-	Expect(GetNamespaceOrDefault("fts")).To(Equal("fts"))
-}
+	It("should return the given namespace when non-empty", func() {
+		Expect(GetNamespaceOrDefault("fts")).To(Equal("fts"))
+	})
+})

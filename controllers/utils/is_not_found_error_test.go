@@ -2,24 +2,26 @@ package utils
 
 import (
 	"errors"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
+var _ = Describe("IsNotFoundError", func() {
 
-func TestIsNotFoundError(t *testing.T) {
-	RegisterFailHandler(Fail)
+	It("should return false for non 404 errors", func() {
+		Expect(IsNotFoundError(errors.New("server error"))).To(BeFalse())
+	})
 
-	Expect(IsNotFoundError(errors.New("server error"))).To(BeFalse())
-	Expect(errors.New("404 Not Found")).To(BeTrue())
-	Expect(apiErrors.NewNotFound(schema.GroupResource{
-		Group: "api.fts.com",
-		Resource: "tools",
-	}, "hammer")).To(BeTrue())
-}
+	It("should return true for 404 Swagger Errors", func() {
+		Expect(IsNotFoundError(errors.New("404 Not Found"))).To(BeTrue())
+	})
+
+	It("should return true for K8s api errors", func() {
+		Expect(IsNotFoundError(apiErrors.NewNotFound(schema.GroupResource{
+			Group:    "api.fts.com",
+			Resource: "tools",
+		}, "hammer"))).To(BeTrue())
+	})
+})

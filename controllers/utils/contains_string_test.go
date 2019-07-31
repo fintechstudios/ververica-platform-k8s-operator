@@ -1,19 +1,18 @@
 package utils
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-// These tests use Ginkgo (BDD-style Go testing framework). Refer to
-// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
-
-func TestContainsString(t *testing.T) {
-	RegisterFailHandler(Fail)
-
+var _ = Describe("AddFinalizerToObjectMeta", func() {
 	strings := []string{"a", "b"}
-	Expect(ContainsString(strings, "c")).To(BeFalse())
-	Expect(ContainsString(strings, "a")).To(BeTrue())
-}
+
+	It("should return true when a string is present", func() {
+		Expect(ContainsString(strings, "a")).To(BeTrue())
+	})
+
+	It("should return false when a string is not present", func() {
+		Expect(ContainsString(strings, "c")).To(BeFalse())
+	})
+})

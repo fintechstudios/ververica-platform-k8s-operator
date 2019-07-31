@@ -99,7 +99,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace verve
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error)  {
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error) {
 	// Now update the k8s resource and status as well
 	err := r.updateResource(req, &vpNamespace, &namespace)
 	return ctrl.Result{}, err

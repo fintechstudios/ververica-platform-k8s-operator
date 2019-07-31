@@ -20,7 +20,6 @@ func DeploymentSpecToNative(deploymentSpec vpAPI.DeploymentSpec) (ververicaplatf
 		deploymentSpec.Template.Spec.Resources = nil
 	}
 
-
 	var vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec
 	specJSON, err := json.Marshal(deploymentSpec)
 	if err != nil {
