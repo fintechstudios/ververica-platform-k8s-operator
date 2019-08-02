@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+
 var _ = Describe("DeploymentState", func() {
 	var deploymentStates = []ververicaplatformv1beta1.DeploymentState{
 		ververicaplatformv1beta1.CancelledState,

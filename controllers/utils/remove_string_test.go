@@ -10,10 +10,18 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-func TestRemoveString(t *testing.T) {
-	RegisterFailHandler(Fail)
+var _ = Describe("RemoveString", func() {
+	var strings []string
 
-	strings := []string{"a", "b"}
-	Expect(len(RemoveString(strings, "c"))).To(Equal(2))
-	Expect(len(RemoveString(strings, "a"))).To(Equal(1))
-}
+	BeforeEach(func() {
+		strings = []string{"a", "b"}
+	})
+
+	It("should remove a string if it is included", func() {
+		Expect(len(RemoveString(strings, "c"))).To(Equal(2))
+	})
+
+	It("should not remove anything if a string is not included", func() {
+		Expect(len(RemoveString(strings, "a"))).To(Equal(1))
+	})
+})

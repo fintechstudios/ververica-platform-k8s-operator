@@ -3,6 +3,8 @@ package converters
 import (
 	"reflect"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	. "github.com/onsi/ginkgo"
@@ -10,23 +12,24 @@ import (
 )
 
 var _ = Describe("DeploymentSpec", func() {
-	const deploymentState = "RUNNING"
-	const deploymentTargetID = "2dd1ded8-eedb-4064-ba9a-006740d0f87a"
-	const deploymentMaxSavepointAttempts = int32(4)
-	const deploymentMaxCreationAttempts = int32(2)
-	const deploymentUpgradeStrategy = "STATELESS"
-	const deploymentRestoreStrategy = "NONE"
-	const deploymentStartFromSavepoint = "s3://flink/a-savepoint"
-	const deploymentRestoreAllowNonRestored = false
-	const deploymentParallelism = int32(1)
-	const deploymentNumTaskManagers = int32(2)
-	const artifactKind = "JAR"
-	const artifactJarUri = "s3://flink/a-jar"
-	const artifactArgs = "--ed ed --and eddy"
-	const artifactEntryClass = "com.fintechstudios.streaming"
-	const artifactFlinkVersion = "1.8.0"
-	const artifactFlinkRegistry = "registry.docker.com"
-	const artifactFlinkTag = "1.8.0_scala1.12"
+	var deploymentStateStr = "RUNNING"
+	var deploymentState = ververicaplatformv1beta1.RunningState
+	var deploymentTargetID = "2dd1ded8-eedb-4064-ba9a-006740d0f87a"
+	var deploymentMaxSavepointAttempts = int32(4)
+	var deploymentMaxCreationAttempts = int32(2)
+	var deploymentUpgradeStrategy = "STATELESS"
+	var deploymentRestoreStrategy = "NONE"
+	var deploymentStartFromSavepoint = "s3://flink/a-savepoint"
+	var deploymentRestoreAllowNonRestored = false
+	var deploymentParallelism = int32(1)
+	var deploymentNumTaskManagers = int32(2)
+	var artifactKind = "JAR"
+	var artifactJarUri = "s3://flink/a-jar"
+	var artifactArgs = "--ed ed --and eddy"
+	var artifactEntryClass = "com.fintechstudios.streaming"
+	var artifactFlinkVersion = "1.8.0"
+	var artifactFlinkRegistry = "registry.docker.com"
+	var artifactFlinkTag = "1.8.0_scala1.12"
 
 	Describe("DeploymentSpecToNative", func() {
 		var deploymentSpec vpAPI.DeploymentSpec
@@ -55,7 +58,7 @@ var _ = Describe("DeploymentSpec", func() {
 			}
 			pods = vpAPI.Pods{}
 			deploymentSpec = vpAPI.DeploymentSpec{
-				State:                        deploymentState,
+				State:                        deploymentStateStr,
 				DeploymentTargetId:           deploymentTargetID,
 				MaxJobCreationAttempts:       deploymentMaxCreationAttempts,
 				MaxSavepointCreationAttempts: deploymentMaxSavepointAttempts,
@@ -111,7 +114,7 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(*vpSpec.MaxSavepointCreationAttempts).To(Equal(deploymentMaxSavepointAttempts))
 			Expect(*vpSpec.MaxJobCreationAttempts).To(Equal(deploymentMaxCreationAttempts))
 			Expect(vpSpec.DeploymentTargetID).To(Equal(deploymentTargetID))
-			Expect(string(vpSpec.State)).To(Equal(deploymentState))
+			Expect(string(vpSpec.State)).To(Equal(deploymentStateStr))
 
 			templateSpec := vpSpec.Template.Spec
 
@@ -150,9 +153,120 @@ var _ = Describe("DeploymentSpec", func() {
 
 	Describe("DeploymentSpecFromNative", func() {
 		var vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec
+		var annotations map[string]string
+		var flinkConfiguration map[string]string
+		var resources map[string]vpAPI.ResourceSpec
+		var vpResources map[string]ververicaplatformv1beta1.VpResourceSpec
+		var log4jLoggers map[string]string
+		var vpPods ververicaplatformv1beta1.VpPods
+
+		BeforeEach(func() {
+			annotations = map[string]string{
+				"testing":           "true",
+				"high-availability": "true",
+			}
+			mem := "2g"
+			vpResources = map[string]ververicaplatformv1beta1.VpResourceSpec{
+				"jobmanager": ververicaplatformv1beta1.VpResourceSpec{
+					Cpu:    *resource.NewQuantity(2, resource.DecimalSI),
+					Memory: &mem,
+				},
+			}
+			resources, _ = ResourcesFromNative(vpResources)
+			log4jLoggers = map[string]string{
+				"":                   "DEBUG",
+				"com.fintechstudios": "VERBOSE",
+			}
+			vpPods = ververicaplatformv1beta1.VpPods{}
+			vpDeploymentSpec = ververicaplatformv1beta1.VpDeploymentSpec{
+				State:                        deploymentState,
+				DeploymentTargetID:           deploymentTargetID,
+				MaxJobCreationAttempts:       &deploymentMaxCreationAttempts,
+				MaxSavepointCreationAttempts: &deploymentMaxSavepointAttempts,
+				UpgradeStrategy: &ververicaplatformv1beta1.VpDeploymentUpgradeStrategy{
+					Kind: deploymentUpgradeStrategy,
+				},
+				RestoreStrategy: &ververicaplatformv1beta1.VpDeploymentRestoreStrategy{
+					Kind:                  deploymentRestoreStrategy,
+					AllowNonRestoredState: deploymentRestoreAllowNonRestored,
+				},
+				StartFromSavepoint: &ververicaplatformv1beta1.VpDeploymentStartFromSavepoint{
+					Kind: deploymentStartFromSavepoint,
+				},
+				Template: &ververicaplatformv1beta1.VpDeploymentTemplate{
+					Metadata: &ververicaplatformv1beta1.VpDeploymentTemplateMetadata{
+						Annotations: annotations,
+					},
+					Spec: &ververicaplatformv1beta1.VpDeploymentTemplateSpec{
+						Artifact: &ververicaplatformv1beta1.VpArtifact{
+							Kind:               artifactKind,
+							JarUri:             artifactJarUri,
+							MainArgs:           artifactArgs,
+							EntryClass:         artifactEntryClass,
+							FlinkVersion:       artifactFlinkVersion,
+							FlinkImageRegistry: artifactFlinkRegistry,
+							FlinkImageTag:      artifactFlinkTag,
+						},
+						Parallelism:          &deploymentParallelism,
+						NumberOfTaskManagers: &deploymentNumTaskManagers,
+						Resources:            vpResources,
+						FlinkConfiguration:   flinkConfiguration,
+						Logging: &ververicaplatformv1beta1.VpLogging{
+							Log4jLoggers: log4jLoggers,
+						},
+						Kubernetes: &ververicaplatformv1beta1.VpKubernetesOptions{
+							Pods: &vpPods,
+						},
+					},
+				},
+			}
+		})
+
+		It("should map an API deployment spec to K8s native", func() {
+			spec, err := DeploymentSpecFromNative(vpDeploymentSpec)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(spec.StartFromSavepoint.Kind).To(Equal(deploymentStartFromSavepoint))
+
+			Expect(spec.RestoreStrategy.Kind).To(Equal(deploymentRestoreStrategy))
+			Expect(spec.RestoreStrategy.AllowNonRestoredState).To(Equal(deploymentRestoreAllowNonRestored))
+
+			Expect(spec.UpgradeStrategy.Kind).To(Equal(deploymentUpgradeStrategy))
+
+			Expect(spec.DeploymentTargetId).To(Equal(deploymentTargetID))
+			Expect(spec.MaxSavepointCreationAttempts).To(Equal(deploymentMaxSavepointAttempts))
+			Expect(spec.MaxJobCreationAttempts).To(Equal(deploymentMaxCreationAttempts))
+			Expect(spec.State).To(Equal(deploymentStateStr))
+
+			templateSpec := spec.Template.Spec
+
+			Expect(templateSpec.Parallelism).To(Equal(deploymentParallelism))
+			Expect(templateSpec.NumberOfTaskManagers).To(Equal(deploymentNumTaskManagers))
+
+			Expect(reflect.DeepEqual(templateSpec.Logging.Log4jLoggers, log4jLoggers)).To(BeTrue())
+			Expect(reflect.DeepEqual(templateSpec.FlinkConfiguration, flinkConfiguration)).To(BeTrue())
+			Expect(reflect.DeepEqual(templateSpec.Resources, resources)).To(BeTrue())
+
+			artifact := templateSpec.Artifact
+			Expect(artifact.FlinkImageTag).To(Equal(artifactFlinkTag))
+			Expect(artifact.FlinkVersion).To(Equal(artifactFlinkVersion))
+			Expect(artifact.FlinkImageRegistry).To(Equal(artifactFlinkRegistry))
+			Expect(artifact.EntryClass).To(Equal(artifactEntryClass))
+			Expect(artifact.MainArgs).To(Equal(artifactArgs))
+			Expect(artifact.Kind).To(Equal(artifactKind))
+			Expect(artifact.JarUri).To(Equal(artifactJarUri))
+
+			templateMetadata := spec.Template.Metadata
+			Expect(reflect.DeepEqual(templateMetadata.Annotations, annotations)).To(BeTrue())
+		})
+
+		It("should return an error given a deployment without a spec", func() {
+			vpDeploymentSpec.Template = nil
+			_, err := DeploymentSpecFromNative(vpDeploymentSpec)
+			Expect(err).To(HaveOccurred())
+		})
 
 		Measure("conversion speed", func(b Benchmarker) {
-			b.Time("to native", func() {
+			b.Time("from native", func() {
 				_, _ = DeploymentSpecFromNative(vpDeploymentSpec)
 			})
 		}, 10)
