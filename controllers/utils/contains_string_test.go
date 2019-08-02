@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("AddFinalizerToObjectMeta", func() {
+var _ = Describe("AddFinalizer", func() {
 	strings := []string{"a", "b"}
 
 	It("should return true when a string is present", func() {

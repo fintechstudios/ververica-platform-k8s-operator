@@ -19,7 +19,7 @@ package controllers
 import (
 	"context"
 	"errors"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
@@ -297,7 +297,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 	if vpDeployment.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Not being deleted, add the finalizer
-		if utils.AddFinalizerToObjectMeta(&vpDeployment.ObjectMeta) {
+		if utils.AddFinalizer(&vpDeployment.ObjectMeta) {
 			log.Info("Adding Finalizer")
 			if err := r.Update(ctx, &vpDeployment); err != nil {
 				return ctrl.Result{}, err
@@ -315,7 +315,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		if utils.RemoveFinalizerFromObjectMeta(&vpDeployment.ObjectMeta) {
+		if utils.RemoveFinalizer(&vpDeployment.ObjectMeta) {
 			if err := r.Update(ctx, &vpDeployment); err != nil {
 				return ctrl.Result{}, err
 			}

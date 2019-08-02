@@ -3,7 +3,6 @@ package converters
 import (
 	"encoding/json"
 	"errors"
-
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
@@ -36,6 +35,10 @@ func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.
 	if err = json.Unmarshal(vpMetadataJSON, &deploymentMetadata); err != nil {
 		return deploymentMetadata, errors.New("cannot encode Deployment Metadata: " + err.Error())
 	}
+
+	// time.Time doesn't serialize correctly, so map over manually
+	deploymentMetadata.CreatedAt = vpDeploymentMetadata.CreatedAt.Time
+	deploymentMetadata.ModifiedAt = vpDeploymentMetadata.ModifiedAt.Time
 
 	return deploymentMetadata, nil
 }

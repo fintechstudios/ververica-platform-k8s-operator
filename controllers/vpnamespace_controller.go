@@ -147,7 +147,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	if vpNamespace.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Not being deleted, add the finalizer
-		if utils.AddFinalizerToObjectMeta(&vpNamespace.ObjectMeta) {
+		if utils.AddFinalizer(&vpNamespace.ObjectMeta) {
 			log.Info("Adding Finalizer")
 			if err := r.Update(ctx, &vpNamespace); err != nil {
 				return ctrl.Result{}, err
@@ -164,7 +164,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		if utils.RemoveFinalizerFromObjectMeta(&vpNamespace.ObjectMeta) {
+		if utils.RemoveFinalizer(&vpNamespace.ObjectMeta) {
 			if err := r.Update(ctx, &vpNamespace); err != nil {
 				return ctrl.Result{}, err
 			}

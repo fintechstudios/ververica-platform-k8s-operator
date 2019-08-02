@@ -7,10 +7,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("AddFinalizerToObjectMeta", func() {
+var _ = Describe("AddFinalizer", func() {
 	It("should add finalizer to empty metadata", func() {
 		objMeta := metav1.ObjectMeta{}
-		res := AddFinalizerToObjectMeta(&objMeta)
+		res := AddFinalizer(&objMeta)
 		Expect(res).To(BeTrue())
 		Expect(objMeta.Finalizers).To(HaveLen(1))
 		Expect(objMeta.Finalizers).To(ContainElement(FinalizerName))
@@ -21,7 +21,7 @@ var _ = Describe("AddFinalizerToObjectMeta", func() {
 		objMeta := metav1.ObjectMeta{
 			Finalizers: []string{otherFinalizer},
 		}
-		res := AddFinalizerToObjectMeta(&objMeta)
+		res := AddFinalizer(&objMeta)
 		Expect(res).To(BeTrue())
 		Expect(objMeta.Finalizers).To(HaveLen(2))
 		Expect(objMeta.Finalizers).To(ContainElement(FinalizerName))
@@ -32,7 +32,7 @@ var _ = Describe("AddFinalizerToObjectMeta", func() {
 		objMeta := metav1.ObjectMeta{
 			Finalizers: []string{FinalizerName},
 		}
-		res := AddFinalizerToObjectMeta(&objMeta)
+		res := AddFinalizer(&objMeta)
 		Expect(res).To(BeFalse())
 		Expect(objMeta.Finalizers).To(HaveLen(1))
 		Expect(objMeta.Finalizers).To(ContainElement(FinalizerName))

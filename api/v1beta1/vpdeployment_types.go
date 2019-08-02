@@ -230,11 +230,11 @@ type DeploymentState string
 
 // All the allowed DeploymentStates
 const (
-	CancelledState     DeploymentState = "CANCELLED" // non-US spelling intentional
-	RunningState       DeploymentState = "RUNNING"
-	TransitioningState DeploymentState = "TRANSITIONING"
-	SuspendedState     DeploymentState = "SUSPENDED"
-	FailedState        DeploymentState = "FAILED"
+	CancelledState     = DeploymentState("CANCELLED") // non-US spelling intentional
+	RunningState       = DeploymentState("RUNNING")
+	TransitioningState = DeploymentState("TRANSITIONING")
+	SuspendedState     = DeploymentState("SUSPENDED")
+	FailedState        = DeploymentState("FAILED")
 )
 
 // VpDeploymentSpec is the spec in the Ververica Platform

@@ -179,7 +179,7 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 
 	if vpDepTarget.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Not being deleted, add the finalizer
-		if utils.AddFinalizerToObjectMeta(&vpDepTarget.ObjectMeta) {
+		if utils.AddFinalizer(&vpDepTarget.ObjectMeta) {
 			log.Info("Adding Finalizer")
 			if err := r.Update(ctx, &vpDepTarget); err != nil {
 				return ctrl.Result{}, err
@@ -193,7 +193,7 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		if utils.RemoveFinalizerFromObjectMeta(&vpDepTarget.ObjectMeta) {
+		if utils.RemoveFinalizer(&vpDepTarget.ObjectMeta) {
 			if err := r.Update(ctx, &vpDepTarget); err != nil {
 				return ctrl.Result{}, err
 			}

@@ -94,7 +94,7 @@ docker-push: docker-push
 swagger-gen:
 	./hack/update-swagger-codegen.sh
 
-# Create a test cluster using Kind
+# Create a test cluster using kind
 .PHONY: test-cluster-create
 test-cluster-create:
 	kind create cluster
