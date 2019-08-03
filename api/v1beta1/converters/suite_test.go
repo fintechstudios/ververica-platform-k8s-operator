@@ -1,6 +1,7 @@
 package converters
 
 import (
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -9,5 +10,7 @@ import (
 
 func TestConverters(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "converters")
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"converters",
+		[]Reporter{envtest.NewlineReporter{}})
 }

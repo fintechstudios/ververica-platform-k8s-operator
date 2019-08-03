@@ -17,7 +17,7 @@ var _ = Describe("DeploymentMetadata", func() {
 	const deploymentName = "test-deployment"
 	const deploymentNamespace = "testing"
 	const deploymentResourceVersion = int32(1)
-	
+
 	Describe("DeploymentMetadataToNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
