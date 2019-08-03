@@ -13,6 +13,7 @@ var _ = Describe("Deployment", func() {
 		BeforeEach(func() {
 			vpDeployment = ververicaplatformv1beta1.VpDeployment{
 				Spec: ververicaplatformv1beta1.VpDeploymentObjectSpec{
+					DeploymentTargetName: "",
 					Metadata: ververicaplatformv1beta1.VpDeploymentMetadata{},
 					Spec: ververicaplatformv1beta1.VpDeploymentSpec{
 						Template: &ververicaplatformv1beta1.VpDeploymentTemplate{

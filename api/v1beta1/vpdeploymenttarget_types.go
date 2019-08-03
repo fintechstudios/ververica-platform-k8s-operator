@@ -43,14 +43,6 @@ type VpDeploymentTargetMetadata struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 	// +optional
-	ID string `json:"id,omitempty"`
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-	// +optional
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
-	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
@@ -80,19 +72,32 @@ type VpDeploymentTargetObjectSpec struct {
 	Spec VpDeploymentTargetSpec `json:"spec,omitempty"`
 }
 
+type VpDeploymentTargetStatus struct {
+	// +optional
+	ID string `json:"id,omitempty"`
+	// +optional
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	// +optional
+	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
+	// +optional
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+}
+
 // +kubebuilder:object:root=true
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
+// +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.metadata.namespace"
-// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
-// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
-// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id"
+// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".status.resourceVersion"
+// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".status.createdAt"
+// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".status.modifiedAt"
 
 // VpDeploymentTarget is the Schema for the vpdeploymenttargets API
 type VpDeploymentTarget struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec VpDeploymentTargetObjectSpec `json:"spec,omitempty"`
+	Spec   VpDeploymentTargetObjectSpec `json:"spec,omitempty"`
+	Status VpDeploymentTargetStatus     `json:"status,omitempty"`
 }
 
 // TODO: think about adding a field / status that keeps track of all the deployments with this target

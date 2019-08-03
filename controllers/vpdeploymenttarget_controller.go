@@ -19,10 +19,12 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
-	"io/ioutil"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,29 +39,17 @@ type VpDeploymentTargetReconciler struct {
 	VPAPIClient vpAPI.APIClient
 }
 
-// updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpDeploymentTargetReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *vpAPI.DeploymentTarget) error {
+// updateStatus takes a k8s resource and an API resource and updates the k8s status subresource
+// as to not trigger another update cycle
+func (r *VpDeploymentTargetReconciler) updateStatus(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *vpAPI.DeploymentTarget) error {
 	ctx := context.Background()
 
-	resource.Name = depTarget.Metadata.Name
-	resource.Spec.Metadata = ververicaplatformv1beta1.VpDeploymentTargetMetadata{
-		Name:            depTarget.Metadata.Name,
-		Namespace:       depTarget.Metadata.Namespace,
-		ID:              depTarget.Metadata.Id,
-		CreatedAt:       &metav1.Time{Time: depTarget.Metadata.CreatedAt},
-		ModifiedAt:      &metav1.Time{Time: depTarget.Metadata.ModifiedAt},
-		ResourceVersion: depTarget.Metadata.ResourceVersion,
-		Labels:          depTarget.Metadata.Labels,
-		Annotations:     depTarget.Metadata.Annotations,
-	}
+	resource.Status.ID = depTarget.Metadata.Id
+	resource.Status.ModifiedAt =  &metav1.Time{Time: depTarget.Metadata.ModifiedAt}
+	resource.Status.CreatedAt =  &metav1.Time{Time: depTarget.Metadata.CreatedAt}
+	resource.Status.ResourceVersion = depTarget.Metadata.ResourceVersion
 
-	resource.Spec.Spec = ververicaplatformv1beta1.VpDeploymentTargetSpec{
-		Kubernetes: ververicaplatformv1beta1.VpKubernetesTarget{
-			Namespace: depTarget.Spec.Kubernetes.Namespace,
-		},
-	}
-
-	if err := r.Update(ctx, resource); err != nil {
+	if err := r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -117,7 +107,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	}
 
 	// TODO: the depTarget data is already in the res, but for some reason need to un-marshal it
-	// 		 most likely a problem with the Swagger
+	// 		 most likely a problem with the Swagger, ie need to add a response w/ type
 	body, _ := ioutil.ReadAll(res.Body)
 	_ = res.Body.Close()
 	var createdDepTarget vpAPI.DeploymentTarget
@@ -128,7 +118,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	log.Info("Created depTarget", "depTarget", createdDepTarget)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(req, &vpDepTarget, &createdDepTarget); err != nil {
+	if err := r.updateStatus(req, &vpDepTarget, &createdDepTarget); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -139,7 +129,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 // updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
 func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget, depTarget vpAPI.DeploymentTarget) (ctrl.Result, error) {
 	// Now update the k8s resource
-	err := r.updateResource(req, &vpDepTarget, &depTarget)
+	err := r.updateStatus(req, &vpDepTarget, &depTarget)
 	return ctrl.Result{}, err
 }
 
