@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-
 var _ = Describe("DeploymentState", func() {
 	var deploymentStates = []ververicaplatformv1beta1.DeploymentState{
 		ververicaplatformv1beta1.CancelledState,
@@ -17,13 +16,13 @@ var _ = Describe("DeploymentState", func() {
 	}
 
 	Describe("DeploymentStateToNative", func() {
-		for _, state := range deploymentStates {
-			It("should map an API status to K8s native: "+string(state), func() {
+		It("should map an API status to K8s native", func() {
+			for _, state := range deploymentStates {
 				mappedState, err := DeploymentStateToNative(string(state))
 				Expect(err).ToNot(HaveOccurred())
 				Expect(mappedState).To(Equal(state))
-			})
-		}
+			}
+		})
 
 		It("should return an error given an invalid state", func() {
 			_, err := DeploymentStateToNative("not-a-state")
@@ -32,13 +31,13 @@ var _ = Describe("DeploymentState", func() {
 	})
 
 	Describe("DeploymentStateFromNative", func() {
-		for _, state := range deploymentStates {
-			It("should map a K8s native status to  API: "+string(state), func() {
+		It("should map a K8s native status to  API", func() {
+			for _, state := range deploymentStates {
 				mappedState, err := DeploymentStateFromNative(state)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(mappedState).To(Equal(string(state)))
-			})
-		}
+			}
+		})
 
 		It("should return an error given an invalid state", func() {
 			_, err := DeploymentStateFromNative(ververicaplatformv1beta1.DeploymentState("not-a-state"))

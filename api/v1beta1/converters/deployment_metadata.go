@@ -3,11 +3,12 @@ package converters
 import (
 	"encoding/json"
 	"errors"
+
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
-//DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
+// DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
 func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (ververicaplatformv1beta1.VpDeploymentMetadata, error) {
 	var vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata
 	metadataJSON, err := json.Marshal(deploymentMetadata)
@@ -37,8 +38,12 @@ func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.
 	}
 
 	// time.Time doesn't serialize correctly, so map over manually
-	deploymentMetadata.CreatedAt = vpDeploymentMetadata.CreatedAt.Time
-	deploymentMetadata.ModifiedAt = vpDeploymentMetadata.ModifiedAt.Time
+	if vpDeploymentMetadata.CreatedAt != nil {
+		deploymentMetadata.CreatedAt = vpDeploymentMetadata.CreatedAt.Time
+	}
+	if vpDeploymentMetadata.ModifiedAt != nil {
+		deploymentMetadata.ModifiedAt = vpDeploymentMetadata.ModifiedAt.Time
+	}
 
 	return deploymentMetadata, nil
 }
