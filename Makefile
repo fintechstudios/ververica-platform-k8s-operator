@@ -34,7 +34,7 @@ manager: generate
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
 run: generate
-	go run -ldflags $(LD_FLAGS) ./main.go
+	KUBECONFIG=$(KUBECONFIG) go run -ldflags $(LD_FLAGS) ./main.go
 
 # Install CRDs into a cluster
 .PHONY: install
@@ -67,7 +67,6 @@ manifests: controller-gen
 fmt:
 	go fmt ./...
 
-# Lint the code, but not the generated!
 .PHONY: lint
 lint:
 	golangci-lint run

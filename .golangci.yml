@@ -1,5 +1,6 @@
 run:
   skip-dirs:
+    # Don't lint the generated api client
     - ververica-platform-api
 
 output:

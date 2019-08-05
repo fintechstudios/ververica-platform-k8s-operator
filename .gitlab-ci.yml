@@ -4,10 +4,17 @@ image:
 
 variables:
   GO111MODULE: "on"
+  KUSTOMIZE_VERSION: "3.0.1"
+  KUBEBUILDER_VERSION: "2.0.0-beta.4"
+  CONTROLLER_GEN_VERSION: "0.2.0-beta.2"
 
-# TODO: only do this once into a vendor dir and cache the results
 before_script:
   - go mod download
+  - go mod vendor # For caching purposes
+
+cache:
+  paths:
+    - vendor
 
 stages:
   - test # build and test the code, lint, etc.
@@ -18,6 +25,25 @@ build:
   stage: build
   script:
     - make
+
+lint:
+  stage: test
+  script:
+    - make lint
+
+test:
+  # must install kubebuilder until there is an officially supported image
+  # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
+  stage: test
+  script:
+    # Install kubebuilder
+    - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/linux/amd64 | tar -xz -C /usr/local/kubebuilder
+    - export PATH=/usr/local/kubebuilder/bin:$PATH
+    # Install kustomize
+    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v3.0.1
+    # Install controller gen
+    - go get sigs.k8s.io/controller-tools/cmd/controller-gen@v${CONTROLLER_GEN_VERSION}
+    - make test
 
 #docker-build:
 #  stage: build
@@ -32,13 +58,12 @@ build:
 #    - sleep 5
 #    - make docker-build
 
-lint:
-  stage: test
-  script:
-    - make lint
 
-test:
-  stage: test
-  script:
-    - make test
-
+#docker-push:
+#  stage: deploy
+#  image: docker:stable
+#  before_script: # TODO: also log into the public registry
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#  script:
+#    # pull image from registry so it can be used as a cache for the build command
+#    - docker pull $CONTAINER_IMAGE:latest || true
