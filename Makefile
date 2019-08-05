@@ -1,22 +1,22 @@
 
 # Image URL to use all building/pushing image targets
-IMG?= controller:latest
-REGISTRY?=fts
+REGISTRY?=registry.docker.io
+IMG?=controller:latest
+IMGNAME=ververica-platform-k8s-controller
+IMAGE=$(REGISTRY)/$(IMGNAME)
 TAG?=0.1.0
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
 VERSION_PKG=$(PKG)/controllers/version/version
 GIT_COMMIT=$(shell git rev-parse HEAD)
 REPO_INFO=$(shell git config --get remote.origin.url)
 BUILD=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-IMGNAME=ververica-platform-k8s-controller
-IMAGE=$(REGISTRY)/$(IMGNAME)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS?="crd:trivialVersions=true"
 
 LD_FLAGS="-X $(VERSION_PKG).controllerVersion=$(TAG) -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).buildDate=$(BUILD)"
 
-# TODO - make this dynamic based on env var
-KUBECONFIG=./.kubeconfig
+TEST_CLUSTER_NAME=ververica-platform-k8s-controller-cluster
+KUBECONFIG=$(shell kind && kind get kubeconfig-path)
 
 
 all: manager
@@ -97,9 +97,4 @@ swagger-gen:
 # Create a test cluster using kind
 .PHONY: test-cluster-create
 test-cluster-create:
-	kind create cluster
-
-# Store the current test cluster's config locally
-.PHONE: test-cluster-store-config
-test-cluster-store-config:
-	kind get kubeconfig > $(KUBECONFIG)
+	kind create cluster --name $(TEST_CLUSTER_NAME)

@@ -6,7 +6,7 @@ for mapping resources to K8s!
 This is built as a CRD / custom controller. Though an Aggregated API might be a better choice,
 the tooling (currently) does not have as good support and I just learned how to `go`.
 
-Built for Ververica Platform `1.4.1`, API Version 1.
+Built for Ververica Platform version `1.4.x`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
 [Ververica Platform Docs](https://docs.ververica.com/)
@@ -54,8 +54,8 @@ System Pre-requisites:
 - `kubebuilder` >= 2.0.0-beta.0
 - `kustomize` >= v3.0.1
 - `docker`
-- [`kind`](https://github.com/kubernetes/minikube)
-
+- [`kind`](https://github.com/kubernetes-sigs/kind) (or similar, like `minikube`)  
+  `kind` is seamless with docker and the tools of this repo, which is why it is built into the `Makefile` scripts. 
 
 ### `make` Scripts
 
@@ -74,7 +74,6 @@ System Pre-requisites:
 - `make fmt` runs `go fmt` on the package
 - `make test` runs the test suites with coverage
 - `make test-cluster-create` initializes a cluster fro testing, using kind
-- `make test-cluster-store-config` stores the created test cluster's kubeconfig locally
 
 
 ### Ververica Platform API

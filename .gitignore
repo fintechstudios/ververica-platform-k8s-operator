@@ -23,5 +23,6 @@ bin
 *.swo
 *~
 
-# Dynamic config for testing
-.kubeconfig
+# vendored go modules
+vendor
+
