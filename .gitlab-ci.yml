@@ -15,6 +15,7 @@ before_script:
 cache:
   paths:
     - vendor
+    - $GOPATH
 
 stages:
   - test # build and test the code, lint, etc.
