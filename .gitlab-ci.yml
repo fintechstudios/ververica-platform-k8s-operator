@@ -1,26 +1,40 @@
 image:
   name: golang:1.12-stretch
 
-
 variables:
   GO111MODULE: "on"
   KUSTOMIZE_VERSION: "3.0.1"
   KUBEBUILDER_VERSION: "2.0.0-beta.4"
   CONTROLLER_GEN_VERSION: "0.2.0-beta.2"
-
-before_script:
-  - go mod download
-  - go mod vendor # For caching purposes
+  KUBEBUILDER_DIR: "/usr/local/kubebuilder"
 
 cache:
   paths:
-    - vendor
     - $GOPATH
+    - $KUBEBUILDER_DIR
+  key: $CI_COMMIT_SHA
 
 stages:
+  - install # install and cache the deps
   - test # build and test the code, lint, etc.
   - build # build the docker image
   - deploy # release the docker image to registry
+
+
+install:
+  stage: install
+  script:
+    # must install kubebuilder until there is an officially supported image
+    # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
+    # Install kubebuilder
+    - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/linux/amd64 | tar -xz -C $KUBEBUILDER_DIR
+    - export PATH=$KUBEBUILDER_DIR/bin:$PATH
+    # Install kustomize
+    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v3.0.1
+    # Install controller gen
+    - go get sigs.k8s.io/controller-tools/cmd/controller-gen@v${CONTROLLER_GEN_VERSION}
+    # Install build deps
+    - go mod download
 
 build:
   stage: build
@@ -28,37 +42,34 @@ build:
     - make
 
 lint:
+  image: golangci/golangci-lint
   stage: test
   script:
     - make lint
 
 test:
-  # must install kubebuilder until there is an officially supported image
-  # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
   stage: test
   script:
-    # Install kubebuilder
-    - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/linux/amd64 | tar -xz -C /usr/local/kubebuilder
-    - export PATH=/usr/local/kubebuilder/bin:$PATH
-    # Install kustomize
-    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v3.0.1
-    # Install controller gen
-    - go get sigs.k8s.io/controller-tools/cmd/controller-gen@v${CONTROLLER_GEN_VERSION}
     - make test
 
-#docker-build:
-#  stage: build
-#  script:
-#    - apt update
-#    - apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
-#    - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-#    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-#    - apt update
-#    - apt install -y docker-ce
-#    - systemctl start docker &
-#    - sleep 5
-#    - make docker-build
-
+docker-build:
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  stage: build
+  script:
+    # pull image from registry so it can be used as a cache for the build command
+    - docker pull $CONTAINER_IMAGE:latest || true
+    # builds image using the pulled image as a cache (if available), tag it
+    - make docker-build
+    # push images to use for subsequent builds
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE:latest
 
 #docker-push:
 #  stage: deploy
