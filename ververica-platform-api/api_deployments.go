@@ -10,13 +10,13 @@
 package ververicaplatformapi
 
 import (
-	"context"
-	"fmt"
-	"github.com/antihax/optional"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"context"
+	"fmt"
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -26,7 +26,7 @@ var (
 
 type DeploymentsApiService service
 
-/*
+/* 
 DeploymentsApiService Create a deployment
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -37,10 +37,10 @@ DeploymentsApiService Create a deployment
 */
 func (a *DeploymentsApiService) CreateDeployment(ctx context.Context, namespace string, body Deployment) (Deployment, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Post")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue Deployment
 	)
 
@@ -89,18 +89,18 @@ func (a *DeploymentsApiService) CreateDeployment(ctx context.Context, namespace 
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 201 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -108,22 +108,22 @@ func (a *DeploymentsApiService) CreateDeployment(ctx context.Context, namespace 
 			}
 
 			var v Deployment
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 DeploymentsApiService Delete deployment
 This operation expects the deployment to be in desired state CANCELLED
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -134,10 +134,10 @@ This operation expects the deployment to be in desired state CANCELLED
 */
 func (a *DeploymentsApiService) DeleteDeployment(ctx context.Context, namespace string, deploymentId string) (Deployment, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Delete")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Delete")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue Deployment
 	)
 
@@ -185,18 +185,18 @@ func (a *DeploymentsApiService) DeleteDeployment(ctx context.Context, namespace 
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -204,22 +204,22 @@ func (a *DeploymentsApiService) DeleteDeployment(ctx context.Context, namespace 
 			}
 
 			var v Deployment
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 DeploymentsApiService Get a deployment by id
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -230,10 +230,10 @@ DeploymentsApiService Get a deployment by id
 */
 func (a *DeploymentsApiService) GetDeployment(ctx context.Context, namespace string, deploymentId string) (Deployment, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue Deployment
 	)
 
@@ -281,18 +281,18 @@ func (a *DeploymentsApiService) GetDeployment(ctx context.Context, namespace str
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -300,42 +300,42 @@ func (a *DeploymentsApiService) GetDeployment(ctx context.Context, namespace str
 			}
 
 			var v Deployment
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 DeploymentsApiService List all deployments
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace
  * @param optional nil or *GetDeploymentsOpts - Optional Parameters:
-     * @param "LabelSelector" (optional.String) -
+     * @param "LabelSelector" (optional.String) - 
 
 @return ResourceListDeployment
 */
 
-type GetDeploymentsOpts struct {
+type GetDeploymentsOpts struct { 
 	LabelSelector optional.String
 }
 
 func (a *DeploymentsApiService) GetDeployments(ctx context.Context, namespace string, localVarOptionals *GetDeploymentsOpts) (ResourceListDeployment, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue ResourceListDeployment
 	)
 
@@ -385,18 +385,18 @@ func (a *DeploymentsApiService) GetDeployments(ctx context.Context, namespace st
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -404,22 +404,22 @@ func (a *DeploymentsApiService) GetDeployments(ctx context.Context, namespace st
 			}
 
 			var v ResourceListDeployment
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 DeploymentsApiService Update a deployment
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -431,10 +431,10 @@ DeploymentsApiService Update a deployment
 */
 func (a *DeploymentsApiService) UpdateDeployment(ctx context.Context, namespace string, deploymentId string, body Deployment) (Deployment, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Patch")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Patch")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue Deployment
 	)
 
@@ -484,18 +484,18 @@ func (a *DeploymentsApiService) UpdateDeployment(ctx context.Context, namespace 
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -503,15 +503,15 @@ func (a *DeploymentsApiService) UpdateDeployment(ctx context.Context, namespace 
 			}
 
 			var v Deployment
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 

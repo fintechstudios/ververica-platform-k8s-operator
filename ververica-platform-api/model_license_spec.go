@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type LicenseSpec struct {
-	LicenseId  string            `json:"licenseId,omitempty"`
-	LicensedTo string            `json:"licensedTo,omitempty"`
-	Expires    int64             `json:"expires,omitempty"`
-	Params     map[string]string `json:"params,omitempty"`
+	LicenseId string `json:"licenseId,omitempty"`
+	LicensedTo string `json:"licensedTo,omitempty"`
+	Expires int64 `json:"expires,omitempty"`
+	Params map[string]string `json:"params,omitempty"`
 }

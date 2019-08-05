@@ -10,6 +10,6 @@
 package ververicaplatformapi
 
 type DeploymentRestoreStrategy struct {
-	Kind                  string `json:"kind,omitempty"`
-	AllowNonRestoredState bool   `json:"allowNonRestoredState,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	AllowNonRestoredState bool `json:"allowNonRestoredState,omitempty"`
 }

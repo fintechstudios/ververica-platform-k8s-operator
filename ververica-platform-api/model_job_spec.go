@@ -10,14 +10,14 @@
 package ververicaplatformapi
 
 type JobSpec struct {
-	Artifact              *Artifact               `json:"artifact,omitempty"`
-	Parallelism           int32                   `json:"parallelism,omitempty"`
-	FlinkConfiguration    map[string]string       `json:"flinkConfiguration,omitempty"`
-	Resources             map[string]ResourceSpec `json:"resources,omitempty"`
-	SavepointLocation     string                  `json:"savepointLocation,omitempty"`
-	AllowNonRestoredState bool                    `json:"allowNonRestoredState,omitempty"`
-	NumberOfTaskManagers  int32                   `json:"numberOfTaskManagers,omitempty"`
-	Logging               *Logging                `json:"logging,omitempty"`
-	Kubernetes            *KubernetesOptions      `json:"kubernetes,omitempty"`
-	DeploymentTarget      *JobDeploymentTarget    `json:"deploymentTarget,omitempty"`
+	Artifact *Artifact `json:"artifact,omitempty"`
+	Parallelism int32 `json:"parallelism,omitempty"`
+	FlinkConfiguration map[string]string `json:"flinkConfiguration,omitempty"`
+	Resources map[string]ResourceSpec `json:"resources,omitempty"`
+	SavepointLocation string `json:"savepointLocation,omitempty"`
+	AllowNonRestoredState bool `json:"allowNonRestoredState,omitempty"`
+	NumberOfTaskManagers int32 `json:"numberOfTaskManagers,omitempty"`
+	Logging *Logging `json:"logging,omitempty"`
+	Kubernetes *KubernetesOptions `json:"kubernetes,omitempty"`
+	DeploymentTarget *JobDeploymentTarget `json:"deploymentTarget,omitempty"`
 }

@@ -9,4 +9,4 @@
 
 package ververicaplatformapi
 
-type Any interface{}
+type Any interface {}

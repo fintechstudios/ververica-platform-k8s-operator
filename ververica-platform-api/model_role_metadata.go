@@ -14,11 +14,11 @@ import (
 )
 
 type RoleMetadata struct {
-	Id              string            `json:"id,omitempty"`
-	Name            string            `json:"name"`
-	Namespace       string            `json:"namespace,omitempty"`
-	CreatedAt       time.Time         `json:"createdAt,omitempty"`
-	ModifiedAt      time.Time         `json:"modifiedAt,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty"`
-	ResourceVersion int32             `json:"resourceVersion,omitempty"`
+	Id string `json:"id,omitempty"`
+	Name string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }

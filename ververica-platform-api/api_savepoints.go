@@ -10,13 +10,14 @@
 package ververicaplatformapi
 
 import (
-	"context"
-	"fmt"
-	"github.com/antihax/optional"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"context"
+	"fmt"
+
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -26,7 +27,7 @@ var (
 
 type SavepointsApiService service
 
-/*
+/* 
 SavepointsApiService Create a new savepoint
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -41,6 +42,7 @@ func (a *SavepointsApiService) CreateSavepoint(ctx context.Context, namespace st
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
+		
 	)
 
 	// create path and map variables
@@ -86,19 +88,20 @@ func (a *SavepointsApiService) CreateSavepoint(ctx context.Context, namespace st
 		return localVarHttpResponse, err
 	}
 
+
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		return localVarHttpResponse, newErr
 	}
 
 	return localVarHttpResponse, nil
 }
 
-/*
+/* 
 SavepointsApiService Get a savepoint by id
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -109,10 +112,10 @@ SavepointsApiService Get a savepoint by id
 */
 func (a *SavepointsApiService) GetSavepoint(ctx context.Context, namespace string, savepointId string) (Savepoint, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue Savepoint
 	)
 
@@ -160,18 +163,18 @@ func (a *SavepointsApiService) GetSavepoint(ctx context.Context, namespace strin
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -179,44 +182,44 @@ func (a *SavepointsApiService) GetSavepoint(ctx context.Context, namespace strin
 			}
 
 			var v Savepoint
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 SavepointsApiService List all savepoints. Can be filtered by DeploymentId
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace
  * @param optional nil or *GetSavepointsOpts - Optional Parameters:
-     * @param "DeploymentId" (optional.Interface of string) -
-     * @param "JobId" (optional.Interface of string) -
+     * @param "DeploymentId" (optional.Interface of string) - 
+     * @param "JobId" (optional.Interface of string) - 
 
 @return []Savepoint
 */
 
-type GetSavepointsOpts struct {
+type GetSavepointsOpts struct { 
 	DeploymentId optional.Interface
-	JobId        optional.Interface
+	JobId optional.Interface
 }
 
 func (a *SavepointsApiService) GetSavepoints(ctx context.Context, namespace string, localVarOptionals *GetSavepointsOpts) ([]Savepoint, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue []Savepoint
 	)
 
@@ -269,18 +272,18 @@ func (a *SavepointsApiService) GetSavepoints(ctx context.Context, namespace stri
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -288,15 +291,15 @@ func (a *SavepointsApiService) GetSavepoints(ctx context.Context, namespace stri
 			}
 
 			var v []Savepoint
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 

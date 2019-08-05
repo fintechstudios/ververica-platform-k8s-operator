@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type ApiToken struct {
-	Kind       string            `json:"kind,omitempty"`
-	ApiVersion string            `json:"apiVersion,omitempty"`
-	Metadata   *ApiTokenMetadata `json:"metadata"`
-	Spec       *ApiTokenSpec     `json:"spec,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	ApiVersion string `json:"apiVersion,omitempty"`
+	Metadata *ApiTokenMetadata `json:"metadata"`
+	Spec *ApiTokenSpec `json:"spec,omitempty"`
 }

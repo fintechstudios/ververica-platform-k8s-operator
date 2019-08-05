@@ -10,7 +10,7 @@
 package ververicaplatformapi
 
 type Failure struct {
-	Message  string `json:"message,omitempty"`
-	Reason   string `json:"reason,omitempty"`
-	FailedAt int64  `json:"failedAt,omitempty"`
+	Message string `json:"message,omitempty"`
+	Reason string `json:"reason,omitempty"`
+	FailedAt int64 `json:"failedAt,omitempty"`
 }

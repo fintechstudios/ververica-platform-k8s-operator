@@ -94,6 +94,7 @@ Main changes necessary:
 * `DeploymentRestoreStrategy` needs choices and `allowNonRestoredState` option
 * `DeploymentStartFromSavepoint` needs choices
 * `POST /namespaces/{namespace}/deployments` needs a `201` response with a `Deployment` in the body
+* `POST /namespaces/{namespace}/deployment-targets` needs a `201` response with a `DeploymenTarget` in the body
 
 #### Post-Generation Changes
 
@@ -126,9 +127,10 @@ package ververicaplatformapi
 type Any interface {}
 ```
 
-You'll also have to change any usages of this type in `structs` to be embedded, instead of by pointer ref.
+You'll also have to change any usages of this type in `structs` to be embedded, instead of by pointer ref, namely in:
+- `model_json_patch_generic.go`
 
-Is this all better than creating an API Client from scratch? Yes. Can I still complain about it? TBD. 
+Is this all better than creating an API Client from scratch? Yes. Can I still gripe about it? TBD. 
 
 
 ## Future Work

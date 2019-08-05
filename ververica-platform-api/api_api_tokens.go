@@ -10,13 +10,14 @@
 package ververicaplatformapi
 
 import (
-	"context"
-	"fmt"
-	"github.com/antihax/optional"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"context"
+	"fmt"
+
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -26,17 +27,17 @@ var (
 
 type ApiTokensApiService service
 
-/*
+/* 
 ApiTokensApiService Create a new api token
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateTokenOpts - Optional Parameters:
-     * @param "Body" (optional.Interface of ApiToken) -
+     * @param "Body" (optional.Interface of ApiToken) - 
 
 
 */
 
-type CreateTokenOpts struct {
+type CreateTokenOpts struct { 
 	Body optional.Interface
 }
 
@@ -46,6 +47,7 @@ func (a *ApiTokensApiService) CreateToken(ctx context.Context, localVarOptionals
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
+		
 	)
 
 	// create path and map variables
@@ -74,10 +76,10 @@ func (a *ApiTokensApiService) CreateToken(ctx context.Context, localVarOptionals
 	}
 	// body params
 	if localVarOptionals != nil && localVarOptionals.Body.IsSet() {
-
+		
 		localVarOptionalBody, localVarOptionalBodyok := localVarOptionals.Body.Value().(ApiToken)
 		if !localVarOptionalBodyok {
-			return nil, reportError("body should be ApiToken")
+				return nil, reportError("body should be ApiToken")
 		}
 		localVarPostBody = &localVarOptionalBody
 	}
@@ -97,19 +99,20 @@ func (a *ApiTokensApiService) CreateToken(ctx context.Context, localVarOptionals
 		return localVarHttpResponse, err
 	}
 
+
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		return localVarHttpResponse, newErr
 	}
 
 	return localVarHttpResponse, nil
 }
 
-/*
+/* 
 ApiTokensApiService Delete an api token by name
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -119,10 +122,10 @@ ApiTokensApiService Delete an api token by name
 */
 func (a *ApiTokensApiService) DeleteToken(ctx context.Context, name string) (ApiToken, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Delete")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Delete")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue ApiToken
 	)
 
@@ -169,18 +172,18 @@ func (a *ApiTokensApiService) DeleteToken(ctx context.Context, name string) (Api
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -188,22 +191,22 @@ func (a *ApiTokensApiService) DeleteToken(ctx context.Context, name string) (Api
 			}
 
 			var v ApiToken
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 ApiTokensApiService Get an api token by name
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -213,10 +216,10 @@ ApiTokensApiService Get an api token by name
 */
 func (a *ApiTokensApiService) GetToken(ctx context.Context, name string) (ApiToken, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue ApiToken
 	)
 
@@ -263,18 +266,18 @@ func (a *ApiTokensApiService) GetToken(ctx context.Context, name string) (ApiTok
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -282,22 +285,22 @@ func (a *ApiTokensApiService) GetToken(ctx context.Context, name string) (ApiTok
 			}
 
 			var v ApiToken
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
 
-/*
+/* 
 ApiTokensApiService List all api tokens
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -306,10 +309,10 @@ ApiTokensApiService List all api tokens
 */
 func (a *ApiTokensApiService) GetTokens(ctx context.Context) (ResourceListApiToken, *http.Response, error) {
 	var (
-		localVarHttpMethod  = strings.ToUpper("Get")
-		localVarPostBody    interface{}
-		localVarFileName    string
-		localVarFileBytes   []byte
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 		localVarReturnValue ResourceListApiToken
 	)
 
@@ -355,18 +358,18 @@ func (a *ApiTokensApiService) GetTokens(ctx context.Context) (ResourceListApiTok
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-		if err == nil {
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
+			body: localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-
+		
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -374,15 +377,15 @@ func (a *ApiTokensApiService) GetTokens(ctx context.Context) (ResourceListApiTok
 			}
 
 			var v ResourceListApiToken
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
 				return localVarReturnValue, localVarHttpResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-
+		
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 

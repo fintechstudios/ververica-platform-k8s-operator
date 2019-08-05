@@ -18,11 +18,10 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
+
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
-	"io/ioutil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -102,7 +101,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 		},
 	}
 	// create it
-	res, err := r.VPAPIClient.
+	createdDepTarget, res, err := r.VPAPIClient.
 		DeploymentTargetsApi.
 		CreateDeploymentTarget(ctx, namespace, depTarget)
 
@@ -113,15 +112,6 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 
 	if err != nil {
 		log.Error(err, "Error creating VP Deployment Target")
-		return ctrl.Result{}, err
-	}
-
-	// TODO: the depTarget data is already in the res, but for some reason need to un-marshal it
-	// 		 most likely a problem with the Swagger
-	body, _ := ioutil.ReadAll(res.Body)
-	_ = res.Body.Close()
-	var createdDepTarget vpAPI.DeploymentTarget
-	if err := json.Unmarshal(body, &createdDepTarget); err != nil {
 		return ctrl.Result{}, err
 	}
 

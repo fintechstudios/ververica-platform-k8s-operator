@@ -10,9 +10,9 @@
 package ververicaplatformapi
 
 type Job struct {
-	Kind       string       `json:"kind,omitempty"`
-	ApiVersion string       `json:"apiVersion,omitempty"`
-	Metadata   *JobMetadata `json:"metadata,omitempty"`
-	Spec       *JobSpec     `json:"spec,omitempty"`
-	Status     *JobStatus   `json:"status,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	ApiVersion string `json:"apiVersion,omitempty"`
+	Metadata *JobMetadata `json:"metadata,omitempty"`
+	Spec *JobSpec `json:"spec,omitempty"`
+	Status *JobStatus `json:"status,omitempty"`
 }
