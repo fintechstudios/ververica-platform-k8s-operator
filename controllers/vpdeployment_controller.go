@@ -19,8 +19,9 @@ package controllers
 import (
 	"context"
 	"errors"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"time"
+
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 
@@ -43,19 +44,20 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpdeployment", req.NamespacedName)
 }
 
-func (r *VpDeploymentReconciler) getDeploymentTargetID(resource ververicaplatformv1beta1.VpDeployment) (string, error) {
-	if len(resource.Spec.Spec.DeploymentTargetID) > 0 {
+// getDeploymentTargetID gets the id of a deployment
+func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment ververicaplatformv1beta1.VpDeployment) (string, error) {
+	if len(vpDeployment.Spec.Spec.DeploymentTargetID) > 0 {
 		// an id has been set, just return it
-		return resource.Spec.Spec.DeploymentTargetID, nil
+		return vpDeployment.Spec.Spec.DeploymentTargetID, nil
 	}
-	name := resource.Spec.DeploymentTargetName
+	name := vpDeployment.Spec.DeploymentTargetName
 	if len(name) == 0 {
 		return "", errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 	}
 
 	ctx := context.Background()
-	namespace := utils.GetNamespaceOrDefault(resource.Spec.Metadata.Namespace)
-	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, resource.Spec.DeploymentTargetName)
+	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	depTarget, _, err := r.VPAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, namespace, vpDeployment.Spec.DeploymentTargetName)
 
 	if err != nil {
 		return "", err
@@ -64,26 +66,25 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(resource ververicaplatfor
 	return depTarget.Metadata.Id, nil
 }
 
-func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namespace string, name string) (*vpAPI.Deployment, error) {
-	if len(name) == 0 {
-		return nil, errors.New("name must not be empty")
+func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namespace string, name string) (vpAPI.Deployment, error) {
+	var deployment vpAPI.Deployment
+	if len(namespace) == 0 || len(name) == 0 {
+		return deployment, errors.New("namespace and name must not be empty")
 	}
 
 	deploymentsList, _, err := r.VPAPIClient.DeploymentsApi.GetDeployments(ctx, namespace, nil)
 
 	if err != nil {
-		return nil, err
+		return deployment, err
 	}
 
-	for _, deployment := range deploymentsList.Items {
+	for _, deployment = range deploymentsList.Items {
 		if deployment.Metadata.Name == name {
-			return &deployment, nil
+			return deployment, nil
 		}
 	}
 
-	// no errors but not found
-	// TODO: consider making this into a not-found error, so we could pass back the struct and not a pointer
-	return nil, nil
+	return deployment, utils.DeploymentNotFoundError{Namespace: namespace, Name: name}
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
@@ -129,12 +130,13 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	dep, err := r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
 
-	if err != nil {
+	// Not found errors are fine
+	if err != nil && !utils.IsNotFoundError(err) {
 		log.Error(err, "while fetching deployments list")
 		return ctrl.Result{}, err
 	}
 
-	if dep != nil && dep.Metadata.Name == vpDeployment.Name {
+	if dep.Metadata.Name == vpDeployment.Name {
 		return ctrl.Result{}, errors.New("deployment names must be unique per namespace")
 	}
 
@@ -226,7 +228,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 	// First must make sure the deployment is canceled, then must delete it
 
 	// Let's make sure it's deleted from the ververica platform
-	// must make sure the namespace and id are set, or will return a list of deployments...
+	// must make sure the namespace and id are set, or the API client will return a list of deployments...
 	var namespace = utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 
 	var (
@@ -236,15 +238,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 	if len(vpDeployment.Spec.Metadata.Id) > 0 {
 		deployment, _, err = r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, vpDeployment.Spec.Metadata.Id)
 	} else {
-		// TODO: this can definitely be cleaned up
-		depPtr, err := r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		if depPtr == nil {
-			return ctrl.Result{}, nil
-		}
-		deployment = *depPtr
+		deployment, err = r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
 	}
 
 	if err != nil {
@@ -327,21 +321,22 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	id := vpDeployment.Spec.Metadata.Id
 	if len(id) == 0 {
+		// no id has been set, something when wrong with the creation process
 		deployment, err := r.getDeploymentByName(ctx, namespace, req.Name)
+
+		if utils.IsNotFoundError(err) {
+			log.Info("Create event")
+			return r.handleCreate(req, vpDeployment)
+		}
 
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		if deployment == nil {
-			log.Info("Create event")
-			return r.handleCreate(req, vpDeployment)
-		}
-
 		// no id, but hasn't
-		log.Info("No id set for deployment", "deployment", *deployment)
+		log.Info("No id set for deployment", "deployment", deployment)
 		// Update in k8s but don't patch - should be handled by the update loop
-		err = r.updateResource(req, &vpDeployment, deployment)
+		err = r.updateResource(req, &vpDeployment, &deployment)
 		return ctrl.Result{}, err
 	}
 

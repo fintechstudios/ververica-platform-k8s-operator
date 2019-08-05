@@ -147,6 +147,7 @@ will there ever be more than one VP running in a cluster?
 * Improvements on the Swagger API generator / moving that to OpenAPI V3.
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
 * Various `TODO`s should give us a place to start!
+* Better package structure for internal code.
 
 ## Acknowledgements
 

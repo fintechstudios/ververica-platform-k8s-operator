@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,14 +15,18 @@ var _ = Describe("IsNotFoundError", func() {
 		Expect(IsNotFoundError(errors.New("server error"))).To(BeFalse())
 	})
 
-	It("should return true for 404 Swagger Errors", func() {
-		Expect(IsNotFoundError(errors.New("404 Not Found"))).To(BeTrue())
-	})
-
-	It("should return true for K8s api errors", func() {
-		Expect(IsNotFoundError(apiErrors.NewNotFound(schema.GroupResource{
+	notFoundErrors := []error{
+		DeploymentNotFoundError{Namespace: "grumpy", Name: "goose"},
+		errors.New("404 Not Found"),
+		apiErrors.NewNotFound(schema.GroupResource{
 			Group:    "api.fts.com",
 			Resource: "tools",
-		}, "hammer"))).To(BeTrue())
+		}, "hammer"),
+	}
+
+	It("should return true for not found errors", func() {
+		for _, err := range notFoundErrors {
+			Expect(IsNotFoundError(err)).To(BeTrue())
+		}
 	})
 })
