@@ -27,6 +27,14 @@ import (
 type VpNamespaceMetadata struct {
 	// +optional
 	Name string `json:"name"`
+	// +optional
+	ID string `json:"id,omitempty"`
+	// +optional
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	// +optional
+	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
+	// +optional
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
 // VpNamespaceSpec defines the desired state of VpNamespace
@@ -46,22 +54,14 @@ type VpNamespaceStatus struct {
 
 	// +optional
 	State string `json:"state,omitempty"`
-	// +optional
-	ID string `json:"id,omitempty"`
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-	// +optional
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id"
-// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".status.resourceVersion"
-// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".status.createdAt"
-// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".status.modifiedAt"
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
+// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
+// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
+// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 
 // VpNamespace is the Schema for the vpnamespaces API
 type VpNamespace struct {
