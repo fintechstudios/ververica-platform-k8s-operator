@@ -1,11 +1,10 @@
 image:
-  name: golang:1.12-stretch
+  name: golang:1.12-stretch # try: gcr.io/kubebuilder/thirdparty-linux:1.14.1
 
 variables:
   GO111MODULE: "on"
   KUSTOMIZE_VERSION: "3.0.1"
   KUBEBUILDER_VERSION: "2.0.0-beta.4"
-  CONTROLLER_GEN_VERSION: "0.2.0-beta.2"
   KUBEBUILDER_DIR: "/usr/local/kubebuilder"
 
 cache:
@@ -20,19 +19,17 @@ stages:
   - build # build the docker image
   - deploy # release the docker image to registry
 
-
 install:
   stage: install
   script:
+    - echo "installing kubebuilder@$KUBEBUILDER_VERSION, kustomize@$KUSTOMIZE_VERSION"
     # must install kubebuilder until there is an officially supported image
     # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
     # Install kubebuilder
     - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/linux/amd64 | tar -xz -C $KUBEBUILDER_DIR
     - export PATH=$KUBEBUILDER_DIR/bin:$PATH
     # Install kustomize
-    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v3.0.1
-    # Install controller gen
-    - go get sigs.k8s.io/controller-tools/cmd/controller-gen@v${CONTROLLER_GEN_VERSION}
+    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v$KUSTOMIZE_VERSION
     # Install build deps
     - go mod download
 
