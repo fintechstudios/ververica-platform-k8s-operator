@@ -114,8 +114,8 @@ spec:
                       type: string
                   type: object
                 state:
-                  description: DeploymentState Only one of the following states may
-                    be specified.
+                  description: DeploymentState is the enum of all possible deployment
+                    states Only one of the following states may be specified.
                   enum:
                   - CANCELLED
                   - RUNNING
@@ -124,7 +124,8 @@ spec:
                   - FAILED
                   type: string
                 template:
-                  description: VpDeploymentTemplate
+                  description: VpDeploymentTemplate is the template for Deployment
+                    jobs
                   properties:
                     metadata:
                       description: VpDeploymentTemplateMetadata
@@ -135,7 +136,8 @@ spec:
                           type: object
                       type: object
                     spec:
-                      description: VpDeploymentTemplateSpec
+                      description: VpDeploymentTemplateSpec is the base spec for Deployment
+                        jobs
                       properties:
                         artifact:
                           description: VpArtifact describes a jar to run along with
@@ -164,10 +166,11 @@ spec:
                             type: string
                           type: object
                         kubernetes:
-                          description: VpKubernetesOptions
+                          description: VpKubernetesOptions allows users to configure
+                            K8s pods for Deployments
                           properties:
                             pods:
-                              description: VpPods
+                              description: VpPods are the K8s specific options
                               properties:
                                 affinity:
                                   description: VpJsonNode is odd - seems incorrect
@@ -222,6 +225,8 @@ spec:
                                   type: object
                                 envVars:
                                   items:
+                                    description: VpEnvVar allows users to specify
+                                      environment variables for jobs
                                     properties:
                                       name:
                                         type: string
@@ -278,6 +283,8 @@ spec:
                                   type: array
                                 imagePullSecrets:
                                   items:
+                                    description: VpLocalObjectReference is the Ververica
+                                      Platform local object reference for secrets
                                     properties:
                                       name:
                                         type: string
@@ -387,6 +394,8 @@ spec:
                                   type: array
                                 volumeMounts:
                                   items:
+                                    description: VpVolumeAndMount joins a volume and
+                                      how it is mounted
                                     properties:
                                       name:
                                         type: string
@@ -489,6 +498,7 @@ spec:
                               type: object
                           type: object
                         logging:
+                          description: VpLogging configures various loggers
                           properties:
                             log4jLoggers:
                               additionalProperties:
@@ -537,16 +547,9 @@ spec:
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
-            jobIds:
-              description: JobIds is a list of job ids created for the deployment
-                We can also think about adding the full Job objects to a list as well,
-                if the information there seems useful
-              items:
-                type: string
-              type: array
             state:
-              description: DeploymentState Only one of the following states may be
-                specified.
+              description: DeploymentState is the enum of all possible deployment
+                states Only one of the following states may be specified.
               enum:
               - CANCELLED
               - RUNNING

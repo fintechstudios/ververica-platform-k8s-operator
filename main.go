@@ -53,7 +53,7 @@ func main() {
 			`Namespace to watch for resources. Default is to watch all namespaces`)
 
 		ververicaPlatformURL = flag.String("ververica-platform-url", "http://localhost:8081/api",
-			"The URL to the Ververica Platform API, without a trailing slash.")
+			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol, host, and base path.")
 	)
 	flag.Parse()
 
@@ -102,8 +102,8 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.VpDeploymentReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("VpDeployment"),
+		Client:      mgr.GetClient(),
+		Log:         ctrl.Log.WithName("controllers").WithName("VpDeployment"),
 		VPAPIClient: *ververicaAPIClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")

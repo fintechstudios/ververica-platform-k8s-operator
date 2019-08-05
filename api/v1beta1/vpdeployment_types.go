@@ -230,11 +230,11 @@ type DeploymentState string
 
 // All the allowed DeploymentStates
 const (
-	CancelledState     DeploymentState = "CANCELLED" // non-US spelling intentional
-	RunningState       DeploymentState = "RUNNING"
-	TransitioningState DeploymentState = "TRANSITIONING"
-	SuspendedState     DeploymentState = "SUSPENDED"
-	FailedState        DeploymentState = "FAILED"
+	CancelledState     = DeploymentState("CANCELLED") // non-US spelling intentional
+	RunningState       = DeploymentState("RUNNING")
+	TransitioningState = DeploymentState("TRANSITIONING")
+	SuspendedState     = DeploymentState("SUSPENDED")
+	FailedState        = DeploymentState("FAILED")
 )
 
 // VpDeploymentSpec is the spec in the Ververica Platform
@@ -279,11 +279,12 @@ type VpDeploymentStatus struct {
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
 
-	// JobIds is a list of job ids created for the deployment
-	// We can also think about adding the full Job objects to a list as well,
-	// if the information there seems useful
-	// +optional
-	JobIds  []string         `json:"jobIds,omitempty"`
+	// TODO: think about adding other information here, ie:
+	// 		- list of Jobs
+	//		- list of Events
+	//		- list of K8s Pods created
+	//		- resource version
+	//		- potentially all dynamic data
 }
 
 // +kubebuilder:object:root=true

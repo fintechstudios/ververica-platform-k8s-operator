@@ -48,8 +48,8 @@ spec:
           description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
           properties:
             metadata:
-              description: VPDeploymentMetadata represents all metadata from the VP
-                API
+              description: VpDeploymentTargetMetadata represents all metadata from
+                the VP API
               properties:
                 annotations:
                   additionalProperties:
@@ -77,9 +77,12 @@ spec:
                   type: integer
               type: object
             spec:
+              description: VpDeploymentTargetSpec allows a users to set defaults for
+                deployments and configure K8s
               properties:
                 deploymentPatchSet:
                   items:
+                    description: JSONPatchGeneric is a generic JSON-Patch object
                     properties:
                       from:
                         type: string

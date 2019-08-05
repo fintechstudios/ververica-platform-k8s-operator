@@ -38,7 +38,6 @@ type Version struct {
 	GoArch            string `json:"goArch"`
 }
 
-
 // GetVersion constructs the current version
 func GetVersion() Version {
 	return Version{

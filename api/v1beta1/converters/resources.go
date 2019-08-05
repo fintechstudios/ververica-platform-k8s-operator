@@ -16,9 +16,7 @@ func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]verv
 		if len(v.Memory) > 0 {
 			res.Memory = &v.Memory
 		}
-		if v.Cpu > 0 {
-			res.Cpu = resource.MustParse(fmt.Sprintf("%f", v.Cpu))
-		}
+		res.Cpu = resource.MustParse(fmt.Sprintf("%f", v.Cpu))
 		vpResources[k] = res
 	}
 	return vpResources, nil

@@ -25,7 +25,7 @@ import (
 
 // JSONPatchGeneric is a generic JSON-Patch object
 type JSONPatchGeneric struct {
-	Op string `json:"op"`
+	Op   string `json:"op"`
 	Path string `json:"path"`
 	// TODO: support any type of JSON as an interface
 	// 		 https://github.com/kubernetes-sigs/kubebuilder/issues/528

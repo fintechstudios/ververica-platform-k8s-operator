@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"reflect"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -34,6 +36,17 @@ var _ = Describe("VpNamespace", func() {
 		created, fetched *VpNamespace
 	)
 
+	It("should deep copy", func() {
+		created = &VpNamespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "foo",
+				Namespace: "default",
+			},
+		}
+		copied := created.DeepCopy()
+		Expect(reflect.DeepEqual(created, copied)).To(BeTrue())
+	})
+
 	// Add Tests for OpenAPI validation (or additonal CRD features) specified in
 	// your API definition.
 	// Avoid adding tests for vanilla CRUD operations because they would
@@ -41,7 +54,6 @@ var _ = Describe("VpNamespace", func() {
 	Context("Create API", func() {
 
 		It("should create an object successfully", func() {
-
 			key = types.NamespacedName{
 				Name:      "foo",
 				Namespace: "default",
@@ -50,7 +62,8 @@ var _ = Describe("VpNamespace", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())

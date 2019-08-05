@@ -26,13 +26,13 @@ SWAGGER_IGNORE_FILE=.swagger-codegen-ignore
 CONFIG_FILE=swagger-gen-config.json
 OUT_DIR=ververica-platform-api
 
-rm -rf ${PROJECT_DIR}/${OUT_DIR}
-mkdir ${PROJECT_DIR}/${OUT_DIR}
-cp ${PROJECT_DIR}/${SWAGGER_IGNORE_FILE} ${PROJECT_DIR}/${OUT_DIR}
+rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}
+mkdir "${PROJECT_DIR}"/${OUT_DIR}
+cp "${PROJECT_DIR}"/${SWAGGER_IGNORE_FILE} "${PROJECT_DIR}"/${OUT_DIR}
 
 docker run --rm \
-    -v ${PROJECT_DIR}:/local:rw \
-    --user $(id -u):$(id -g) \
+    -v "${PROJECT_DIR}":/local:rw \
+    --user "$(id -u)":"$(id -g)" \
     swaggerapi/swagger-codegen-cli generate \
     -i /local/${SWAGGER_FILE} \
     -l go \

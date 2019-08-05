@@ -11,7 +11,7 @@ Method | HTTP request | Description
 
 
 # **CreateDeploymentTarget**
-> CreateDeploymentTarget(ctx, namespace, body)
+> DeploymentTarget CreateDeploymentTarget(ctx, namespace, body)
 Create a deployment target
 
 
@@ -26,7 +26,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**DeploymentTarget**](DeploymentTarget.md)
 
 ### Authorization
 

@@ -32,15 +32,15 @@ DeploymentTargetsApiService Create a deployment target
  * @param namespace
  * @param body
 
-
+@return DeploymentTarget
 */
-func (a *DeploymentTargetsApiService) CreateDeploymentTarget(ctx context.Context, namespace string, body DeploymentTarget) (*http.Response, error) {
+func (a *DeploymentTargetsApiService) CreateDeploymentTarget(ctx context.Context, namespace string, body DeploymentTarget) (DeploymentTarget, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		
+		localVarReturnValue DeploymentTarget
 	)
 
 	// create path and map variables
@@ -72,20 +72,27 @@ func (a *DeploymentTargetsApiService) CreateDeploymentTarget(ctx context.Context
 	localVarPostBody = &body
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHttpResponse, err := a.client.callAPI(r)
 	if err != nil || localVarHttpResponse == nil {
-		return localVarHttpResponse, err
+		return localVarReturnValue, localVarHttpResponse, err
 	}
 
 	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 	localVarHttpResponse.Body.Close()
 	if err != nil {
-		return localVarHttpResponse, err
+		return localVarReturnValue, localVarHttpResponse, err
 	}
 
+	if localVarHttpResponse.StatusCode < 300 {
+		// If we succeed, return the data, otherwise pass on to decode error.
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
+			return localVarReturnValue, localVarHttpResponse, err
+		}
+	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
@@ -93,10 +100,26 @@ func (a *DeploymentTargetsApiService) CreateDeploymentTarget(ctx context.Context
 			error: localVarHttpResponse.Status,
 		}
 		
-		return localVarHttpResponse, newErr
+		if localVarHttpResponse.StatusCode == 201 {
+			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+			if err != nil {
+				return localVarReturnValue, localVarHttpResponse, err
+			}
+
+			var v DeploymentTarget
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
+				return localVarReturnValue, localVarHttpResponse, newErr
+		}
+		
+		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
-	return localVarHttpResponse, nil
+	return localVarReturnValue, localVarHttpResponse, nil
 }
 
 /* 

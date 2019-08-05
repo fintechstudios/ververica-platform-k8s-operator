@@ -99,7 +99,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace verve
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error)  {
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error) {
 	// Now update the k8s resource and status as well
 	err := r.updateResource(req, &vpNamespace, &namespace)
 	return ctrl.Result{}, err
@@ -147,7 +147,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	if vpNamespace.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Not being deleted, add the finalizer
-		if utils.AddFinalizerToObjectMeta(&vpNamespace.ObjectMeta) {
+		if utils.AddFinalizer(&vpNamespace.ObjectMeta) {
 			log.Info("Adding Finalizer")
 			if err := r.Update(ctx, &vpNamespace); err != nil {
 				return ctrl.Result{}, err
@@ -164,7 +164,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 			return res, err
 		}
 		// otherwise, we're all good, just remove the finalizer
-		if utils.RemoveFinalizerFromObjectMeta(&vpNamespace.ObjectMeta) {
+		if utils.RemoveFinalizer(&vpNamespace.ObjectMeta) {
 			if err := r.Update(ctx, &vpNamespace); err != nil {
 				return ctrl.Result{}, err
 			}

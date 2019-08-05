@@ -10,13 +10,14 @@
 package ververicaplatformapi
 
 import (
-	"github.com/antihax/optional"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"context"
 	"fmt"
+
+	"github.com/antihax/optional"
 )
 
 // Linger please
