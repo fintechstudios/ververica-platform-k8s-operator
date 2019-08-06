@@ -1,10 +1,9 @@
 
 # Image URL to use all building/pushing image targets
-REGISTRY?=registry.docker.io
-IMG?=controller:latest
+REGISTRY?=index.docker.io
 IMGNAME=ververica-platform-k8s-controller
-IMAGE=$(REGISTRY)/$(IMGNAME)
 TAG?=0.1.0
+IMG?=$(REGISTRY)/$(IMGNAME)
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
 VERSION_PKG=$(PKG)/controllers/version/version
 GIT_COMMIT=$(shell git rev-parse HEAD)
@@ -79,14 +78,15 @@ generate: controller-gen
 # Build the docker image
 .PHONY: docker-build
 docker-build: manager
-	docker build . -t ${IMG}
+	docker build . -t ${IMG}:${TAG} -t ${IMG}:${GIT_COMMIT}
 	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
+	sed -i'' -e 's@image: .*@image: '"${IMG}:${TAG}"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 .PHONY: docker-push
 docker-push: docker-push
-	docker push ${IMG}
+	docker push ${IMG}:${TAG}
+	docker push ${IMG}:${GIT_COMMIT}
 
 # Update the Swagger Client API
 .PHONY: swagger-gen
