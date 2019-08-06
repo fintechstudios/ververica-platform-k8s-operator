@@ -16,15 +16,14 @@ stages:
   - release # release the docker image to registry
 
 install:
+  stage: install
   variables:
-    DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
   services:
     - docker:dind
   image: docker:stable
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  stage: build
   script:
     # per-branch test image will be created and used as the "cache"
     # pull test image from registry so it can be used as a cache for the build command
