@@ -19,11 +19,11 @@ import (
 	"flag"
 	"os"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/version"
-
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	ververicaplatformapi "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/version"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	_ "github.com/joho/godotenv/autoload"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -75,7 +75,7 @@ func main() {
 		"version", version.GetVersion().ToString())
 
 	// Build the Ververica Platform API Client
-	ververicaAPIClient := ververicaplatformapi.NewAPIClient(&ververicaplatformapi.Configuration{
+	ververicaAPIClient := vpAPI.NewAPIClient(&vpAPI.Configuration{
 		BasePath:      *ververicaPlatformURL,
 		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
 		UserAgent:     "VervericaPlatformK8sController/1.0.0/go",

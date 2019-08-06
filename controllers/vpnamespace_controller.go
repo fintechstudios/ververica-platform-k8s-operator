@@ -40,7 +40,7 @@ type VpNamespaceReconciler struct {
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpNamespaceReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpNamespace, namespace *vpAPI.Namespace) error {
+func (r *VpNamespaceReconciler) updateResource(resource *ververicaplatformv1beta1.VpNamespace, namespace *vpAPI.Namespace) error {
 	ctx := context.Background()
 
 	resource.Name = namespace.Metadata.Name
@@ -91,7 +91,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace verve
 	log.Info("Created namespace", "namespace", namespace)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(req, &vpNamespace, &namespace); err != nil {
+	if err := r.updateResource(&vpNamespace, &namespace); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -101,7 +101,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace verve
 // handleUpdate updates the k8s resource when it already exists in the VP
 func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace ververicaplatformv1beta1.VpNamespace, namespace vpAPI.Namespace) (ctrl.Result, error) {
 	// Now update the k8s resource and status as well
-	err := r.updateResource(req, &vpNamespace, &namespace)
+	err := r.updateResource(&vpNamespace, &namespace)
 	return ctrl.Result{}, err
 }
 

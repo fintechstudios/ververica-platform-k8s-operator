@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
-
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
@@ -88,7 +87,7 @@ func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namesp
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
+func (r *VpDeploymentReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
 	ctx := context.Background()
 
 	metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
@@ -110,11 +109,11 @@ func (r *VpDeploymentReconciler) updateResource(req ctrl.Request, resource *verv
 	}
 	resource.Status.State = state
 
-	if err = r.Update(ctx, resource); err != nil {
+	if err := r.Update(ctx, resource); err != nil {
 		return err
 	}
 
-	if err = r.Status().Update(ctx, resource); err != nil {
+	if err := r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -128,18 +127,6 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 
 	// See if there already exists a deployment by that name
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	dep, err := r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
-
-	// Not found errors are fine
-	if err != nil && !utils.IsNotFoundError(err) {
-		log.Error(err, "while fetching deployments list")
-		return ctrl.Result{}, err
-	}
-
-	if dep.Metadata.Name == vpDeployment.Name {
-		return ctrl.Result{}, errors.New("deployment names must be unique per namespace")
-	}
-
 	deployment, err := converters.DeploymentFromNative(vpDeployment)
 
 	if err != nil {
@@ -168,10 +155,10 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment ver
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Created deployment", "deployment", createdDep)
+	log.Info("Created deployment", "deployment", createdDep.Metadata.Id)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(req, &vpDeployment, &createdDep); err != nil {
+	if err := r.updateResource(&vpDeployment, &createdDep); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -193,7 +180,8 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 	}
 
 	// Patches with no changes to the spec should not trigger
-	// another transition but will bump the resource version
+	// sequential patches with the same spec will not trigger a new transition
+	// but will bump the resource version, making a direct equality check impossible
 	updatedDep, res, err := r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, namespace, currentDeployment.Metadata.Id, desiredDeployment)
 
 	if res != nil && res.StatusCode == 400 {
@@ -205,6 +193,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment ver
 		log.Error(err, "Error patching VP Deployment")
 		return ctrl.Result{}, err
 	}
+
 	vpDeployment.Status.State, err = converters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {
@@ -235,8 +224,8 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 		deployment vpAPI.Deployment
 		err        error
 	)
-	if len(vpDeployment.Spec.Metadata.Id) > 0 {
-		deployment, _, err = r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, vpDeployment.Spec.Metadata.Id)
+	if len(vpDeployment.Spec.Metadata.ID) > 0 {
+		deployment, _, err = r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, vpDeployment.Spec.Metadata.ID)
 	} else {
 		deployment, err = r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
 	}
@@ -253,14 +242,14 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 			// must cancel it
 			log.Info("Cancelling Deployment")
 			deployment.Spec.State = string(ververicaplatformv1beta1.CancelledState)
-			deployment, _, err = r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.Id, deployment)
+			deployment, _, err = r.VPAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.ID, deployment)
 
 			if err != nil {
 				return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 			}
 		}
 		// Just have to wait now
-		err = r.updateResource(req, &vpDeployment, &deployment)
+		err = r.updateResource(&vpDeployment, &deployment)
 		// Can take a while to tear down
 		return ctrl.Result{RequeueAfter: time.Second * 30}, err
 	}
@@ -319,9 +308,9 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	id := vpDeployment.Spec.Metadata.Id
+	id := vpDeployment.Spec.Metadata.ID
 	if len(id) == 0 {
-		// no id has been set, something when wrong with the creation process
+		// no id has been set
 		deployment, err := r.getDeploymentByName(ctx, namespace, req.Name)
 
 		if utils.IsNotFoundError(err) {
@@ -333,17 +322,17 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 			return ctrl.Result{}, err
 		}
 
-		// no id, but hasn't
 		log.Info("No id set for deployment", "deployment", deployment)
 		// Update in k8s but don't patch - should be handled by the update loop
-		err = r.updateResource(req, &vpDeployment, &deployment)
+		err = r.updateResource(&vpDeployment, &deployment)
 		return ctrl.Result{}, err
 	}
 
 	deployment, _, err := r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, id)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
-			// Not found, let's create it
+			log.Info("Deployment by id not found - creating", "id", id)
+			// Not found, means incorrect id is set but let's create it anyways
 			return r.handleCreate(req, vpDeployment)
 		}
 		// Other error, not good!

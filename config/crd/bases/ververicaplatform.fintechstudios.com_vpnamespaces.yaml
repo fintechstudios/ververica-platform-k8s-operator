@@ -11,7 +11,7 @@ spec:
     name: Id
     type: string
   - JSONPath: .spec.metadata.resourceVersion
-    name: ResourceVersion
+    name: Resource-Version
     type: integer
   - JSONPath: .spec.metadata.createdAt
     name: Created

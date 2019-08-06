@@ -10,9 +10,6 @@ spec:
   - JSONPath: .spec.metadata.id
     name: Id
     type: string
-  - JSONPath: .spec.metadata.resourceVersion
-    name: ResourceVersion
-    type: integer
   - JSONPath: .spec.metadata.createdAt
     name: Created
     type: date
@@ -20,13 +17,13 @@ spec:
     name: Modified
     type: date
   - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
-    name: FlinkVersion
+    name: Flink-Version
     type: string
   - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
-    name: FlinkImageTag
+    name: Flink-Image-Tag
     type: string
   - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
-    name: FlinkImageRegistry
+    name: Flink-Image-Registry
     type: string
   group: ververicaplatform.fintechstudios.com
   names:
@@ -82,9 +79,6 @@ spec:
                   type: string
                 namespace:
                   type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
               type: object
             spec:
               description: VpDeploymentSpec is the spec in the Ververica Platform
@@ -547,6 +541,9 @@ spec:
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
+            resourceVersion:
+              format: int32
+              type: integer
             state:
               description: DeploymentState is the enum of all possible deployment
                 states Only one of the following states may be specified.

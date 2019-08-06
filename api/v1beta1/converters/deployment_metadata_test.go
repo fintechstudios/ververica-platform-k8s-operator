@@ -16,7 +16,6 @@ var _ = Describe("DeploymentMetadata", func() {
 	const deploymentId = "9cfce163-e969-4d75-8847-0c4309fcfe99"
 	const deploymentName = "test-deployment"
 	const deploymentNamespace = "testing"
-	const deploymentResourceVersion = int32(1)
 
 	Describe("DeploymentMetadataToNative", func() {
 		var annotations map[string]string
@@ -50,10 +49,9 @@ var _ = Describe("DeploymentMetadata", func() {
 		It("should map an API deployment metadata to K8s native", func() {
 			vpMetadata, err := DeploymentMetadataToNative(metadata)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(vpMetadata.ResourceVersion).To(Equal(deploymentResourceVersion))
 			Expect(vpMetadata.Name).To(Equal(deploymentName))
 			Expect(vpMetadata.Namespace).To(Equal(deploymentNamespace))
-			Expect(vpMetadata.Id).To(Equal(deploymentId))
+			Expect(vpMetadata.ID).To(Equal(deploymentId))
 			createdAtTime := metav1.NewTime(createdAt)
 			modifiedAtTime := metav1.NewTime(modifiedAt)
 			Expect(vpMetadata.CreatedAt.Equal(&createdAtTime)).To(BeTrue())
@@ -87,21 +85,19 @@ var _ = Describe("DeploymentMetadata", func() {
 				"excellent": "adventure",
 			}
 			vpMetadata = ververicaplatformv1beta1.VpDeploymentMetadata{
-				Id:              deploymentId,
+				ID:              deploymentId,
 				Annotations:     annotations,
 				Labels:          labels,
 				Name:            deploymentName,
 				Namespace:       deploymentNamespace,
 				CreatedAt:       &createdAt,
 				ModifiedAt:      &modifiedAt,
-				ResourceVersion: deploymentResourceVersion,
 			}
 		})
 
 		It("should map an API deployment metadata to K8s native", func() {
 			metadata, err := DeploymentMetadataFromNative(vpMetadata)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(metadata.ResourceVersion).To(Equal(deploymentResourceVersion))
 			Expect(metadata.Name).To(Equal(deploymentName))
 			Expect(metadata.Namespace).To(Equal(deploymentNamespace))
 			Expect(metadata.Id).To(Equal(deploymentId))
