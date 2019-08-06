@@ -2,7 +2,11 @@ image:
   name: golang:1.12-stretch # try: gcr.io/kubebuilder/thirdparty-linux:1.14.1
 
 variables:
+  # already the default on the official go image, but not available to the gitlab cache path unless specified here
   GO111MODULE: "on"
+  GOARCH: "amd64"
+  GOOS: "linux"
+  GOPATH: "/go"
   KUSTOMIZE_VERSION: "3.0.1"
   KUBEBUILDER_VERSION: "2.0.0-beta.0"
   KUBEBUILDER_DIR: "/usr/local/kubebuilder"
@@ -13,8 +17,8 @@ before_script:
 
 cache:
   paths:
-    - $GOPATH
-    - $KUBEBUILDER_DIR
+    - $GOPATH/*
+    - $KUBEBUILDER_DIR/*
   key: $CI_COMMIT_SHA
 
 stages:
@@ -30,11 +34,17 @@ install:
     # must install kubebuilder until there is an officially supported image
     # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
     # Install kubebuilder
-    - mkdir -p $KUBEBUILDER_DIR
-    - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/linux/amd64 | tar -xz -C $KUBEBUILDER_DIR
+    - mkdir -p ${KUBEBUILDER_DIR}
+    - curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${GOOS}/${GOARCH} | tar -xz -C ${KUBEBUILDER_DIR}
+    - DL_NAME=kubebuilder_${KUBEBUILDER_VERSION}_${GOOS}_${GOARCH}
+    - mv $KUBEBUILDER_DIR/${DL_NAME}/bin $KUBEBUILDER_DIR/bin
+    - rm -rf ${KUBEBUILDER_DIR}/${DL_NAME}
     - export PATH=$KUBEBUILDER_DIR/bin:$PATH
     # Install kustomize
-    - go get sigs.k8s.io/kustomize/v3/cmd/kustomize@v$KUSTOMIZE_VERSION
+    - KUSTOMIZE_DL=kustomize_${KUSTOMIZE_VERSION}_${GOOS}_${GOARCH}
+    - curl -O -L https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/${KUSTOMIZE_DL}
+    - chmod +x ${KUSTOMIZE_DL}
+    - mv ${KUSTOMIZE_DL} bin/kustomize # just pop it in the kubebuilder bin for now
     # Install build deps
     - go mod download
 
