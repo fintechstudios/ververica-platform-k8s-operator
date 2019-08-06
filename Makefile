@@ -1,10 +1,9 @@
 
 # Image URL to use all building/pushing image targets
-REGISTRY?=registry.docker.io
-IMG?=controller:latest
+REGISTRY?=index.docker.io
 IMGNAME=ververica-platform-k8s-controller
-IMAGE=$(REGISTRY)/$(IMGNAME)
 TAG?=0.1.0
+IMG?=$(REGISTRY)/$(IMGNAME)
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
 VERSION_PKG=$(PKG)/controllers/version/version
 GIT_COMMIT=$(shell git rev-parse HEAD)
@@ -29,12 +28,12 @@ test: generate manifests
 # Build manager binary
 .PHONY: manager
 manager: generate
-	go build -ldflags $(LD_FLAGS) -o bin/manager main.go
+	go build $(ARGS) -ldflags $(LD_FLAGS) -o bin/manager main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
 run: generate
-	go run -ldflags $(LD_FLAGS) ./main.go
+	KUBECONFIG=$(KUBECONFIG) go run -ldflags $(LD_FLAGS) ./main.go
 
 # Install CRDs into a cluster
 .PHONY: install
@@ -47,7 +46,6 @@ deploy: install
 	kustomize build config/default | kubectl --kubeconfig $(KUBECONFIG) apply -f -
 
 # find or download controller-gen
-# download controller-gen if necessary
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))
@@ -67,7 +65,6 @@ manifests: controller-gen
 fmt:
 	go fmt ./...
 
-# Lint the code, but not the generated!
 .PHONY: lint
 lint:
 	golangci-lint run
@@ -80,14 +77,15 @@ generate: controller-gen
 # Build the docker image
 .PHONY: docker-build
 docker-build: manager
-	docker build . -t ${IMG}
+	docker build . -t $(IMG):$(TAG) -t $(IMG):$(GIT_COMMIT)
 	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
+	sed -i'' -e 's@image: .*@image: '"$(IMG):$(TAG)"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 .PHONY: docker-push
 docker-push: docker-push
-	docker push ${IMG}
+	docker push $(IMG):$(TAG)
+	docker push $(IMG):$(GIT_COMMIT)
 
 # Update the Swagger Client API
 .PHONY: swagger-gen

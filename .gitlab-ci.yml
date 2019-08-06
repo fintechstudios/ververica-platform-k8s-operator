@@ -1,44 +1,97 @@
-image:
-  name: golang:1.12-stretch
-
-
 variables:
-  GO111MODULE: "on"
+  GL_IMAGE_REPO: registry.gitlab.com/$CI_PROJECT_PATH
+  BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
+  BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA
+  RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
+  DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
-# TODO: only do this once into a vendor dir and cache the results
 before_script:
-  - go mod download
+  - cd /workspace # from Dockerfile_build
+
+image:
+  name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
+  entrypoint: [""] # override entrypoint to take arbitrary commands
 
 stages:
-  - test # build and test the code, lint, etc.
+  - install # install and cache the deps
   - build # build the docker image
-  - deploy # release the docker image to registry
+  - test # build and test the code, lint, etc.
+  - release # release the docker image to registry
+
+install:
+  stage: install
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    # per-branch test image will be created and used as the "cache"
+    # pull test image from registry so it can be used as a cache for the build command
+    - docker pull $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG || true
+    # builds the test image using the pulled image as a cache (if available), tag it
+    - "docker build \
+        --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
+        -f Dockerfile_build \
+        --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
+        --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        ."
+    # push test images to use for subsequent builds
+    - docker push $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG
+    - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
 
 build:
   stage: build
+  variables:
+    GIT_STRATEGY: none
   script:
     - make
 
-#docker-build:
-#  stage: build
-#  script:
-#    - apt update
-#    - apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
-#    - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-#    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-#    - apt update
-#    - apt install -y docker-ce
-#    - systemctl start docker &
-#    - sleep 5
-#    - make docker-build
-
 lint:
   stage: test
+  variables:
+    GIT_STRATEGY: none
   script:
     - make lint
 
 test:
   stage: test
+  variables:
+    GIT_STRATEGY: none
   script:
     - make test
 
+release-docker-build:
+  stage: release
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    # use the commit's builder image
+    - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
+    # builds image using the pulled image as a cache (if available), tag it
+    - "docker build \
+        --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        --build-arg BUILD_IMG=$GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        -f Dockerfile \
+        --tag $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG \
+        ."
+    # push release images to local registry for publishing
+    - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
+
+#docker-push:
+#  stage: release
+#  image: docker:stable
+#  before_script: # TODO: also log into the public registry
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#  script:
+#    # pull image from registry so it can be used as a cache for the build command
+#    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_SHA || true
+# log in and push to the docker hub
+#  - echo "$DOCKER_HUB_PASS" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin docker.io

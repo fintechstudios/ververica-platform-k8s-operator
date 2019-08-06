@@ -41,6 +41,8 @@ Look in [docs/mappings](./docs/mappings) for information on each supported resou
 ## Development
 
 Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
+[`kind`](https://github.com/kubernetes-sigs/kind) is used for running a local test cluster,
+though something like `minikube` will also do.  
 
 More on the design of the controller and its resources can be found
 in [docs/design.md](./docs/design.md).
@@ -49,13 +51,11 @@ in [docs/design.md](./docs/design.md).
 Also built as a Go 1.11 module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= 1.12
-- `make` >= 4
-- `kubebuilder` >= 2.0.0-beta.0
-- `kustomize` >= v3.0.1
-- `docker`
-- [`kind`](https://github.com/kubernetes-sigs/kind) (or similar, like `minikube`)  
-  `kind` is seamless with docker and the tools of this repo, which is why it is built into the `Makefile` scripts. 
+- `go` >= `1.12`
+- `make` >= `4`
+- `kubebuilder` == [`v2.0.0-beta.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0-beta.0)
+- [`kustomize`](https://github.com/kubernetes-sigs/kustomize) >= `v3.0.1`
+- `docker` >= `19`
 
 ### `make` Scripts
 
@@ -141,14 +141,14 @@ Some known issues + places to improve:
 * Mapping of more VP resources!
 * `DeploymentTarget.deploymentPatchSet` values can only be `strings`.
 * The nesting of `metadata` and `spec` is a little wonky.
-* Watching the VP API for updates to Deployments, Jobs, etc would be excellent.
+* Watching the VP API for updates to Deployments, Jobs, Events, etc would be excellent.
 * Adding more `status` subresources to link everything together would also be most excellent.
 * It might make sense to have a 1-1 mapping between K8s namespaces and names and VP namespaces and names, but 
-will there ever be more than one VP running in a cluster?
-* Improvements on the Swagger API generator / moving that to OpenAPI V3.
+will there ever be more than one VP instance running in a cluster?
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
 * Various `TODO`s should give us a place to start!
 * Better package structure for internal code.
+* Splitting tests into unit, integration, etc.
 
 ## Acknowledgements
 
