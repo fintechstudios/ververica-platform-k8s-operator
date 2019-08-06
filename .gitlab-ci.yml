@@ -1,13 +1,15 @@
 variables:
-  BUILDER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH-builder
-  RELEASE_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH-release
+  GL_IMAGE_REPO: registry.gitlab.com/$CI_PROJECT_PATH
+  BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
+  BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA
+  RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
   DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
 before_script:
   - cd /workspace # from Dockerfile_build
 
 image:
-  name: $BUILDER_IMAGE:$CI_COMMIT_SHA # built in the install phase
+  name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
   entrypoint: [""] # override entrypoint to take arbitrary commands
 
 stages:
@@ -28,12 +30,12 @@ install:
   script:
     # per-branch test image will be created and used as the "cache"
     # pull test image from registry so it can be used as a cache for the build command
-    - docker pull $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG || true
+    - docker pull $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG || true
     # builds the test image using the pulled image as a cache (if available), tag it
-    - docker build --cache-from $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG -f Dockerfile_build --tag $RELEASE_IMAGE:$CI_COMMIT_SHA --tag $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker build --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG -f Dockerfile_build --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG .
     # push test images to use for subsequent builds
-    - docker push $BUILDER_IMAGE:$CI_COMMIT_SHA
-    - docker push $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker push $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG
+    - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
 
 build:
   stage: build
@@ -68,11 +70,11 @@ release-docker-build:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   script:
     # use the commit's builder image
-    - docker pull $BUILDER_IMAGE:$CI_COMMIT_SHA
+    - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
     # builds image using the pulled image as a cache (if available), tag it
-    - docker build --cache-from $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG -f Dockerfile --tag $RELEASE_IMAGE:$CI_COMMIT_SHA .
+    - docker build --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG -f Dockerfile --tag $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG .
     # push images to local registry for publishing
-    - docker push $RELEASE_IMAGE:$CI_COMMIT_SHA
+    - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
 
 #docker-push:
 #  stage: release
