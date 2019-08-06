@@ -16,10 +16,10 @@ before_script:
   - export PATH=$KUBEBUILDER_DIR/bin:$PATH
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG} # per-branch, as the dependencies shouldn't change much, but will be updated if needed
   paths:
-    - $GOPATH/*
-    - $KUBEBUILDER_DIR/*
-  key: $CI_COMMIT_SHA
+    - $GOPATH/ # go dependencies
+    - $KUBEBUILDER_DIR/ # kubebuilder + dependencies binaries
 
 stages:
   - install # install and cache the deps
@@ -33,7 +33,7 @@ install:
     - GOOS=$(go env GOOS)
     - GOARCH=$(go env GOARCH)
     - echo "installing kubebuilder@$KUBEBUILDER_VERSION, kustomize@$KUSTOMIZE_VERSION"
-    # must install kubebuilder until there is an officially supported test image
+    # must install kubebuilder until there is an officially supported test image - TODO: skip if already cached
     # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
     # Install kubebuilder
     - mkdir -p ${KUBEBUILDER_DIR}
@@ -78,7 +78,7 @@ docker-build:
   stage: build
   script:
     # pull image from registry so it can be used as a cache for the build command
-    - docker pull $CONTAINER_IMAGE:latest || true
+    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_SHA || true
     # builds image using the pulled image as a cache (if available), tag it
     - make docker-build
     # push images to local registry for publishing
