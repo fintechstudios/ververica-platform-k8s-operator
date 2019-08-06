@@ -28,7 +28,7 @@ test: generate manifests
 # Build manager binary
 .PHONY: manager
 manager: generate
-	go build -ldflags $(LD_FLAGS) -o bin/manager main.go
+	go build $(ARGS) -ldflags $(LD_FLAGS) -o bin/manager main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
@@ -77,15 +77,15 @@ generate: controller-gen
 # Build the docker image
 .PHONY: docker-build
 docker-build: manager
-	docker build . -t ${IMG}:${TAG} -t ${IMG}:${GIT_COMMIT}
+	docker build . -t $(IMG):$(TAG) -t $(IMG):$(GIT_COMMIT)
 	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}:${TAG}"'@' ./config/default/manager_image_patch.yaml
+	sed -i'' -e 's@image: .*@image: '"$(IMG):$(TAG)"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 .PHONY: docker-push
 docker-push: docker-push
-	docker push ${IMG}:${TAG}
-	docker push ${IMG}:${GIT_COMMIT}
+	docker push $(IMG):$(TAG)
+	docker push $(IMG):$(GIT_COMMIT)
 
 # Update the Swagger Client API
 .PHONY: swagger-gen

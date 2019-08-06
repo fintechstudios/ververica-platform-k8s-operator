@@ -1,12 +1,13 @@
 variables:
-  CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+  BUILDER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH-builder
+  RELEASE_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH-release
   DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
 before_script:
-  - cd /workspace # from Dockerfile_test
+  - cd /workspace # from Dockerfile_build
 
 image:
-  name: $CONTAINER_IMAGE:$CI_COMMIT_SHA # built in the install phase
+  name: $BUILDER_IMAGE:$CI_COMMIT_SHA # built in the install phase
   entrypoint: [""] # override entrypoint to take arbitrary commands
 
 stages:
@@ -27,12 +28,12 @@ install:
   script:
     # per-branch test image will be created and used as the "cache"
     # pull test image from registry so it can be used as a cache for the build command
-    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_SLUG || true
+    - docker pull $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG || true
     # builds the test image using the pulled image as a cache (if available), tag it
-    - docker build --cache-from $CONTAINER_IMAGE:latest -f Dockerfile_test --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA --tag $CONTAINER_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker build --cache-from $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG -f Dockerfile_build --tag $RELEASE_IMAGE:$CI_COMMIT_SHA --tag $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG .
     # push test images to use for subsequent builds
-    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
-    - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker push $BUILDER_IMAGE:$CI_COMMIT_SHA
+    - docker push $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG
 
 build:
   stage: build
@@ -55,22 +56,23 @@ test:
   script:
     - make test
 
-#docker-build:
-#  variables:
-#    DOCKER_DRIVER: overlay2
-#  services:
-#    - docker:dind
-#  image: docker:stable
-#  before_script:
-#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#  stage: build
-#  script:
-#    # pull image from registry so it can be used as a cache for the build command
-#    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_SHA || true
-#    # builds image using the pulled image as a cache (if available), tag it
-#    - make docker-build
-#    # push images to local registry for publishing
-#    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+release-docker-build:
+  stage: release
+  variables:
+    DOCKER_DRIVER: overlay2
+    GIT_STRATEGY: none
+  services:
+    - docker:dind
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    # use the commit's builder image
+    - docker pull $BUILDER_IMAGE:$CI_COMMIT_SHA
+    # builds image using the pulled image as a cache (if available), tag it
+    - docker build --cache-from $BUILDER_IMAGE:$CI_COMMIT_REF_SLUG -f Dockerfile --tag $RELEASE_IMAGE:$CI_COMMIT_SHA .
+    # push images to local registry for publishing
+    - docker push $RELEASE_IMAGE:$CI_COMMIT_SHA
 
 #docker-push:
 #  stage: release
