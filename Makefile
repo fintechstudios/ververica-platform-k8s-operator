@@ -46,7 +46,6 @@ deploy: install
 	kustomize build config/default | kubectl --kubeconfig $(KUBECONFIG) apply -f -
 
 # find or download controller-gen
-# download controller-gen if necessary
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))

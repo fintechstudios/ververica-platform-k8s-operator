@@ -1,4 +1,4 @@
-# A test image to run tests on an such
+# A development environment in an image to run tests on, build, etc.
 FROM golang:1.12.5-stretch
 
 ENV CGO_ENABLED 0
@@ -36,11 +36,16 @@ COPY go.sum go.sum
 # and so that source changes don't invalidate our downloaded layer
 RUN go mod download
 
-# Copy the dev / test files
-COPY Dockerfile Dockerfile
-COPY PROJECT PROJECT
-COPY .golangci.yml .golangci.yml
+# Download the necessessary controller-gen
 COPY Makefile Makefile
+RUN make controller-gen
+
+# Copy the dev / test files
+COPY hack/ hack/
+COPY Dockerfile Dockerfile
+COPY .golangci.yml .golangci.yml
+COPY PROJECT PROJECT
+COPY config/ config/
 
 # Copy the go source
 COPY main.go main.go
