@@ -32,7 +32,12 @@ install:
     # pull test image from registry so it can be used as a cache for the build command
     - docker pull $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG || true
     # builds the test image using the pulled image as a cache (if available), tag it
-    - docker build --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG -f Dockerfile_build --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG .
+    - "docker build \
+        --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
+        -f Dockerfile_build \
+        --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
+        --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        ."
     # push test images to use for subsequent builds
     - docker push $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG
     - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
@@ -62,7 +67,6 @@ release-docker-build:
   stage: release
   variables:
     DOCKER_DRIVER: overlay2
-    GIT_STRATEGY: none
   services:
     - docker:dind
   image: docker:stable
@@ -72,8 +76,13 @@ release-docker-build:
     # use the commit's builder image
     - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
     # builds image using the pulled image as a cache (if available), tag it
-    - docker build --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG -f Dockerfile --tag $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG .
-    # push images to local registry for publishing
+    - "docker build \
+        --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        --build-arg BUILD_IMG=$GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
+        -f Dockerfile \
+        --tag $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG \
+        ."
+    # push release images to local registry for publishing
     - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
 
 #docker-push:
