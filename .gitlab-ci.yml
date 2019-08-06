@@ -30,8 +30,10 @@ stages:
 install:
   stage: install
   script:
+    - GOOS=$(go env GOOS)
+    - GOARCH=$(go env GOARCH)
     - echo "installing kubebuilder@$KUBEBUILDER_VERSION, kustomize@$KUSTOMIZE_VERSION"
-    # must install kubebuilder until there is an officially supported image
+    # must install kubebuilder until there is an officially supported test image
     # see: https://github.com/kubernetes-sigs/kubebuilder/issues/665
     # Install kubebuilder
     - mkdir -p ${KUBEBUILDER_DIR}
@@ -44,7 +46,7 @@ install:
     - KUSTOMIZE_DL=kustomize_${KUSTOMIZE_VERSION}_${GOOS}_${GOARCH}
     - curl -O -L https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/${KUSTOMIZE_DL}
     - chmod +x ${KUSTOMIZE_DL}
-    - mv ${KUSTOMIZE_DL} bin/kustomize # just pop it in the kubebuilder bin for now
+    - mv ${KUSTOMIZE_DL} ${KUBEBUILDER_DIR}/bin/kustomize # just pop it in the kubebuilder bin for now
     # Install build deps
     - go mod download
 
