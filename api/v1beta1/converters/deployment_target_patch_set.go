@@ -9,10 +9,6 @@ import (
 
 // DeploymentTargetPatchSetFromNative converts a deployment k8s patch set to a platform patch set
 func DeploymentTargetPatchSetFromNative(vpPatchSet []ververicaplatformv1beta1.JSONPatchGeneric) ([]vpAPI.JsonPatchGeneric, error) {
-	if vpPatchSet == nil {
-		return nil, errors.New("patch set cannot be nil")
-	}
-
 	patchSet := make([]vpAPI.JsonPatchGeneric, len(vpPatchSet))
 	for i, patch := range vpPatchSet {
 		patchSet[i] = vpAPI.JsonPatchGeneric{
@@ -42,10 +38,6 @@ func parseDeploymentPatchValue(value vpAPI.Any) (*string, bool) {
 
 // DeploymentTargetPatchSetToNative converts a deployment platform patch set to a k8s patch set
 func DeploymentTargetPatchSetToNative(patchSet []vpAPI.JsonPatchGeneric) ([]ververicaplatformv1beta1.JSONPatchGeneric, error) {
-	if patchSet == nil || len(patchSet) == 0 {
-		return []ververicaplatformv1beta1.JSONPatchGeneric{}, nil
-	}
-
 	vpPatchSet := make([]ververicaplatformv1beta1.JSONPatchGeneric, len(patchSet))
 	for i, patch := range patchSet {
 		value, ok := parseDeploymentPatchValue(patch.Value)

@@ -42,7 +42,6 @@ var _ = Describe("DeploymentMetadata", func() {
 				Namespace:       deploymentNamespace,
 				CreatedAt:       createdAt,
 				ModifiedAt:      modifiedAt,
-				ResourceVersion: deploymentResourceVersion,
 			}
 		})
 
