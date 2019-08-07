@@ -17,7 +17,8 @@ stages:
   - install # install and cache the deps
   - build # build the docker image
   - test # build and test the code, lint, etc.
-  - release # release the docker image to registry
+  - pre-release # build the release image
+  - release # tag and release the docker image to repositories
 
 install:
   stage: install
@@ -65,7 +66,7 @@ test:
     - make test
 
 release-docker-build:
-  stage: release
+  stage: pre-release
   variables:
     DOCKER_DRIVER: overlay2
   services:
