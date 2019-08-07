@@ -1,6 +1,6 @@
 ARG BUILD_IMG
-ARG GIT_COMMIT
-ARG VERSION
+ARG GIT_COMMIT=""
+ARG VERSION="latest"
 
 # Build the manager binary from the builder docker image
 FROM ${BUILD_IMG} as builder
