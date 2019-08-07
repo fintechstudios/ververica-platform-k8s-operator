@@ -6,7 +6,7 @@ ARG VERSION
 FROM ${BUILD_IMG} as builder
 
 # Build and force refetching, override
-RUN make ARGS="-a" VERSION=${VERSION} GIT_COMMIT=${GIT_COMMIT}
+RUN make ARGS="-a" VERSION="${VERSION}" GIT_COMMIT="${GIT_COMMIT}"
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
