@@ -77,11 +77,11 @@ release-docker-build:
   script:
     # use the commit's builder image
     - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
-    # builds image using the pulled image as a cache (if available), tag it
+    # builds image using the pulled image as a cache and tag it
     - "docker build \
         --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
         --build-arg BUILD_IMG=$GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
-        --build-arg GIT_COMMIT=$(git rev-parse HEAD) \
+        --build-arg GIT_COMMIT=$CI_COMMIT_SHA \
         --build-arg VERSION=$CI_COMMIT_TAG \
         -f Dockerfile \
         --tag $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG \
