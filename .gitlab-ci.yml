@@ -123,4 +123,4 @@ docker-release-latest:
     refs:
       - tags
   variables:
-    RELEASE_TAG: $CI_COMMIT_TAG
+    RELEASE_TAG: latest
