@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -39,6 +40,7 @@ import (
 var _ *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var logger logr.Logger
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -50,6 +52,7 @@ func TestControllers(t *testing.T) {
 
 var _ = BeforeSuite(func(done Done) {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logger = zap.LoggerTo(GinkgoWriter, true).WithName("Controller Tests")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{

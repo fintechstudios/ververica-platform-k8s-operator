@@ -1,4 +1,4 @@
-# Ververica Platform Controller
+# Ververica Platform K8s Controller
 
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
@@ -32,7 +32,6 @@ custom VP Resources will all be prefixed with `Vp`.
 * `Secret Value`
 * `Status`
 
-
 To avoid naming conflicts, and for simplicity, and VP `metadata` and `spec` fields
 are nested under the top-level `spec` field of the K8s resource.
 
@@ -47,7 +46,6 @@ though something like `minikube` will also do.
 More on the design of the controller and its resources can be found
 in [docs/design.md](./docs/design.md).
 
-
 Also built as a Go 1.11 module - no vendor files here.
 
 System Pre-requisites:
@@ -59,7 +57,7 @@ System Pre-requisites:
 
 ### `make` Scripts
 
-- `make`
+- `make` alias for `manager`
 - `make run` runs the entire app
 - `make manager` builds the entire app binary
 - `make manifests` builds the CRDs
@@ -73,8 +71,15 @@ System Pre-requisites:
 - `make lint` runs the golangci linter 
 - `make fmt` runs `go fmt` on the package
 - `make test` runs the test suites with coverage
-- `make test-cluster-create` initializes a cluster fro testing, using kind
+- `make test-cluster-create` initializes a cluster for testing, using kind
+- `make test-cluster-delete` deletes the testing cluster
+- `make dotenv` stores the test cluster config in a `.env` file - warning, it will overwrite the file.
 
+### Environment
+
+To use the default test cluster, you'll need to store a `KUBECONFIG` env var pointed to it.
+
+[`godotenv`](https://github.com/joho/godotenv) automatically loads this when running `main`.
 
 ### Ververica Platform API
 
@@ -132,6 +137,16 @@ You'll also have to change any usages of this type in `structs` to be embedded, 
 Is this all better than creating an API Client from scratch? Yes. Can I still gripe about it? TBD. 
 
 
+### Building Images
+
+The images are built in two steps:
+1. The [`Dockerfile_build`](./Dockerfile_build) image is a full development environment for running tests, linting,
+and building the source with the correct tooling. This can also be used for development if you so like,
+just override the entrypoint.
+2. The build image is then passed as a build arg to the main [`Dockerfile`](./Dockerfile), which builds
+the manager binary and copies it over into an image for distribution.
+
+
 ## Future Work
 
 This is a MVP for Flink deployments at FinTech Studios. We would love to see this
@@ -148,7 +163,8 @@ will there ever be more than one VP instance running in a cluster?
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
 * Various `TODO`s should give us a place to start!
 * Better package structure for internal code.
-* Splitting tests into unit, integration, etc.
+* Make the APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
+* Splitting tests into unit, integration, e2e tests against a live cluster, etc.
 
 ## Acknowledgements
 

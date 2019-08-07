@@ -51,8 +51,7 @@ var _ = Describe("VpNamespace", func() {
 	// your API definition.
 	// Avoid adding tests for vanilla CRUD operations because they would
 	// test Kubernetes API server, which isn't the goal here.
-	Context("Create API", func() {
-
+	Context("Create Namespace", func() {
 		It("should create an object successfully", func() {
 			key = types.NamespacedName{
 				Name:      "foo",
@@ -76,7 +75,6 @@ var _ = Describe("VpNamespace", func() {
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
-
 	})
 
 })

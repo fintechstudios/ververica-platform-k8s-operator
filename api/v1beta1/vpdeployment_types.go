@@ -30,7 +30,7 @@ type VpDeploymentMetadata struct {
 	// +optional
 	Name string `json:"name,omitempty"`
 	// +optional
-	Id string `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 	// +optional
@@ -41,8 +41,6 @@ type VpDeploymentMetadata struct {
 	Labels map[string]string `json:"labels,omitempty"`
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
-	// +optional
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
 // VpDeploymentUpgradeStrategy describes how to upgrade a job
@@ -93,6 +91,7 @@ type VpResourceSpec struct {
 	// +optional
 	Cpu resource.Quantity `json:"cpu,omitempty"`
 	// +optional
+	// +kubebuilder:validation:minLength=2
 	Memory *string `json:"memory,omitempty"`
 }
 
@@ -184,6 +183,7 @@ type VpPods struct {
 	// +optional
 	Affinity *VpJsonNode `json:"affinity,omitempty"`
 	// +optional
+	// +kubebuilder:validation:UniqueItems=true
 	Tolerations []VpJsonNode `json:"tolerations,omitempty"`
 	// +optional
 	VolumeMounts []VpVolumeAndMount `json:"volumeMounts,omitempty"`
@@ -202,8 +202,10 @@ type VpKubernetesOptions struct {
 type VpDeploymentTemplateSpec struct {
 	Artifact *VpArtifact `json:"artifact"`
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	Parallelism *int32 `json:"parallelism,omitempty"`
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	NumberOfTaskManagers *int32 `json:"numberOfTaskManagers,omitempty"`
 	// +optional
 	Resources map[string]VpResourceSpec `json:"resources,omitempty"`
@@ -279,23 +281,24 @@ type VpDeploymentStatus struct {
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
 
+	// +optional
+	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+
 	// TODO: think about adding other information here, ie:
 	// 		- list of Jobs
 	//		- list of Events
 	//		- list of K8s Pods created
-	//		- resource version
-	//		- potentially all dynamic data
+	//		- potentially all dynamic data (id, etc.) ?
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
-// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
-// +kubebuilder:printcolumn:name="FlinkVersion",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
-// +kubebuilder:printcolumn:name="FlinkImageTag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
-// +kubebuilder:printcolumn:name="FlinkImageRegistry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"
+// +kubebuilder:printcolumn:name="Flink-Version",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
+// +kubebuilder:printcolumn:name="Flink-Image-Tag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
+// +kubebuilder:printcolumn:name="Flink-Image-Registry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"
 
 // VpDeployment is the Schema for the vpdeployments API
 type VpDeployment struct {

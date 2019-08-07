@@ -1,4 +1,5 @@
 variables:
+  VERSION: 0.1.0
   GL_IMAGE_REPO: registry.gitlab.com/$CI_PROJECT_PATH
   BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
   BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA

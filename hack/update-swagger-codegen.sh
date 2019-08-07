@@ -22,13 +22,11 @@ set -o pipefail
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")
 PROJECT_DIR="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
 SWAGGER_FILE=ververica-platform-swagger.json
-SWAGGER_IGNORE_FILE=.swagger-codegen-ignore
 CONFIG_FILE=swagger-gen-config.json
 OUT_DIR=ververica-platform-api
 
-rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}
-mkdir "${PROJECT_DIR}"/${OUT_DIR}
-cp "${PROJECT_DIR}"/${SWAGGER_IGNORE_FILE} "${PROJECT_DIR}"/${OUT_DIR}
+rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !("${PROJECT_DIR:?}"/${OUT_DIR}/*_interface*) !("${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore)
+mkdir -p "${PROJECT_DIR}"/${OUT_DIR}
 
 docker run --rm \
     -v "${PROJECT_DIR}":/local:rw \

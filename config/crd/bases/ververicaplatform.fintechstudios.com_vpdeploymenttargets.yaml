@@ -14,7 +14,7 @@ spec:
     name: Namespace
     type: string
   - JSONPath: .spec.metadata.resourceVersion
-    name: ResourceVersion
+    name: Resource-Version
     type: integer
   - JSONPath: .spec.metadata.createdAt
     name: Created
@@ -92,7 +92,8 @@ spec:
                         type: string
                       value:
                         description: "TODO: support any type of JSON as an interface
-                          \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528"
+                          \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528
+                          \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
                         type: string
                     required:
                     - op

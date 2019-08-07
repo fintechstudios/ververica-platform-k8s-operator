@@ -34,6 +34,7 @@ type VpNamespaceMetadata struct {
 	// +optional
 	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 }
 
@@ -59,7 +60,7 @@ type VpNamespaceStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
-// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
+// +kubebuilder:printcolumn:name="Resource-Version",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 

@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
@@ -37,7 +38,7 @@ type VpDeploymentTargetReconciler struct {
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpDeploymentTargetReconciler) updateResource(req ctrl.Request, resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *vpAPI.DeploymentTarget) error {
+func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *vpAPI.DeploymentTarget) error {
 	ctx := context.Background()
 
 	resource.Name = depTarget.Metadata.Name
@@ -52,10 +53,16 @@ func (r *VpDeploymentTargetReconciler) updateResource(req ctrl.Request, resource
 		Annotations:     depTarget.Metadata.Annotations,
 	}
 
+	vpPatchSet, err := converters.DeploymentTargetPatchSetToNative(depTarget.Spec.DeploymentPatchSet)
+	if err != nil {
+		return err
+	}
+
 	resource.Spec.Spec = ververicaplatformv1beta1.VpDeploymentTargetSpec{
 		Kubernetes: ververicaplatformv1beta1.VpKubernetesTarget{
 			Namespace: depTarget.Spec.Kubernetes.Namespace,
 		},
+		DeploymentPatchSet: vpPatchSet,
 	}
 
 	if err := r.Update(ctx, resource); err != nil {
@@ -76,14 +83,9 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	log := r.getLogger(req)
 	namespace := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
 
-	patchSet := make([]vpAPI.JsonPatchGeneric, len(vpDepTarget.Spec.Spec.DeploymentPatchSet))
-	for i, patch := range vpDepTarget.Spec.Spec.DeploymentPatchSet {
-		patchSet[i] = vpAPI.JsonPatchGeneric{
-			Op:    patch.Op,
-			Path:  patch.Path,
-			From:  patch.From,
-			Value: patch.Value,
-		}
+	patchSet, err := converters.DeploymentTargetPatchSetFromNative(vpDepTarget.Spec.Spec.DeploymentPatchSet)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	depTarget := vpAPI.DeploymentTarget{
@@ -118,7 +120,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	log.Info("Created depTarget", "depTarget", createdDepTarget)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(req, &vpDepTarget, &createdDepTarget); err != nil {
+	if err := r.updateResource(&vpDepTarget, &createdDepTarget); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -129,7 +131,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 // updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
 func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget, depTarget vpAPI.DeploymentTarget) (ctrl.Result, error) {
 	// Now update the k8s resource
-	err := r.updateResource(req, &vpDepTarget, &depTarget)
+	err := r.updateResource(&vpDepTarget, &depTarget)
 	return ctrl.Result{}, err
 }
 
@@ -143,7 +145,7 @@ func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarge
 
 	if err != nil {
 		// If it's already gone, great!
-		// TODO: think about adding a wait time if the error
+		// TODO: think about setting a wait time if the error
 		//		 is about deployments still being attached to the dep target,
 		// 		 as perhaps they're still in the deletion process
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)

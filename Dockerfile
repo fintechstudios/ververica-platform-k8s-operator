@@ -3,7 +3,7 @@ ARG BUILD_IMG
 # Build the manager binary from the builder docker image
 FROM ${BUILD_IMG} as builder
 
-# Build
+# Build and force refetching
 RUN make ARGS="-a"
 
 # Use distroless as minimal base image to package the manager binary

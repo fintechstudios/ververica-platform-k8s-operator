@@ -29,8 +29,9 @@ type JSONPatchGeneric struct {
 	Path string `json:"path"`
 	// TODO: support any type of JSON as an interface
 	// 		 https://github.com/kubernetes-sigs/kubebuilder/issues/528
+	//       https://github.com/kubernetes-sigs/controller-tools/issues/294
 	// +optional
-	Value string `json:"value,omitempty"`
+	Value *string `json:"value,omitempty"`
 	// +optional
 	From string `json:"from,omitempty"`
 }
@@ -49,6 +50,7 @@ type VpDeploymentTargetMetadata struct {
 	// +optional
 	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
@@ -83,7 +85,7 @@ type VpDeploymentTargetObjectSpec struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
 // +kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.metadata.namespace"
-// +kubebuilder:printcolumn:name="ResourceVersion",type="integer",JSONPath=".spec.metadata.resourceVersion"
+// +kubebuilder:printcolumn:name="Resource-Version",type="integer",JSONPath=".spec.metadata.resourceVersion"
 // +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
 // +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
 
@@ -94,8 +96,6 @@ type VpDeploymentTarget struct {
 
 	Spec VpDeploymentTargetObjectSpec `json:"spec,omitempty"`
 }
-
-// TODO: think about adding a field / status that keeps track of all the deployments with this target
 
 // +kubebuilder:object:root=true
 
