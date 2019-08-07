@@ -50,7 +50,7 @@ func GetVersion() Version {
 	}
 }
 
-// ToString gets a simple string representation of the version
-func (v Version) ToString() string {
+// String gets a simple string representation of the version
+func (v Version) String() string {
 	return fmt.Sprintf("%#v", v)
 }
