@@ -72,7 +72,7 @@ func main() {
 		os.Exit(1)
 	}
 	setupLog.Info("Starting Ververica Platform K8s controller",
-		"version", version.GetVersion().ToString())
+		"version", version.GetVersion().String())
 
 	// Build the Ververica Platform API Client
 	ververicaAPIClient := vpAPI.NewAPIClient(&vpAPI.Configuration{

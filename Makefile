@@ -1,18 +1,14 @@
 
 # Image URL to use all building/pushing image targets
-REGISTRY?=index.docker.io/fintechstudios
-IMGNAME=ververica-platform-k8s-controller
-TAG?=0.1.0
-IMG?=$(REGISTRY)/$(IMGNAME)
+VERSION?=latest
+IMG?=fintechstudios/ververica-platform-k8s-controller
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
 VERSION_PKG=$(PKG)/controllers/version/version
-GIT_COMMIT=$(shell git rev-parse HEAD)
-REPO_INFO=$(shell git config --get remote.origin.url)
 BUILD=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS?="crd:trivialVersions=true"
 
-LD_FLAGS="-X $(VERSION_PKG).controllerVersion=$(TAG) -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).buildDate=$(BUILD)"
+LD_FLAGS="-X $(VERSION_PKG).controllerVersion=$(VERSION) -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).buildDate=$(BUILD)"
 
 TEST_CLUSTER_NAME=ververica-platform-k8s-controller-cluster
 
@@ -82,17 +78,9 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
 
 # Build the docker image
-.PHONY: docker-build
-docker-build: manager
-	docker build . -t $(IMG):$(TAG) -t $(IMG):$(GIT_COMMIT)
-	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"$(IMG):$(TAG)"'@' ./config/default/manager_image_patch.yaml
-
-# Push the docker image
-.PHONY: docker-push
-docker-push: docker-push
-	docker push $(IMG):$(TAG)
-	docker push $(IMG):$(GIT_COMMIT)
+.PHONY: kustomize-patch-image
+kustomize-patch-image:
+	sed -i'' -e 's@image: .*@image: '"$(IMG):$(VERSION)"'@' ./config/default/manager_image_patch.yaml
 
 # Update the Swagger Client API
 .PHONY: swagger-gen

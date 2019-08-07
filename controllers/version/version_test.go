@@ -13,14 +13,14 @@ var _ = Describe("Version", func() {
 		})
 	})
 
-	Describe("ToString", func() {
+	Describe("String", func() {
 		var version Version
 		BeforeEach(func() {
 			version = GetVersion()
 		})
 
 		It("should create a version string", func() {
-			Expect(len(version.ToString())).ToNot(BeZero())
+			Expect(len(version.String())).ToNot(BeZero())
 		})
 	})
 })
