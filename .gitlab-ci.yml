@@ -114,6 +114,17 @@ docker-release-tags:
   variables:
     RELEASE_TAG: $CI_COMMIT_TAG
 
+# Release the commit version only on master, but not the tag as that will be run elsewhere
+docker-release-commit:
+  <<: *docker-releaser
+  only:
+    - /^master$/
+  except:
+    refs:
+      - tags
+  variables:
+    RELEASE_TAG: $CI_COMMIT_SHA
+
 # Release the latest version only on master, but not the tag as that will be run elsewhere
 docker-release-latest:
   <<: *docker-releaser

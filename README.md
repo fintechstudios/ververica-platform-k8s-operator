@@ -37,6 +37,13 @@ are nested under the top-level `spec` field of the K8s resource.
 
 Look in [docs/mappings](./docs/mappings) for information on each supported resource.
 
+## Docker
+
+Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ververica-platform-k8s-controller).
+*  The `latest` tag always refers to the current HEAD in the master branch.
+* Each master commit hash is also tagged and published.
+* Git tags are published with the same tag. 
+
 ## Development
 
 Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
