@@ -79,7 +79,6 @@ release-docker-build:
     - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
     # builds image using the pulled image as a cache and tag it
     - "docker build \
-        --cache-from $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
         --build-arg BUILD_IMG=$GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
         --build-arg GIT_COMMIT=$CI_COMMIT_SHA \
         --build-arg VERSION=$CI_COMMIT_TAG \
