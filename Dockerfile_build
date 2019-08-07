@@ -46,8 +46,6 @@ COPY Dockerfile Dockerfile
 COPY .golangci.yml .golangci.yml
 COPY PROJECT PROJECT
 COPY config/ config/
-COPY testing-interfaces testing-interfaces
-COPY mocks mocks
 
 # Copy the go source
 COPY main.go main.go
