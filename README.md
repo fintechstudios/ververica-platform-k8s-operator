@@ -13,7 +13,7 @@ Built for Ververica Platform version `1.4.x`.
 
 ## Supported Resources
 
-Since the resources names of K8s and the Ververica Platform somewhat class, the 
+Since the resources names of K8s and the Ververica Platform somewhat clash, the 
 custom VP Resources will all be prefixed with `Vp`.
 
 * `DeploymentTarget` -> `VpDeploymentTarget`
@@ -37,6 +37,18 @@ are nested under the top-level `spec` field of the K8s resource.
 
 Look in [docs/mappings](./docs/mappings) for information on each supported resource.
 
+## Running
+
+To run the binary directly, after building run `./bin/manager`.
+
+Flags:
+* `--help` prints usage
+* `--ververica-platform-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform API  
+* `--debug` debug mode for logging
+* `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
+* `--metrics-addr=:8080` address to bind metrics to 
+* `--watch-namespace=all-namespaces` the namespace to watch resources on
+
 ## Development
 
 Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
@@ -58,8 +70,8 @@ System Pre-requisites:
 ### `make` Scripts
 
 - `make` alias for `manager`
-- `make run` runs the entire app
 - `make manager` builds the entire app binary
+- `make run` runs the entire app
 - `make manifests` builds the CRDs
 - `make install` installs the CRDs on the cluster
 - `make deploy` installs the entire app on the cluster
@@ -74,6 +86,8 @@ System Pre-requisites:
 - `make test-cluster-create` initializes a cluster for testing, using kind
 - `make test-cluster-delete` deletes the testing cluster
 - `make dotenv` stores the test cluster config in a `.env` file - warning, it will overwrite the file.
+- `make kustomize-patch-image` sets the current version as the default deployment image tag
+- `make kustomize-build` builds the default k8s resources for deployment
 
 ### Environment
 
