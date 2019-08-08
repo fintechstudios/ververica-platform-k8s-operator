@@ -35,13 +35,13 @@ var _ = Describe("DeploymentMetadata", func() {
 				"excellent": "adventure",
 			}
 			metadata = vpAPI.DeploymentMetadata{
-				Id:              deploymentId,
-				Annotations:     annotations,
-				Labels:          labels,
-				Name:            deploymentName,
-				Namespace:       deploymentNamespace,
-				CreatedAt:       createdAt,
-				ModifiedAt:      modifiedAt,
+				Id:          deploymentId,
+				Annotations: annotations,
+				Labels:      labels,
+				Name:        deploymentName,
+				Namespace:   deploymentNamespace,
+				CreatedAt:   createdAt,
+				ModifiedAt:  modifiedAt,
 			}
 		})
 
@@ -84,13 +84,13 @@ var _ = Describe("DeploymentMetadata", func() {
 				"excellent": "adventure",
 			}
 			vpMetadata = ververicaplatformv1beta1.VpDeploymentMetadata{
-				ID:              deploymentId,
-				Annotations:     annotations,
-				Labels:          labels,
-				Name:            deploymentName,
-				Namespace:       deploymentNamespace,
-				CreatedAt:       &createdAt,
-				ModifiedAt:      &modifiedAt,
+				ID:          deploymentId,
+				Annotations: annotations,
+				Labels:      labels,
+				Name:        deploymentName,
+				Namespace:   deploymentNamespace,
+				CreatedAt:   &createdAt,
+				ModifiedAt:  &modifiedAt,
 			}
 		})
 

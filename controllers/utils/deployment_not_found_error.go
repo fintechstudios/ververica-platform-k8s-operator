@@ -5,7 +5,7 @@ import (
 )
 
 type DeploymentNotFoundError struct {
-	Name string
+	Name      string
 	Namespace string
 }
 

@@ -47,7 +47,7 @@ func main() {
 		metricsAddr          = flag.String("metrics-addr", ":8080", "The address the metric endpoint binds to.")
 		enableLeaderElection = flag.Bool("enable-leader-election", false,
 			"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-		enableDebugMode = flag.Bool("debug", true, "Enable debug mode for logging.")
+		enableDebugMode = flag.Bool("debug", false, "Enable debug mode for logging.")
 
 		watchNamespace = flag.String("watch-namespace", apiv1.NamespaceAll,
 			`Namespace to watch for resources. Default is to watch all namespaces`)

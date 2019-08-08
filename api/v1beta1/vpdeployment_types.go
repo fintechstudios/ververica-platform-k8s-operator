@@ -101,7 +101,6 @@ type VpLogging struct {
 	Log4jLoggers map[string]string `json:"log4jLoggers,omitempty"`
 }
 
-// VpJsonNode is odd - seems incorrect but TBD
 type VpJsonNode struct {
 	// +optional
 	ValueNode bool `json:"valueNode,omitempty"`
