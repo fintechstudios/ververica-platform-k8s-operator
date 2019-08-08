@@ -77,10 +77,14 @@ lint:
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
 
-# Build the docker image
+# Patch the latest image version into the default kustomize image patch
 .PHONY: kustomize-patch-image
 kustomize-patch-image:
 	sed -i'' -e 's@image: .*@image: '"$(IMG):$(VERSION)"'@' ./config/default/manager_image_patch.yaml
+
+# Build the k8s resources for deployment
+kustomize-build: kustomize-patch-image
+	kustomize build config/default > resources.yaml
 
 # Update the Swagger Client API
 .PHONY: swagger-gen
