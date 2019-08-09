@@ -11,5 +11,5 @@ rbacProxy:
 
 controller:
   imageRepository: fintechstudios/ververica-platform-k8s-controller
-  imageTag: latest
+  imageTag: v0.2.0
   imagePullPolicy: IfNotPresent
