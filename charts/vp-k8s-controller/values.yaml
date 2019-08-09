@@ -1,0 +1,15 @@
+rbac:
+  enabled: true
+
+rbacProxy:
+  enabled: true
+  logLevel: 10
+  imageRepository: gcr.io/kubebuilder/kube-rbac-proxy
+  imageTag: v0.4.0
+  imagePullPolicy: IfNotPresent
+  port: 8443
+
+controller:
+  imageRepository: fintechstudios/ververica-platform-k8s-controller
+  imageTag: latest
+  imagePullPolicy: IfNotPresent

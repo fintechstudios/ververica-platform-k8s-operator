@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
+  name: {{ template "vp-k8s-controller.name" . }}-controller-manager-metrics-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+      {{- if .Values.rbacProxy.enabled }}
+    - name: https
+      port: 8443
+      targetPort: https
+      {{- end }}
+    - name: http
+      port: 8080
+      targetPort: https
+  selector:
+    control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
