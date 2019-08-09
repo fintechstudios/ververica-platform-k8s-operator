@@ -1,0 +1,570 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: vpdeployments.ververicaplatform.fintechstudios.com
+  annotations:
+    "helm.sh/hook": crd-install
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  additionalPrinterColumns:
+    - JSONPath: .spec.metadata.id
+      name: Id
+      type: string
+    - JSONPath: .spec.metadata.createdAt
+      name: Created
+      type: date
+    - JSONPath: .spec.metadata.modifiedAt
+      name: Modified
+      type: date
+    - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
+      name: Flink-Version
+      type: string
+    - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
+      name: Flink-Image-Tag
+      type: string
+    - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
+      name: Flink-Image-Registry
+      type: string
+  group: ververicaplatform.fintechstudios.com
+  names:
+    kind: VpDeployment
+    plural: vpdeployments
+  scope: ""
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: VpDeployment is the Schema for the vpdeployments API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: VpDeploymentObjectSpec defines the desired state of VpDeployment
+          properties:
+            deploymentTargetName:
+              description: DeploymentTargetName is an extension on the VP API Must
+                provide a spec.deploymentTargetId if not set
+              type: string
+            metadata:
+              description: VP
+              properties:
+                annotations:
+                  additionalProperties:
+                    type: string
+                  type: object
+                createdAt:
+                  format: date-time
+                  type: string
+                id:
+                  type: string
+                labels:
+                  additionalProperties:
+                    type: string
+                  type: object
+                modifiedAt:
+                  format: date-time
+                  type: string
+                name:
+                  description: Set through K8s obj meta name
+                  type: string
+                namespace:
+                  type: string
+              type: object
+            spec:
+              description: VpDeploymentSpec is the spec in the Ververica Platform
+              properties:
+                deploymentTargetId:
+                  type: string
+                maxJobCreationAttempts:
+                  format: int32
+                  type: integer
+                maxSavepointCreationAttempts:
+                  format: int32
+                  type: integer
+                restoreStrategy:
+                  description: VpDeploymentRestoreStrategy describes how to restore
+                    a job
+                  properties:
+                    allowNonRestoredState:
+                      type: boolean
+                    kind:
+                      type: string
+                  type: object
+                startFromSavepoint:
+                  description: VpDeploymentStartFromSavepoint describes which savepoint,
+                    if any, to start the job with
+                  properties:
+                    kind:
+                      type: string
+                  type: object
+                state:
+                  description: DeploymentState is the enum of all possible deployment
+                    states Only one of the following states may be specified.
+                  enum:
+                    - CANCELLED
+                    - RUNNING
+                    - TRANSITIONING
+                    - SUSPENDED
+                    - FAILED
+                  type: string
+                template:
+                  description: VpDeploymentTemplate is the template for Deployment
+                    jobs
+                  properties:
+                    metadata:
+                      description: VpDeploymentTemplateMetadata
+                      properties:
+                        annotations:
+                          additionalProperties:
+                            type: string
+                          type: object
+                      type: object
+                    spec:
+                      description: VpDeploymentTemplateSpec is the base spec for Deployment
+                        jobs
+                      properties:
+                        artifact:
+                          description: VpArtifact describes a jar to run along with
+                            the Flink requirements
+                          properties:
+                            entryClass:
+                              type: string
+                            flinkImageRegistry:
+                              type: string
+                            flinkImageTag:
+                              type: string
+                            flinkVersion:
+                              type: string
+                            jarUri:
+                              type: string
+                            kind:
+                              type: string
+                            mainArgs:
+                              type: string
+                          required:
+                            - jarUri
+                            - kind
+                          type: object
+                        flinkConfiguration:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        kubernetes:
+                          description: VpKubernetesOptions allows users to configure
+                            K8s pods for Deployments
+                          properties:
+                            pods:
+                              description: VpPods are the K8s specific options
+                              properties:
+                                affinity:
+                                  description: VpJsonNode is odd - seems incorrect
+                                    but TBD
+                                  properties:
+                                    array:
+                                      type: boolean
+                                    bigDecimal:
+                                      type: boolean
+                                    bigInteger:
+                                      type: boolean
+                                    binary:
+                                      type: boolean
+                                    boolean:
+                                      type: boolean
+                                    containerNode:
+                                      type: boolean
+                                    double:
+                                      type: boolean
+                                    float:
+                                      type: boolean
+                                    floatingPointNumber:
+                                      type: boolean
+                                    int:
+                                      type: boolean
+                                    integralNumber:
+                                      type: boolean
+                                    long:
+                                      type: boolean
+                                    missingNode:
+                                      type: boolean
+                                    nodeType:
+                                      type: string
+                                    "null":
+                                      type: boolean
+                                    number:
+                                      type: boolean
+                                    object:
+                                      type: boolean
+                                    pojo:
+                                      type: boolean
+                                    short:
+                                      type: boolean
+                                    textual:
+                                      type: boolean
+                                    valueNode:
+                                      type: boolean
+                                  type: object
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                envVars:
+                                  items:
+                                    description: VpEnvVar allows users to specify
+                                      environment variables for jobs
+                                    properties:
+                                      name:
+                                        type: string
+                                      value:
+                                        type: string
+                                      valueFrom:
+                                        description: VpJsonNode is odd
+                                        properties:
+                                          array:
+                                            type: boolean
+                                          bigDecimal:
+                                            type: boolean
+                                          bigInteger:
+                                            type: boolean
+                                          binary:
+                                            type: boolean
+                                          boolean:
+                                            type: boolean
+                                          containerNode:
+                                            type: boolean
+                                          double:
+                                            type: boolean
+                                          float:
+                                            type: boolean
+                                          floatingPointNumber:
+                                            type: boolean
+                                          int:
+                                            type: boolean
+                                          integralNumber:
+                                            type: boolean
+                                          long:
+                                            type: boolean
+                                          missingNode:
+                                            type: boolean
+                                          nodeType:
+                                            type: string
+                                          "null":
+                                            type: boolean
+                                          number:
+                                            type: boolean
+                                          object:
+                                            type: boolean
+                                          pojo:
+                                            type: boolean
+                                          short:
+                                            type: boolean
+                                          textual:
+                                            type: boolean
+                                          valueNode:
+                                            type: boolean
+                                        type: object
+                                    type: object
+                                  type: array
+                                imagePullSecrets:
+                                  items:
+                                    description: VpLocalObjectReference is the Ververica
+                                      Platform local object reference for secrets
+                                    properties:
+                                      name:
+                                        type: string
+                                    required:
+                                      - name
+                                    type: object
+                                  type: array
+                                nodeSelector:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                securityContext:
+                                  description: VpJsonNode is odd - seems incorrect
+                                    but TBD
+                                  properties:
+                                    array:
+                                      type: boolean
+                                    bigDecimal:
+                                      type: boolean
+                                    bigInteger:
+                                      type: boolean
+                                    binary:
+                                      type: boolean
+                                    boolean:
+                                      type: boolean
+                                    containerNode:
+                                      type: boolean
+                                    double:
+                                      type: boolean
+                                    float:
+                                      type: boolean
+                                    floatingPointNumber:
+                                      type: boolean
+                                    int:
+                                      type: boolean
+                                    integralNumber:
+                                      type: boolean
+                                    long:
+                                      type: boolean
+                                    missingNode:
+                                      type: boolean
+                                    nodeType:
+                                      type: string
+                                    "null":
+                                      type: boolean
+                                    number:
+                                      type: boolean
+                                    object:
+                                      type: boolean
+                                    pojo:
+                                      type: boolean
+                                    short:
+                                      type: boolean
+                                    textual:
+                                      type: boolean
+                                    valueNode:
+                                      type: boolean
+                                  type: object
+                                tolerations:
+                                  items:
+                                    description: VpJsonNode is odd - seems incorrect
+                                      but TBD
+                                    properties:
+                                      array:
+                                        type: boolean
+                                      bigDecimal:
+                                        type: boolean
+                                      bigInteger:
+                                        type: boolean
+                                      binary:
+                                        type: boolean
+                                      boolean:
+                                        type: boolean
+                                      containerNode:
+                                        type: boolean
+                                      double:
+                                        type: boolean
+                                      float:
+                                        type: boolean
+                                      floatingPointNumber:
+                                        type: boolean
+                                      int:
+                                        type: boolean
+                                      integralNumber:
+                                        type: boolean
+                                      long:
+                                        type: boolean
+                                      missingNode:
+                                        type: boolean
+                                      nodeType:
+                                        type: string
+                                      "null":
+                                        type: boolean
+                                      number:
+                                        type: boolean
+                                      object:
+                                        type: boolean
+                                      pojo:
+                                        type: boolean
+                                      short:
+                                        type: boolean
+                                      textual:
+                                        type: boolean
+                                      valueNode:
+                                        type: boolean
+                                    type: object
+                                  type: array
+                                volumeMounts:
+                                  items:
+                                    description: VpVolumeAndMount joins a volume and
+                                      how it is mounted
+                                    properties:
+                                      name:
+                                        type: string
+                                      volume:
+                                        description: VpJsonNode is odd - seems incorrect
+                                          but TBD
+                                        properties:
+                                          array:
+                                            type: boolean
+                                          bigDecimal:
+                                            type: boolean
+                                          bigInteger:
+                                            type: boolean
+                                          binary:
+                                            type: boolean
+                                          boolean:
+                                            type: boolean
+                                          containerNode:
+                                            type: boolean
+                                          double:
+                                            type: boolean
+                                          float:
+                                            type: boolean
+                                          floatingPointNumber:
+                                            type: boolean
+                                          int:
+                                            type: boolean
+                                          integralNumber:
+                                            type: boolean
+                                          long:
+                                            type: boolean
+                                          missingNode:
+                                            type: boolean
+                                          nodeType:
+                                            type: string
+                                          "null":
+                                            type: boolean
+                                          number:
+                                            type: boolean
+                                          object:
+                                            type: boolean
+                                          pojo:
+                                            type: boolean
+                                          short:
+                                            type: boolean
+                                          textual:
+                                            type: boolean
+                                          valueNode:
+                                            type: boolean
+                                        type: object
+                                      volumeMount:
+                                        description: VpJsonNode is odd - seems incorrect
+                                          but TBD
+                                        properties:
+                                          array:
+                                            type: boolean
+                                          bigDecimal:
+                                            type: boolean
+                                          bigInteger:
+                                            type: boolean
+                                          binary:
+                                            type: boolean
+                                          boolean:
+                                            type: boolean
+                                          containerNode:
+                                            type: boolean
+                                          double:
+                                            type: boolean
+                                          float:
+                                            type: boolean
+                                          floatingPointNumber:
+                                            type: boolean
+                                          int:
+                                            type: boolean
+                                          integralNumber:
+                                            type: boolean
+                                          long:
+                                            type: boolean
+                                          missingNode:
+                                            type: boolean
+                                          nodeType:
+                                            type: string
+                                          "null":
+                                            type: boolean
+                                          number:
+                                            type: boolean
+                                          object:
+                                            type: boolean
+                                          pojo:
+                                            type: boolean
+                                          short:
+                                            type: boolean
+                                          textual:
+                                            type: boolean
+                                          valueNode:
+                                            type: boolean
+                                        type: object
+                                    type: object
+                                  type: array
+                              type: object
+                          type: object
+                        logging:
+                          description: VpLogging configures various loggers
+                          properties:
+                            log4jLoggers:
+                              additionalProperties:
+                                type: string
+                              type: object
+                          type: object
+                        numberOfTaskManagers:
+                          format: int32
+                          type: integer
+                        parallelism:
+                          format: int32
+                          type: integer
+                        resources:
+                          additionalProperties:
+                            description: VpResourceSpec represents the resource requirements
+                              for components like the job and task managers
+                            properties:
+                              cpu:
+                                type: string
+                              memory:
+                                type: string
+                            type: object
+                          type: object
+                      required:
+                        - artifact
+                      type: object
+                  required:
+                    - spec
+                  type: object
+                upgradeStrategy:
+                  description: VpDeploymentUpgradeStrategy describes how to upgrade
+                    a job
+                  properties:
+                    kind:
+                      type: string
+                  type: object
+              required:
+                - state
+                - template
+                - upgradeStrategy
+              type: object
+          required:
+            - metadata
+            - spec
+          type: object
+        status:
+          description: VpDeploymentStatus defines the observed state of VpDeployment
+          properties:
+            resourceVersion:
+              format: int32
+              type: integer
+            state:
+              description: DeploymentState is the enum of all possible deployment
+                states Only one of the following states may be specified.
+              enum:
+                - CANCELLED
+                - RUNNING
+                - TRANSITIONING
+                - SUSPENDED
+                - FAILED
+              type: string
+          type: object
+      required:
+        - metadata
+        - spec
+      type: object
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

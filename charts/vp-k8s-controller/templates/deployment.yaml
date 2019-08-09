@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "vp-k8s-controller.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
+  name: {{ template "vp-k8s-controller.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
+  template:
+    metadata:
+      labels:
+        control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
+    spec:
+      containers:
+          {{- if .Values.rbacProxy.enabled }}
+        - name: kube-rbac-proxy
+          image: {{ .Values.rbacProxy.imageRepository }}:{{ .Values.rbacProxy.imageTag }}
+          args:
+            - --secure-listen-address=0.0.0.0:{{ .Values.rbacProxy.port }}
+            - --upstream=http://127.0.0.1:8080/
+            - --logtostderr=true
+            - --v={{ .Values.rbacProxy.logLevel }}
+          ports:
+            - containerPort: {{ .Values.rbacProxy.port }}
+              name: https
+          {{- end }}
+        - name: manager
+          image: {{ .Values.controller.imageRepository }}:{{ .Values.controller.imageTag }}
+          imagePullPolicy: {{ .Values.controller.imagePullPolicy }}
+          command:
+            - /manager
+          args:
+            - --metrics-addr=127.0.0.1:8080
+            - --ververica-platform-url=http://ververica-platform-appmanager/api
+          resources:
+            limits:
+              cpu: 100m
+              memory: 30Mi
+            requests:
+              cpu: 100m
+              memory: 20Mi
+      terminationGracePeriodSeconds: 10

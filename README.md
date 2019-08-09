@@ -56,6 +56,12 @@ Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ver
 * Each master commit hash is also tagged and published.
 * Git tags are published with the same tag. 
 
+## Helm
+
+A base Helm chart is provided in [`./charts/vp-k8s-controller`](./charts/vp-k8s-controller).
+
+This sets up a deployment with a metrics server, RBAC policies, CRDs, and optionally an RBAC proxy.
+
 ## Development
 
 Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
@@ -154,8 +160,6 @@ type Any interface {}
 
 You'll also have to change any usages of this type in `structs` to be embedded, instead of by pointer ref, namely in:
 - `model_json_patch_generic.go`
-
-Is this all better than creating an API Client from scratch? Yes. Can I still gripe about it? TBD. 
 
 
 ### Building Images
