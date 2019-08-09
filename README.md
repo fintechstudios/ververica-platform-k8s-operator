@@ -198,3 +198,7 @@ will there ever be more than one VP instance running in a cluster?
 
 Other OSS that influenced this project:
 * [Kong Ingress Controller](https://github.com/Kong/kubernetes-ingress-controller)
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller?ref=badge_large)
