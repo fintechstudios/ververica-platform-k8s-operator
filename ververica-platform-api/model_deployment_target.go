@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type DeploymentTarget struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *DeploymentTargetMetadata `json:"metadata"`
-	Spec *DeploymentTargetSpec `json:"spec"`
+	Kind       string                    `json:"kind,omitempty"`
+	ApiVersion string                    `json:"apiVersion,omitempty"`
+	Metadata   *DeploymentTargetMetadata `json:"metadata"`
+	Spec       *DeploymentTargetSpec     `json:"spec"`
 }

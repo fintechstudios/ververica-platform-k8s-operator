@@ -10,12 +10,12 @@
 package ververicaplatformapi
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"context"
-	"fmt"
 
 	"github.com/antihax/optional"
 )
@@ -27,29 +27,29 @@ var (
 
 type EventsApiService service
 
-/* 
+/*
 EventsApiService Filter all events for a deployment or job
 
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace
  * @param optional nil or *GetEventsOpts - Optional Parameters:
-     * @param "DeploymentId" (optional.Interface of string) - 
-     * @param "JobId" (optional.Interface of string) - 
+     * @param "DeploymentId" (optional.Interface of string) -
+     * @param "JobId" (optional.Interface of string) -
 
 @return ResourceListEvent
 */
 
-type GetEventsOpts struct { 
+type GetEventsOpts struct {
 	DeploymentId optional.Interface
-	JobId optional.Interface
+	JobId        optional.Interface
 }
 
 func (a *EventsApiService) GetEvents(ctx context.Context, namespace string, localVarOptionals *GetEventsOpts) (ResourceListEvent, *http.Response, error) {
 	var (
-		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
+		localVarHttpMethod  = strings.ToUpper("Get")
+		localVarPostBody    interface{}
+		localVarFileName    string
+		localVarFileBytes   []byte
 		localVarReturnValue ResourceListEvent
 	)
 
@@ -102,18 +102,18 @@ func (a *EventsApiService) GetEvents(ctx context.Context, namespace string, loca
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+		if err == nil {
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body: localVarBody,
+			body:  localVarBody,
 			error: localVarHttpResponse.Status,
 		}
-		
+
 		if localVarHttpResponse.StatusCode == 200 {
 			localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
 			if err != nil {
@@ -121,15 +121,15 @@ func (a *EventsApiService) GetEvents(ctx context.Context, namespace string, loca
 			}
 
 			var v ResourceListEvent
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
 				return localVarReturnValue, localVarHttpResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHttpResponse, newErr
 		}
-		
+
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 

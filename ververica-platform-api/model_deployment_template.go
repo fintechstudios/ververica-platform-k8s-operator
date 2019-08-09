@@ -11,5 +11,5 @@ package ververicaplatformapi
 
 type DeploymentTemplate struct {
 	Metadata *DeploymentTemplateMetadata `json:"metadata,omitempty"`
-	Spec *DeploymentTemplateSpec `json:"spec"`
+	Spec     *DeploymentTemplateSpec     `json:"spec"`
 }

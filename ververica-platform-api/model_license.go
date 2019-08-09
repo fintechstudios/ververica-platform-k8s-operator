@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type License struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *LicenseMetadata `json:"metadata"`
-	Spec *LicenseSpec `json:"spec"`
+	Kind       string           `json:"kind,omitempty"`
+	ApiVersion string           `json:"apiVersion,omitempty"`
+	Metadata   *LicenseMetadata `json:"metadata"`
+	Spec       *LicenseSpec     `json:"spec"`
 }

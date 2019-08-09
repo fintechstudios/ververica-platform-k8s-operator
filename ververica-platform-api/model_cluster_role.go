@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type ClusterRole struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *ClusterRoleMetadata `json:"metadata"`
-	Spec *ClusterRoleSpec `json:"spec"`
+	Kind       string               `json:"kind,omitempty"`
+	ApiVersion string               `json:"apiVersion,omitempty"`
+	Metadata   *ClusterRoleMetadata `json:"metadata"`
+	Spec       *ClusterRoleSpec     `json:"spec"`
 }
