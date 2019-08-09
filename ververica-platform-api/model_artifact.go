@@ -10,11 +10,11 @@
 package ververicaplatformapi
 
 type Artifact struct {
-	Kind string `json:"kind"`
-	JarUri string `json:"jarUri"`
-	MainArgs string `json:"mainArgs,omitempty"`
-	EntryClass string `json:"entryClass,omitempty"`
-	FlinkVersion string `json:"flinkVersion,omitempty"`
+	Kind               string `json:"kind"`
+	JarUri             string `json:"jarUri"`
+	MainArgs           string `json:"mainArgs,omitempty"`
+	EntryClass         string `json:"entryClass,omitempty"`
+	FlinkVersion       string `json:"flinkVersion,omitempty"`
 	FlinkImageRegistry string `json:"flinkImageRegistry,omitempty"`
-	FlinkImageTag string `json:"flinkImageTag,omitempty"`
+	FlinkImageTag      string `json:"flinkImageTag,omitempty"`
 }

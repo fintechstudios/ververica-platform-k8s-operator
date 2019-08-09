@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type RevisionInformation struct {
-	CommitShaLong string `json:"commitShaLong,omitempty"`
+	CommitShaLong  string `json:"commitShaLong,omitempty"`
 	CommitShaShort string `json:"commitShaShort,omitempty"`
-	BuildVersion string `json:"buildVersion,omitempty"`
-	BuildTime string `json:"buildTime,omitempty"`
+	BuildVersion   string `json:"buildVersion,omitempty"`
+	BuildTime      string `json:"buildTime,omitempty"`
 }

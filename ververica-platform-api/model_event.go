@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type Event struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *EventMetadata `json:"metadata,omitempty"`
-	Spec *EventSpec `json:"spec,omitempty"`
+	Kind       string         `json:"kind,omitempty"`
+	ApiVersion string         `json:"apiVersion,omitempty"`
+	Metadata   *EventMetadata `json:"metadata,omitempty"`
+	Spec       *EventSpec     `json:"spec,omitempty"`
 }

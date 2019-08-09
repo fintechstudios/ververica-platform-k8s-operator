@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type ClusterRoleBinding struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Metadata *ClusterRoleBindingMetadata `json:"metadata"`
-	Spec *ClusterRoleBindingSpec `json:"spec"`
+	Kind       string                      `json:"kind,omitempty"`
+	ApiVersion string                      `json:"apiVersion,omitempty"`
+	Metadata   *ClusterRoleBindingMetadata `json:"metadata"`
+	Spec       *ClusterRoleBindingSpec     `json:"spec"`
 }

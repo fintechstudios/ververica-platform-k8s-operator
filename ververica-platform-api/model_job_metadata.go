@@ -14,12 +14,12 @@ import (
 )
 
 type JobMetadata struct {
-	Id string `json:"id,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
-	TerminatedAt int64 `json:"terminatedAt,omitempty"`
-	DeploymentId string `json:"deploymentId,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	Id              string            `json:"id,omitempty"`
+	CreatedAt       time.Time         `json:"createdAt,omitempty"`
+	ModifiedAt      time.Time         `json:"modifiedAt,omitempty"`
+	TerminatedAt    int64             `json:"terminatedAt,omitempty"`
+	DeploymentId    string            `json:"deploymentId,omitempty"`
+	Annotations     map[string]string `json:"annotations,omitempty"`
+	ResourceVersion int32             `json:"resourceVersion,omitempty"`
+	Namespace       string            `json:"namespace,omitempty"`
 }

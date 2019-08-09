@@ -14,8 +14,8 @@ import (
 )
 
 type ApiTokenMetadata struct {
-	Id string `json:"id,omitempty"`
-	Name string `json:"name"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	Id         string    `json:"id,omitempty"`
+	Name       string    `json:"name"`
+	CreatedAt  time.Time `json:"createdAt,omitempty"`
 	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
 }

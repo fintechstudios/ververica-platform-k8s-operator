@@ -10,8 +10,8 @@
 package ververicaplatformapi
 
 type ResourceQuota struct {
-	Kind string `json:"kind,omitempty"`
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Spec *ResourceQuotaSpec `json:"spec,omitempty"`
-	Status *ResourceQuotaStatus `json:"status,omitempty"`
+	Kind       string               `json:"kind,omitempty"`
+	ApiVersion string               `json:"apiVersion,omitempty"`
+	Spec       *ResourceQuotaSpec   `json:"spec,omitempty"`
+	Status     *ResourceQuotaStatus `json:"status,omitempty"`
 }
