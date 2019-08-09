@@ -1,5 +1,7 @@
 # Ververica Platform K8s Controller
 
+[![badge](https://goreportcard.com/badge/github.com/fintechstudios/ververica-platform-k8s-controller)](https://goreportcard.com/report/github.com/fintechstudios/ververica-platform-k8s-controller)
+
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
