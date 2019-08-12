@@ -9,11 +9,11 @@ spec:
   ports:
       {{- if .Values.rbacProxy.enabled }}
     - name: https
-      port: 8443
+      port: {{ .Values.rbacProxy.port }}
       targetPort: https
       {{- end }}
     - name: http
-      port: {{.Values.controller.metricsPort}}
+      port: {{ .Values.controller.metricsPort }}
       targetPort: https
   selector:
     control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
