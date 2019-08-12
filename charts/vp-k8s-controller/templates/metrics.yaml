@@ -13,7 +13,7 @@ spec:
       targetPort: https
       {{- end }}
     - name: http
-      port: 8080
+      port: {{.Values.controller.metricsPort}}
       targetPort: https
   selector:
     control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
