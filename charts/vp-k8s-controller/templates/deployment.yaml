@@ -23,7 +23,7 @@ spec:
           image: {{ .Values.rbacProxy.imageRepository }}:{{ .Values.rbacProxy.imageTag }}
           args:
             - --secure-listen-address=0.0.0.0:{{ .Values.rbacProxy.port }}
-            - --upstream=http://{{.Values.controller.metricsAddress}}/
+            - --upstream=http://{{.Values.controller.metricsHost}}:{{.Values.controller.metricsPort}}/
             - --logtostderr=true
             - --v={{ .Values.rbacProxy.logLevel }}
           ports:
@@ -36,7 +36,7 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr={{.Values.controller.metricsAddress}}
+            - --metrics-addr={{.Values.controller.metricsHost}}:{{.Values.controller.metricsPort}}
             - --ververica-platform-url={{.Values.controller.vpApiUrl}}
           resources:
             limits:
