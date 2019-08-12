@@ -1,4 +1,4 @@
-package version
+package main
 
 import (
 	"testing"
@@ -8,12 +8,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
-func TestVersion(t *testing.T) {
+func TestMainPkg(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "version")
+	RunSpecs(t, "main")
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"version",
+		"main",
 		[]Reporter{envtest.NewlineReporter{}})
 
 }
