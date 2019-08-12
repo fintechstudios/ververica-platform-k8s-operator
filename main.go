@@ -17,15 +17,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"runtime"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/version"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	_ "github.com/joho/godotenv/autoload"
 	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -33,7 +34,42 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
+	controllerVersion = "unknown"
+	goos              = runtime.GOOS
+	goarch            = runtime.GOARCH
+	gitCommit         = "$Format:%H$"          // sha1 from git, output of $(git rev-parse HEAD)
+	buildDate         = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+)
+
+// Version is a simple representation of the current application and runtime version
+type Version struct {
+	ControllerVersion string `json:"controllerVersion"`
+	GitCommit         string `json:"gitCommit"`
+	BuildDate         string `json:"buildDate"`
+	GoVersion         string `json:"goVersion"`
+	GoOs              string `json:"goOs"`
+	GoArch            string `json:"goArch"`
+}
+
+// GetVersion constructs the current version
+func GetVersion() Version {
+	return Version{
+		ControllerVersion: controllerVersion,
+		GitCommit:         gitCommit,
+		BuildDate:         buildDate,
+		GoVersion:         runtime.Version(),
+		GoOs:              goos,
+		GoArch:            goarch,
+	}
+}
+
+// String gets a simple string representation of the version
+func (v Version) String() string {
+	return fmt.Sprintf("%#v", v)
+}
+
+var (
+	scheme   = k8sRuntime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 )
 
@@ -72,7 +108,7 @@ func main() {
 		os.Exit(1)
 	}
 	setupLog.Info("Starting Ververica Platform K8s controller",
-		"version", version.GetVersion().String())
+		"version", GetVersion().String())
 
 	// Build the Ververica Platform API Client
 	ververicaAPIClient := vpAPI.NewAPIClient(&vpAPI.Configuration{
