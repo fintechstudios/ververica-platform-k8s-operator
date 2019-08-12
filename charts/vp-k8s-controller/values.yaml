@@ -13,3 +13,5 @@ controller:
   imageRepository: fintechstudios/ververica-platform-k8s-controller
   imageTag: v0.2.0
   imagePullPolicy: IfNotPresent
+  metricsAddress: 127.0.0.1:8080
+  vpApiUrl: http://ververica-platform-appmanager/api
