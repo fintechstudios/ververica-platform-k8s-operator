@@ -14,6 +14,6 @@ spec:
       {{- end }}
     - name: http
       port: {{ .Values.controller.metricsPort }}
-      targetPort: https
+      targetPort: http
   selector:
     control-plane: {{ template "vp-k8s-controller.name" . }}-controller-manager
