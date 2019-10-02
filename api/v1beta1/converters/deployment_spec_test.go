@@ -29,6 +29,7 @@ var _ = Describe("DeploymentSpec", func() {
 	var artifactEntryClass = "com.fintechstudios.streaming"
 	var artifactFlinkVersion = "1.8.0"
 	var artifactFlinkRegistry = "registry.docker.com"
+	var artifactFlinkRepository = "v1.4/flink"
 	var artifactFlinkTag = "1.8.0_scala1.12"
 
 	Describe("DeploymentSpecToNative", func() {
@@ -78,13 +79,14 @@ var _ = Describe("DeploymentSpec", func() {
 					},
 					Spec: &vpAPI.DeploymentTemplateSpec{
 						Artifact: &vpAPI.Artifact{
-							Kind:               artifactKind,
-							JarUri:             artifactJarUri,
-							MainArgs:           artifactArgs,
-							EntryClass:         artifactEntryClass,
-							FlinkVersion:       artifactFlinkVersion,
-							FlinkImageRegistry: artifactFlinkRegistry,
-							FlinkImageTag:      artifactFlinkTag,
+							Kind:                 artifactKind,
+							JarUri:               artifactJarUri,
+							MainArgs:             artifactArgs,
+							EntryClass:           artifactEntryClass,
+							FlinkVersion:         artifactFlinkVersion,
+							FlinkImageRegistry:   artifactFlinkRegistry,
+							FlinkImageRepository: artifactFlinkRepository,
+							FlinkImageTag:        artifactFlinkTag,
 						},
 						Parallelism:          deploymentParallelism,
 						NumberOfTaskManagers: deploymentNumTaskManagers,
@@ -129,6 +131,7 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(artifact.FlinkImageTag).To(Equal(artifactFlinkTag))
 			Expect(artifact.FlinkVersion).To(Equal(artifactFlinkVersion))
 			Expect(artifact.FlinkImageRegistry).To(Equal(artifactFlinkRegistry))
+			Expect(artifact.FlinkImageRepository).To(Equal(artifactFlinkRepository))
 			Expect(artifact.EntryClass).To(Equal(artifactEntryClass))
 			Expect(artifact.MainArgs).To(Equal(artifactArgs))
 			Expect(artifact.Kind).To(Equal(artifactKind))
@@ -199,13 +202,14 @@ var _ = Describe("DeploymentSpec", func() {
 					},
 					Spec: &ververicaplatformv1beta1.VpDeploymentTemplateSpec{
 						Artifact: &ververicaplatformv1beta1.VpArtifact{
-							Kind:               artifactKind,
-							JarUri:             artifactJarUri,
-							MainArgs:           artifactArgs,
-							EntryClass:         artifactEntryClass,
-							FlinkVersion:       artifactFlinkVersion,
-							FlinkImageRegistry: artifactFlinkRegistry,
-							FlinkImageTag:      artifactFlinkTag,
+							Kind:                 artifactKind,
+							JarUri:               artifactJarUri,
+							MainArgs:             artifactArgs,
+							EntryClass:           artifactEntryClass,
+							FlinkVersion:         artifactFlinkVersion,
+							FlinkImageRegistry:   artifactFlinkRegistry,
+							FlinkImageRepository: artifactFlinkRepository,
+							FlinkImageTag:        artifactFlinkTag,
 						},
 						Parallelism:          &deploymentParallelism,
 						NumberOfTaskManagers: &deploymentNumTaskManagers,
@@ -250,6 +254,7 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(artifact.FlinkImageTag).To(Equal(artifactFlinkTag))
 			Expect(artifact.FlinkVersion).To(Equal(artifactFlinkVersion))
 			Expect(artifact.FlinkImageRegistry).To(Equal(artifactFlinkRegistry))
+			Expect(artifact.FlinkImageRepository).To(Equal(artifactFlinkRepository))
 			Expect(artifact.EntryClass).To(Equal(artifactEntryClass))
 			Expect(artifact.MainArgs).To(Equal(artifactArgs))
 			Expect(artifact.Kind).To(Equal(artifactKind))
