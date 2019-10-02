@@ -5,7 +5,7 @@ import (
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 )
 
-//DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation
+// DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation
 func DeploymentStateToNative(state string) (ververicaplatformv1beta1.DeploymentState, error) {
 	switch state {
 	case string(ververicaplatformv1beta1.CancelledState):

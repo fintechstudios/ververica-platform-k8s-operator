@@ -26,6 +26,7 @@ spec:
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
           flinkVersion: "1.8"
           flinkImageRegistry: registry.platform.data-artisans.net/dist
+          flinkImageRepository: v1.4/flink
           flinkImageTag: 1.8.0-stream2-scala_2.11
         parallelism: 1
         numberOfTaskManagers: 1

@@ -25,6 +25,9 @@ spec:
   - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
     name: Flink-Image-Registry
     type: string
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRepository
+    name: Flink-Image-Repository
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeployment
@@ -141,6 +144,8 @@ spec:
                               type: string
                             flinkImageRegistry:
                               type: string
+                            flinkImageRepository:
+                              type: string
                             flinkImageTag:
                               type: string
                             flinkVersion:
@@ -167,8 +172,6 @@ spec:
                               description: VpPods are the K8s specific options
                               properties:
                                 affinity:
-                                  description: VpJsonNode is odd - seems incorrect
-                                    but TBD
                                   properties:
                                     array:
                                       type: boolean
@@ -227,8 +230,6 @@ spec:
                                       value:
                                         type: string
                                       valueFrom:
-                                        description: VpJsonNode is odd - seems incorrect
-                                          but TBD
                                         properties:
                                           array:
                                             type: boolean
@@ -291,8 +292,6 @@ spec:
                                     type: string
                                   type: object
                                 securityContext:
-                                  description: VpJsonNode is odd - seems incorrect
-                                    but TBD
                                   properties:
                                     array:
                                       type: boolean
@@ -339,8 +338,6 @@ spec:
                                   type: object
                                 tolerations:
                                   items:
-                                    description: VpJsonNode is odd - seems incorrect
-                                      but TBD
                                     properties:
                                       array:
                                         type: boolean
@@ -394,8 +391,6 @@ spec:
                                       name:
                                         type: string
                                       volume:
-                                        description: VpJsonNode is odd - seems incorrect
-                                          but TBD
                                         properties:
                                           array:
                                             type: boolean
@@ -441,8 +436,6 @@ spec:
                                             type: boolean
                                         type: object
                                       volumeMount:
-                                        description: VpJsonNode is odd - seems incorrect
-                                          but TBD
                                         properties:
                                           array:
                                             type: boolean

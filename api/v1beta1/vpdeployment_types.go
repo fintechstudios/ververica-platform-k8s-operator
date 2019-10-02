@@ -83,6 +83,8 @@ type VpArtifact struct {
 	// +optional
 	FlinkImageRegistry string `json:"flinkImageRegistry,omitempty"`
 	// +optional
+	FlinkImageRepository string `json:"flinkImageRepository,omitempty"`
+	// +optional
 	FlinkImageTag string `json:"flinkImageTag,omitempty"`
 }
 
@@ -298,6 +300,7 @@ type VpDeploymentStatus struct {
 // +kubebuilder:printcolumn:name="Flink-Version",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
 // +kubebuilder:printcolumn:name="Flink-Image-Tag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
 // +kubebuilder:printcolumn:name="Flink-Image-Registry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"
+// +kubebuilder:printcolumn:name="Flink-Image-Repository",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRepository"
 
 // VpDeployment is the Schema for the vpdeployments API
 type VpDeployment struct {
