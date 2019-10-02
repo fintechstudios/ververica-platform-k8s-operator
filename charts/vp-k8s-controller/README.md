@@ -14,7 +14,7 @@ A little Helm chart for deploying the Ververica Platform Kubernetes Controller.
 | `rbacProxy.imagePullPolicy`  |                                                      | `IfNotPresent`                                     |
 | `rbacProxy.port`             |                                                      | `8443`                                             |
 | `controller.imageRepository` | Image repository for the Manager                     | `fintechstudios/ververica-platform-k8s-controller` |
-| `controller.imageTag`        |                                                      | `v0.3.0`                                           |
+| `controller.imageTag`        |                                                      | `v0.3.1`                                           |
 | `controller.imagePullPolicy` |                                                      | `IfNotPresent`                                     |
 | `controller.metricsHost`     | Host for the metrics reporter.                       | `127.0.0.1`                                        |
 | `controller.metricsPort`     | Port for the metrics reporter.                       | `8080`                                             |
