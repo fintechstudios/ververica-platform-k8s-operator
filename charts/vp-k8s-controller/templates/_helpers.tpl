@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "vp-k8s-controller.labels" -}}
-app.kubernetes.io/name: {{ include "name" . }}
+app.kubernetes.io/name: {{ include "vp-k8s-controller.name" . }}
 helm.sh/chart: {{ include "chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

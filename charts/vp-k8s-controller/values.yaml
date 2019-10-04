@@ -9,6 +9,13 @@ rbacProxy:
   imagePullPolicy: IfNotPresent
   port: 8443
 
+##  Hyperkube image to use when cleaning up
+##
+hyperkubeImage:
+  repository: k8s.gcr.io/hyperkube
+  tag: v1.12.1
+  pullPolicy: IfNotPresent
+
 controller:
   imageRepository: fintechstudios/ververica-platform-k8s-controller
   imageTag: v0.3.1
