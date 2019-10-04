@@ -1,0 +1,38 @@
+{{- if and .Values.prometheusOperator.enabled .Values.prometheusOperator.cleanupCustomResource }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "vp-k8s-controller.fullname" . }}-controller-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": hook-succeeded
+  labels:
+    app: {{ template "vp-k8s-controller.name" . }}-controller
+{{ include "vp-k8s-controller.labels" . | indent 4 }}
+spec:
+  template:
+    metadata:
+      name: {{ template "vp-k8s-controller.fullname" . }}-controller-cleanup
+      labels:
+        app: {{ template "vp-k8s-controller.name" . }}-controller
+{{ include "vp-k8s-controller.labels" . | indent 8 }}
+    spec:
+      containers:
+        - name: kubectl
+          image: "{{ .Values.hyperkubeImage.repository }}:{{ .Values.hyperkubeImage.tag }}"
+          imagePullPolicy: "{{ .Values.hyperkubeImage.pullPolicy }}"
+          command:
+          - /bin/sh
+          - -c
+          - >
+              kubectl delete vpdeployments        --all;
+              kubectl delete vpdeploymenttargets  --all;
+              kubectl delete vpnamespaces         --all;
+              sleep 10;
+              kubectl delete crd vpdeployments.ververicaplatform.fintechstudios.com;
+              kubectl delete crd vpdeploymenttargets.ververicaplatform.fintechstudios.com;
+              kubectl delete crd vpnamespaces.ververicaplatform.fintechstudios.com;
+      restartPolicy: OnFailure
+{{- end }}
