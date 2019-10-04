@@ -1,4 +1,3 @@
-{{- if and .Values.prometheusOperator.enabled .Values.prometheusOperator.cleanupCustomResource }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -35,4 +34,3 @@ spec:
               kubectl delete crd vpdeploymenttargets.ververicaplatform.fintechstudios.com;
               kubectl delete crd vpnamespaces.ververicaplatform.fintechstudios.com;
       restartPolicy: OnFailure
-{{- end }}
