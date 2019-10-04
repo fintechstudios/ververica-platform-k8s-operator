@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -148,55 +149,56 @@ type VpJsonNode struct {
 	Null bool `json:"null,omitempty"`
 }
 
-// VpVolumeAndMount joins a volume and how it is mounted
+// VpVolumeAndMount is a wrapper around both core.Volume and core.VolumeMount
 type VpVolumeAndMount struct {
-	// +optional
-	Name *string `json:"name,omitempty"`
-	// +optional
-	Volume *VpJsonNode `json:"volume,omitempty"`
-	// +optional
-	VolumeMount *VpJsonNode `json:"volumeMount,omitempty"`
+	Name        string            `json:"name"`
+	Volume      *core.Volume      `json:"volume"`
+	VolumeMount *core.VolumeMount `json:"volumeMount"`
 }
 
-// VpEnvVar allows users to specify environment variables for jobs
-type VpEnvVar struct {
-	// +optional
-	Name *string `json:"name,omitempty"`
-	// +optional
-	Value *string `json:"value,omitempty"`
-	// +optional
-	ValueFrom *VpJsonNode `json:"valueFrom,omitempty"`
-}
-
-// VpLocalObjectReference is the Ververica Platform local object reference for secrets
-type VpLocalObjectReference struct {
-	Name string `json:"name"`
-}
-
-// VpPods are the K8s specific options
-type VpPods struct {
+// VpPodSpec is a subset of core.PodSpec, with annotations, env => envVars, and volume mounts
+type VpPodSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+	// List of environment variables to set in the container.
+	// Cannot be updated.
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
-	// +optional
-	SecurityContext *VpJsonNode `json:"securityContext,omitempty"`
-	// +optional
-	Affinity *VpJsonNode `json:"affinity,omitempty"`
-	// +optional
-	// +kubebuilder:validation:UniqueItems=true
-	Tolerations []VpJsonNode `json:"tolerations,omitempty"`
+	// +patchMergeKey=name
+	// +patchStrategy=merge
+	EnvVars []core.EnvVar `json:"envVars,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+
 	// +optional
 	VolumeMounts []VpVolumeAndMount `json:"volumeMounts,omitempty"`
+
+
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
 	// +optional
-	EnvVars []VpEnvVar `json:"envVars,omitempty"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
-	ImagePullSecrets []VpLocalObjectReference `json:"imagePullSecrets,omitempty"`
+	SecurityContext *core.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,14,opt,name=securityContext"`
+	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+	// If specified, these secrets will be passed to individual puller implementations for them to use. For example,
+	// in the case of docker, only DockerConfig type secrets are honored.
+	// More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+	// +optional
+	// +patchMergeKey=name
+	// +patchStrategy=merge
+	ImagePullSecrets []core.LocalObjectReference `json:"imagePullSecrets,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,15,rep,name=imagePullSecrets"`
+	// If specified, the pod's scheduling constraints
+	// +optional
+	Affinity *core.Affinity `json:"affinity,omitempty" protobuf:"bytes,18,opt,name=affinity"`
+	// If specified, the pod's tolerations.
+	// +optional
+	Tolerations []core.Toleration `json:"tolerations,omitempty" protobuf:"bytes,22,opt,name=tolerations"`
 }
 
 // VpKubernetesOptions allows users to configure K8s pods for Deployments
 type VpKubernetesOptions struct {
-	Pods *VpPods `json:"pods,omitempty"`
+	Pods *VpPodSpec `json:"pods,omitempty"`
 }
 
 // VpDeploymentTemplateSpec is the base spec for Deployment jobs

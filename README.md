@@ -131,6 +131,7 @@ Main changes necessary:
 * `DeploymentStartFromSavepoint` needs choices
 * `POST /namespaces/{namespace}/deployments` needs a `201` response with a `Deployment` in the body
 * `POST /namespaces/{namespace}/deployment-targets` needs a `201` response with a `DeploymenTarget` in the body
+* `model_pods.go` needs to be updated with the proper Kubernetes types
 
 #### Post-Generation Changes
 

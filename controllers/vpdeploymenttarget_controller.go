@@ -130,7 +130,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 // handleUpdate updates the k8s resource when it already exists in the VP
 // updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
 func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget, depTarget vpAPI.DeploymentTarget) (ctrl.Result, error) {
-	// Now update the k8s resource
+	// First delete the resource in VP and then re-create it
 	err := r.updateResource(&vpDepTarget, &depTarget)
 	return ctrl.Result{}, err
 }

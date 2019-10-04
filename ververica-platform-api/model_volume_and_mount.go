@@ -9,8 +9,10 @@
 
 package ververicaplatformapi
 
+import core "k8s.io/api/core/v1"
+
 type VolumeAndMount struct {
-	Name        string    `json:"name,omitempty"`
-	Volume      *JsonNode `json:"volume,omitempty"`
-	VolumeMount *JsonNode `json:"volumeMount,omitempty"`
+	Name        string            `json:"name,omitempty"`
+	Volume      *core.Volume      `json:"volume,omitempty"`
+	VolumeMount *core.VolumeMount `json:"volumeMount,omitempty"`
 }
