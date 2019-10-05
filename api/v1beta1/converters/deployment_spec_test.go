@@ -161,7 +161,7 @@ var _ = Describe("DeploymentSpec", func() {
 		var resources map[string]vpAPI.ResourceSpec
 		var vpResources map[string]ververicaplatformv1beta1.VpResourceSpec
 		var log4jLoggers map[string]string
-		var vpPods ververicaplatformv1beta1.VpPods
+		var vpPods ververicaplatformv1beta1.VpPodSpec
 
 		BeforeEach(func() {
 			annotations = map[string]string{
@@ -180,7 +180,7 @@ var _ = Describe("DeploymentSpec", func() {
 				"":                   "DEBUG",
 				"com.fintechstudios": "VERBOSE",
 			}
-			vpPods = ververicaplatformv1beta1.VpPods{}
+			vpPods = ververicaplatformv1beta1.VpPodSpec{}
 			vpDeploymentSpec = ververicaplatformv1beta1.VpDeploymentSpec{
 				State:                        deploymentState,
 				DeploymentTargetID:           deploymentTargetID,
