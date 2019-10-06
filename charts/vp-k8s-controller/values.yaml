@@ -18,7 +18,7 @@ hyperkubeImage:
 
 controller:
   imageRepository: fintechstudios/ververica-platform-k8s-controller
-  imageTag: v0.3.1
+  imageTag: v0.3.2
   imagePullPolicy: IfNotPresent
   metricsHost: 127.0.0.1
   metricsPort: 8080
