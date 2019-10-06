@@ -44,6 +44,15 @@ spec:
             "com.fintechstudios": DEBUG
         kubernetes:
           pods:
+            volumeMounts:
+              - name: config
+                volume:
+                  name: config
+                  configMap:
+                    name: test-configmap
+                volumeMount:
+                  name: config
+                  mountPath: /opt/flink/conf
             annotations:
               "iam.amazonaws.com/role": k8s-flink-job
 
