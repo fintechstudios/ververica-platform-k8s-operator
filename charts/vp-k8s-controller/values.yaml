@@ -16,7 +16,9 @@ hyperkubeImage:
   tag: v1.12.1
   pullPolicy: IfNotPresent
 
+
 controller:
+  cleanupCustomResourceBeforeInstall: false
   imageRepository: fintechstudios/ververica-platform-k8s-controller
   imageTag: v0.3.2
   imagePullPolicy: IfNotPresent
