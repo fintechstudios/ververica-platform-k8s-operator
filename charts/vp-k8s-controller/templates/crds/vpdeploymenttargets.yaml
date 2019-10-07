@@ -2,26 +2,27 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
+  creationTimestamp: null
   annotations:
     "helm.sh/hook": crd-install
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   additionalPrinterColumns:
-    - JSONPath: .spec.metadata.id
-      name: Id
-      type: string
-    - JSONPath: .spec.metadata.namespace
-      name: Namespace
-      type: string
-    - JSONPath: .spec.metadata.resourceVersion
-      name: Resource-Version
-      type: integer
-    - JSONPath: .spec.metadata.createdAt
-      name: Created
-      type: date
-    - JSONPath: .spec.metadata.modifiedAt
-      name: Modified
-      type: date
+  - JSONPath: .spec.metadata.id
+    name: Id
+    type: string
+  - JSONPath: .spec.metadata.namespace
+    name: Namespace
+    type: string
+  - JSONPath: .spec.metadata.resourceVersion
+    name: Resource-Version
+    type: integer
+  - JSONPath: .spec.metadata.createdAt
+    name: Created
+    type: date
+  - JSONPath: .spec.metadata.modifiedAt
+    name: Modified
+    type: date
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeploymentTarget
@@ -96,8 +97,8 @@ spec:
                           \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
                         type: string
                     required:
-                      - op
-                      - path
+                    - op
+                    - path
                     type: object
                   type: array
                 kubernetes:
@@ -108,14 +109,14 @@ spec:
                       type: string
                   type: object
               required:
-                - kubernetes
+              - kubernetes
               type: object
           type: object
       type: object
   versions:
-    - name: v1beta1
-      served: true
-      storage: true
+  - name: v1beta1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""
