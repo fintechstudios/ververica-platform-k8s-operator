@@ -5,7 +5,9 @@ metadata:
   creationTimestamp: null
   annotations:
     "helm.sh/hook": crd-install
+{{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
+{{- end }}
 spec:
   additionalPrinterColumns:
     - JSONPath: .spec.metadata.id
