@@ -48,8 +48,7 @@ spec:
           description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
           properties:
             metadata:
-              description: VpDeploymentTargetMetadata represents all metadata from
-                the VP API
+              description: VpMetadata represents all metadata from the VP API
               properties:
                 annotations:
                   additionalProperties:
@@ -68,13 +67,9 @@ spec:
                   format: date-time
                   type: string
                 name:
-                  description: Taken from the K8s resource
                   type: string
                 namespace:
                   type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
               type: object
             spec:
               description: VpDeploymentTargetSpec allows a users to set defaults for

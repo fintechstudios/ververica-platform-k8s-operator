@@ -1,0 +1,7 @@
+apiVersion: ververicaplatform.fintechstudios.com/v1beta1
+kind: VpSavepoint
+metadata:
+  name: vpsavepoint-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -90,7 +90,7 @@ func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namesp
 func (r *VpDeploymentReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
 	ctx := context.Background()
 
-	metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
+	metadata, err := converters.MetadataToNative(*deployment.Metadata)
 
 	if err != nil {
 		return err

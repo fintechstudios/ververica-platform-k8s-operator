@@ -78,7 +78,6 @@ spec:
                   format: date-time
                   type: string
                 name:
-                  description: Set through K8s obj meta name
                   type: string
                 namespace:
                   type: string

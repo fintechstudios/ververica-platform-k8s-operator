@@ -58,3 +58,23 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
+  - vpsavepoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
+  - vpsavepoints/status
+  verbs:
+  - get
+  - patch
+  - update

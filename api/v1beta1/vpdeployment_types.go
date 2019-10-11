@@ -25,25 +25,6 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// VpDeploymentMetadata represents all metadata from the VP API
-type VpDeploymentMetadata struct {
-	// Set through K8s obj meta name
-	// +optional
-	Name string `json:"name,omitempty"`
-	// +optional
-	ID string `json:"id,omitempty"`
-	// +optional
-	Namespace string `json:"namespace,omitempty"`
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
-	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
 // VpDeploymentUpgradeStrategy describes how to upgrade a job
 type VpDeploymentUpgradeStrategy struct {
 	// +optional
@@ -170,7 +151,6 @@ type VpPodSpec struct {
 	// +optional
 	VolumeMounts []VpVolumeAndMount `json:"volumeMounts,omitempty"`
 
-
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
 	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -267,8 +247,8 @@ type VpDeploymentObjectSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// VP
-	Metadata VpDeploymentMetadata `json:"metadata"`
-	Spec     VpDeploymentSpec     `json:"spec"`
+	Metadata VpMetadata       `json:"metadata"`
+	Spec     VpDeploymentSpec `json:"spec"`
 
 	// DeploymentTargetName is an extension on the VP API
 	// Must provide a spec.deploymentTargetId if not set

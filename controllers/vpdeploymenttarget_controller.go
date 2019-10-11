@@ -42,7 +42,7 @@ func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatfor
 	ctx := context.Background()
 
 	resource.Name = depTarget.Metadata.Name
-	resource.Spec.Metadata = ververicaplatformv1beta1.VpDeploymentTargetMetadata{
+	resource.Spec.Metadata = &ververicaplatformv1beta1.VpMetadata {
 		Name:            depTarget.Metadata.Name,
 		Namespace:       depTarget.Metadata.Namespace,
 		ID:              depTarget.Metadata.Id,
@@ -58,7 +58,7 @@ func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatfor
 		return err
 	}
 
-	resource.Spec.Spec = ververicaplatformv1beta1.VpDeploymentTargetSpec{
+	resource.Spec.Spec = &ververicaplatformv1beta1.VpDeploymentTargetSpec{
 		Kubernetes: ververicaplatformv1beta1.VpKubernetesTarget{
 			Namespace: depTarget.Spec.Kubernetes.Namespace,
 		},
