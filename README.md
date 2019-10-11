@@ -8,9 +8,6 @@
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
-This is built as a CRD / custom controller. Though an Aggregated API might be a better choice,
-the tooling (currently) does not have as good support and I just learned how to `go`.
-
 Built for Ververica Platform version `1.4.x`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
@@ -186,14 +183,10 @@ improved!
 Some known issues + places to improve:
 * Mapping of more VP resources!
 * `DeploymentTarget.deploymentPatchSet` values can only be `strings`.
-* The nesting of `metadata` and `spec` is a little wonky.
 * Watching the VP API for updates to Deployments, Jobs, Events, etc would be excellent.
 * Adding more `status` subresources to link everything together would also be most excellent.
-* It might make sense to have a 1-1 mapping between K8s namespaces and names and VP namespaces and names, but 
-will there ever be more than one VP instance running in a cluster?
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
-* Various `TODO`s should give us a place to start!
-* Better package structure for internal code.
+* Various `TODO`s
 * Make the APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
 * Splitting tests into unit, integration, e2e tests against a live cluster, etc.
 
