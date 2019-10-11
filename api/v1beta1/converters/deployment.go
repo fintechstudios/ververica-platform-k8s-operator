@@ -17,7 +17,7 @@ func DeploymentFromNative(vpDeployment ververicaplatformv1beta1.VpDeployment) (v
 		return deployment, err
 	}
 
-	deploymentMeta, err := MetadataFromNative(vpDeployment.Spec.Metadata)
+	deploymentMeta, err := DeploymentMetadataFromNative(vpDeployment.Spec.Metadata)
 	if err != nil {
 		return deployment, err
 	}

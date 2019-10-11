@@ -36,7 +36,7 @@ import (
 type VpNamespaceReconciler struct {
 	client.Client
 	Log         logr.Logger
-	VPAPIClient vpAPI.APIClient
+	VPAPIClient *vpAPI.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them

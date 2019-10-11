@@ -8,8 +8,8 @@ import (
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
-// MetadataToNative converts a Ververica Platform deployment into its native K8s representation
-func MetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1beta1.VpMetadata, error) {
+// DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
+func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1beta1.VpMetadata, error) {
 	var vpMetadata v1beta1.VpMetadata
 	metadataJSON, err := json.Marshal(deploymentMetadata)
 	if err != nil {
@@ -24,8 +24,8 @@ func MetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1beta1.VpMe
 	return vpMetadata, nil
 }
 
-// MetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func MetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.DeploymentMetadata, error) {
+// DeploymentMetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
+func DeploymentMetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.DeploymentMetadata, error) {
 	var deploymentMetadata vpAPI.DeploymentMetadata
 	vpMetadataJSON, err := json.Marshal(vpMetadata)
 	if err != nil {

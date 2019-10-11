@@ -65,7 +65,7 @@ type VpSavepointMetadata struct {
 // VpSavepointSpec defines the desired state of VpSavepoint
 type VpSavepointObjectSpec struct {
 	// +optional
-	Metadata VpMetadata `json:"metadata,omitempty"`
+	Metadata VpSavepointMetadata `json:"metadata,omitempty"`
 
 	// +optional
 	Spec VpSavepointSpec `json:"spec,omitempty"`
@@ -100,8 +100,8 @@ type VpSavepoint struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   VpSavepointSpec   `json:"spec,omitempty"`
-	Status VpSavepointStatus `json:"status,omitempty"`
+	Spec   VpSavepointObjectSpec `json:"spec,omitempty"`
+	Status VpSavepointStatus     `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

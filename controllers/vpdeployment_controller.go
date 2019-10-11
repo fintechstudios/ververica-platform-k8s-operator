@@ -23,6 +23,7 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/vp_api_helpers"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
@@ -35,7 +36,7 @@ import (
 type VpDeploymentReconciler struct {
 	client.Client
 	Log         logr.Logger
-	VPAPIClient vpAPI.APIClient
+	VPAPIClient *vpAPI.APIClient
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -65,32 +66,11 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment ververicapla
 	return depTarget.Metadata.Id, nil
 }
 
-func (r *VpDeploymentReconciler) getDeploymentByName(ctx context.Context, namespace string, name string) (vpAPI.Deployment, error) {
-	var deployment vpAPI.Deployment
-	if len(namespace) == 0 || len(name) == 0 {
-		return deployment, errors.New("namespace and name must not be empty")
-	}
-
-	deploymentsList, _, err := r.VPAPIClient.DeploymentsApi.GetDeployments(ctx, namespace, nil)
-
-	if err != nil {
-		return deployment, err
-	}
-
-	for _, deployment = range deploymentsList.Items {
-		if deployment.Metadata.Name == name {
-			return deployment, nil
-		}
-	}
-
-	return deployment, utils.DeploymentNotFoundError{Namespace: namespace, Name: name}
-}
-
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
 func (r *VpDeploymentReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeployment, deployment *vpAPI.Deployment) error {
 	ctx := context.Background()
 
-	metadata, err := converters.MetadataToNative(*deployment.Metadata)
+	metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
 
 	if err != nil {
 		return err
@@ -227,7 +207,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment ver
 	if len(vpDeployment.Spec.Metadata.ID) > 0 {
 		deployment, _, err = r.VPAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, vpDeployment.Spec.Metadata.ID)
 	} else {
-		deployment, err = r.getDeploymentByName(ctx, namespace, vpDeployment.Name)
+		deployment, err = vpApiHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, vpDeployment.Name)
 	}
 
 	if err != nil {
@@ -311,7 +291,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	id := vpDeployment.Spec.Metadata.ID
 	if len(id) == 0 {
 		// no id has been set
-		deployment, err := r.getDeploymentByName(ctx, namespace, req.Name)
+		deployment, err := vpApiHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, req.Name)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("Create event")

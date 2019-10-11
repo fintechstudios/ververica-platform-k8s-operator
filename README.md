@@ -21,6 +21,7 @@ custom VP Resources will all be prefixed with `Vp`.
 * `DeploymentTarget` -> `VpDeploymentTarget`
 * `Deployment` -> `VpDeployment`
 * `Namespace` -> `VpNamespace`
+* `Savepoint` -> `VpSavepoint`
 
 ## Unsupported
 
@@ -30,7 +31,6 @@ custom VP Resources will all be prefixed with `Vp`.
 * `Role`
 * `Cluster Role Binding`
 * `Cluster Role`
-* `Savepoint`
 * `Secret Value`
 * `Status`
 
@@ -181,12 +181,9 @@ This is a MVP for Flink deployments at FinTech Studios. We would love to see thi
 improved! 
 
 Some known issues + places to improve:
-* Mapping of more VP resources!
 * `DeploymentTarget.deploymentPatchSet` values can only be `strings`.
-* Watching the VP API for updates to Deployments, Jobs, Events, etc would be excellent.
-* Adding more `status` subresources to link everything together would also be most excellent.
+* Watching the VP API for updates to Deployments, Jobs, Events, etc and adding updates to the `status` fields.
 * Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
-* Various `TODO`s
 * Make the APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
 * Splitting tests into unit, integration, e2e tests against a live cluster, etc.
 

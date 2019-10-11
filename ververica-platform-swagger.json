@@ -1631,6 +1631,12 @@
         "responses": {
           "default": {
             "description": "successful operation"
+          },
+          "201": {
+            "description": "successful creation",
+            "schema": {
+              "$ref": "#/definitions/Savepoint"
+            }
           }
         }
       }
@@ -2973,8 +2979,8 @@
           "type": "string"
         },
         "failedAt": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "format": "date-time"
         }
       }
     },

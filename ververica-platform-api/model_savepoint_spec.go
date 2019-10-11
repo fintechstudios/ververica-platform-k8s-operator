@@ -11,5 +11,5 @@ package ververicaplatformapi
 
 type SavepointSpec struct {
 	SavepointLocation string `json:"savepointLocation"`
-	FlinkSavepointId  string `json:"flinkSavepointId"`
+	FlinkSavepointId string `json:"flinkSavepointId"`
 }

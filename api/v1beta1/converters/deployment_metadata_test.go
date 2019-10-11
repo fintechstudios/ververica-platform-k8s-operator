@@ -17,7 +17,7 @@ var _ = Describe("DeploymentMetadata", func() {
 	const deploymentName = "test-deployment"
 	const deploymentNamespace = "testing"
 
-	Describe("MetadataToNative", func() {
+	Describe("DeploymentMetadataToNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
 		var createdAt time.Time
@@ -46,7 +46,7 @@ var _ = Describe("DeploymentMetadata", func() {
 		})
 
 		It("should map an API deployment metadata to K8s native", func() {
-			vpMetadata, err := MetadataToNative(metadata)
+			vpMetadata, err := DeploymentMetadataToNative(metadata)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(vpMetadata.Name).To(Equal(deploymentName))
 			Expect(vpMetadata.Namespace).To(Equal(deploymentNamespace))
@@ -61,12 +61,12 @@ var _ = Describe("DeploymentMetadata", func() {
 
 		Measure("conversion speed", func(b Benchmarker) {
 			b.Time("to native", func() {
-				_, _ = MetadataToNative(metadata)
+				_, _ = DeploymentMetadataToNative(metadata)
 			})
 		}, 10)
 	})
 
-	Describe("MetadataFromNative", func() {
+	Describe("DeploymentMetadataFromNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
 		var createdAt metav1.Time
@@ -95,7 +95,7 @@ var _ = Describe("DeploymentMetadata", func() {
 		})
 
 		It("should map an API deployment metadata to K8s native", func() {
-			metadata, err := MetadataFromNative(vpMetadata)
+			metadata, err := DeploymentMetadataFromNative(vpMetadata)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(metadata.Name).To(Equal(deploymentName))
 			Expect(metadata.Namespace).To(Equal(deploymentNamespace))
@@ -108,7 +108,7 @@ var _ = Describe("DeploymentMetadata", func() {
 
 		Measure("conversion speed", func(b Benchmarker) {
 			b.Time("from native", func() {
-				_, _ = MetadataFromNative(vpMetadata)
+				_, _ = DeploymentMetadataFromNative(vpMetadata)
 			})
 		}, 10)
 	})

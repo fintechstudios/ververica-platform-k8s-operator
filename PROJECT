@@ -11,3 +11,6 @@ resources:
 - group: ververicaplatform
   version: v1beta1
   kind: VpDeployment
+- group: ververicaplatform
+  version: v1beta1
+  kind: VpSavepoint
