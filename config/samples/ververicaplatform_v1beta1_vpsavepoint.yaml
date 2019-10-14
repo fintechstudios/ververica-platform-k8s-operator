@@ -3,5 +3,6 @@ kind: VpSavepoint
 metadata:
   name: vpsavepoint-sample
 spec:
-  # Add fields here
-  foo: bar
+  deploymentName: deployment
+  metadata:
+    namespace: doc-ingestion

@@ -3,15 +3,15 @@ kind: VpDeployment
 metadata:
   name: deployment
 spec:
-  deploymentTargetName: dep-target
+  deploymentTargetName: dep-target-testing
   metadata:
     namespace: doc-ingestion
   spec:
     state: RUNNING
     upgradeStrategy:
-      kind: STATELESS
+      kind: STATEFUL
     restoreStrategy:
-      kind: NONE
+      kind: LATEST_SAVEPOINT
     maxSavepointCreationAttempts: 4
     maxJobCreationAttempts: 4
     template:
@@ -26,8 +26,8 @@ spec:
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
           flinkVersion: "1.8"
           flinkImageRegistry: registry.platform.data-artisans.net/dist
-          flinkImageRepository: v1.4/flink
-          flinkImageTag: 1.8.0-stream2-scala_2.11
+          flinkImageRepository: flink
+          flinkImageTag: 1.8.0-stream2-scala_2.11-slim
         parallelism: 1
         numberOfTaskManagers: 1
         resources:
@@ -38,6 +38,8 @@ spec:
             memory: 1.5g
         flinkConfiguration:
           high-availability.storageDir:  s3://flink/haState
+          state.savepoints.dir: file:///flink/state/savepoints
+          state.checkpoints.dir: file:///flink/state/checkpoints
           taskmanager.numberOfTaskSlots: "1"
         logging:
           log4jLoggers:
