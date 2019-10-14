@@ -132,6 +132,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint verve
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpsavepoints,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpsavepoints/status,verbs=get;update;patch
 
+// Reconcile is the main entrypoint for the reconciliation loop
 func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
@@ -173,6 +174,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager registers the controller
 func (r *VpSavepointReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ververicaplatformv1beta1.VpSavepoint{}).
