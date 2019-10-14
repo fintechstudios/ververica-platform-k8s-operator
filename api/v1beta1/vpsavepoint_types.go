@@ -32,26 +32,25 @@ type VpSavepointFailure struct {
 }
 
 type VpSavepointSpec struct {
-	// +optional
-	SavepointLocation string `json:"savepointLocation,omitempty"`
+	SavepointLocation string `json:"savepointLocation"`
 	FlinkSavepointID  string `json:"flinkSavepointId"`
 }
 
 // +kubebuilder:validation:Enum=USER_REQUEST;SUSPEND_AND_UPGRADE;SUSPEND;COPIED
-type savepointOrigin string
+type SavepointOrigin string
 
 const (
-	UserRequestOrigin       = savepointOrigin("USER_REQUEST")
-	SuspendAndUpgradeOrigin = savepointOrigin("SUSPEND_AND_UPGRADE")
-	SuspendOrigin           = savepointOrigin("SUSPEND")
-	CopiedOrigin            = savepointOrigin("COPIED")
+	UserRequestOrigin       = SavepointOrigin("USER_REQUEST")
+	SuspendAndUpgradeOrigin = SavepointOrigin("SUSPEND_AND_UPGRADE")
+	SuspendOrigin           = SavepointOrigin("SUSPEND")
+	CopiedOrigin            = SavepointOrigin("COPIED")
 )
 
 type VpSavepointMetadata struct {
 	// +optional
 	VpMetadata `json:",inline"`
 
-	// Can be specified through the VpSavepointObjectSpec
+	// Can be specified through the .spec.deploymentName
 	// +optional
 	DeploymentID string `json:"deploymentId,omitempty"`
 
@@ -59,7 +58,7 @@ type VpSavepointMetadata struct {
 	JobID string `json:"jobId,omitempty"`
 
 	// +optional
-	Origin savepointOrigin `json:"origin,omitempty"`
+	Origin SavepointOrigin `json:"origin,omitempty"`
 }
 
 // VpSavepointSpec defines the desired state of VpSavepoint
@@ -77,17 +76,17 @@ type VpSavepointObjectSpec struct {
 }
 
 // +kubebuilder:validation:Enum=STARTED;COMPLETED;FAILED
-type savepointState string
+type SavepointState string
 
 const (
-	StartedSavepointState   = savepointState("STARTED")
-	CompletedSavepointState = savepointState("COMPLETED")
-	FailedSavepointState    = savepointState("FAILED")
+	StartedSavepointState   = SavepointState("STARTED")
+	CompletedSavepointState = SavepointState("COMPLETED")
+	FailedSavepointState    = SavepointState("FAILED")
 )
 
 // VpSavepointStatus defines the observed state of VpSavepoint
 type VpSavepointStatus struct {
-	State savepointState `json:"state"`
+	State SavepointState `json:"state"`
 	// +optional
 	Failure VpSavepointFailure `json:"failure,omitempty"`
 }

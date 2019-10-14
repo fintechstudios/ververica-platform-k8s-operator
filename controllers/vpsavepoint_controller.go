@@ -18,9 +18,9 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPIHelpers "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/vp_api_helpers"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
@@ -44,35 +44,35 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(resource *ververicaplatformv1beta1.VpSavepoint, deployment *vpAPI.Savepoint) error {
-	// ctx := context.Background()
-	//
-	// metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
-	//
-	// if err != nil {
-	// 	return err
-	// }
-	// resource.Spec.Metadata = metadata
-	//
-	// spec, err := converters.DeploymentSpecToNative(*deployment.Spec)
-	// if err != nil {
-	// 	return err
-	// }
-	// resource.Spec.Spec = spec
-	//
-	// state, err := converters.DeploymentStateToNative(deployment.Status.State)
-	// if err != nil {
-	// 	return err
-	// }
-	// resource.Status.State = state
-	//
-	// if err := r.Update(ctx, resource); err != nil {
-	// 	return err
-	// }
-	//
-	// if err := r.Status().Update(ctx, resource); err != nil {
-	// 	return err
-	// }
+func (r *VpSavepointReconciler) updateResource(vpSavepoint *ververicaplatformv1beta1.VpSavepoint, savepoint *vpAPI.Savepoint) error {
+	ctx := context.Background()
+
+	metadata, err := converters.SavepointMetadataToNative(*savepoint.Metadata)
+
+	if err != nil {
+		return err
+	}
+	vpSavepoint.Spec.Metadata = metadata
+
+	spec, err := converters.SavepointSpecToNative(*savepoint.Spec)
+	if err != nil {
+		return err
+	}
+	vpSavepoint.Spec.Spec = spec
+
+	state, err := converters.SavepointStateToNative(savepoint.Status.State)
+	if err != nil {
+		return err
+	}
+	vpSavepoint.Status.State = state
+
+	if err := r.Update(ctx, vpSavepoint); err != nil {
+		return err
+	}
+
+	if err := r.Status().Update(ctx, vpSavepoint); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -82,29 +82,37 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint verve
 	log := r.getLogger(req)
 
 	namespace := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
+	depId := vpSavepoint.Spec.Metadata.DeploymentID
+	if depId == "" {
+		// no deployment id has been explicitly set
+		// try to find one
+		depName := vpSavepoint.Spec.DeploymentName
+		deployment, err := vpAPIHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, depName)
 
-	savepoint, res, err := r.VPAPIClient.SavepointsApi.CreateSavepoint(ctx, namespace, vpAPI.Savepoint{
+		if utils.IsNotFoundError(err) {
+			log.Error(err, "No deployment by name %s", depName)
+			return ctrl.Result{}, err
+		}
+
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		depId = deployment.Metadata.Id
+	}
+
+	savepointSpec, err := converters.SavepointSpecFromNative(vpSavepoint.Spec.Spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	createdSavepoint, res, err := r.VPAPIClient.SavepointsApi.CreateSavepoint(ctx, namespace, vpAPI.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
 		Metadata: &vpAPI.SavepointMetadata{
-			Id:              "",
-			CreatedAt:       time.Time{},
-			ModifiedAt:      time.Time{},
-			DeploymentId:    "",
-			JobId:           "",
-			Origin:          "",
-			Annotations:     nil,
-			ResourceVersion: 0,
-			Namespace:       "",
+			DeploymentId: depId,
+			Namespace:    namespace,
 		},
-		Status: &vpAPI.SavepointStatus{
-			State:   "",
-			Failure: nil,
-		},
-		Spec:       &vpAPI.SavepointSpec{
-			SavepointLocation: "",
-			FlinkSavepointId:  "",
-		},
+		Spec: &savepointSpec,
 	})
 
 	if res != nil && res.StatusCode == 400 {
@@ -118,7 +126,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint verve
 	}
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(&vpSavepoint, &savepoint); err != nil {
+	if err := r.updateResource(&vpSavepoint, &createdSavepoint); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -141,36 +149,22 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if !vpSavepoint.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Being deleted
 		log.Info("Delete event")
-		log.Info("Warn: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned.")
+		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned.")
 		return ctrl.Result{}, nil
 	}
 
 	namespace := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	depId := vpSavepoint.Spec.Metadata.DeploymentID
-	if len(depId) == 0 {
-		// no deployment id has been explicitly set
-		// try to find one
-		depName := vpSavepoint.Spec.DeploymentName
-		deployment, err := vpAPIHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, depName)
-
-		if utils.IsNotFoundError(err) {
-			log.Error(err, "No deployment by name %s", depName)
-			// TODO: update status with message
-			return ctrl.Result{Requeue: false}, err
-		}
-
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		depId = deployment.Metadata.Id
-	}
 
 	savepointId := vpSavepoint.Spec.Metadata.ID
+	if vpSavepoint.Spec.Metadata.ID == "" {
+		log.Info("Creating savepoint")
+		return r.handleCreate(req, vpSavepoint)
+	}
+
 	savepoint, _, err := r.VPAPIClient.SavepointsApi.GetSavepoint(ctx, namespace, savepointId)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
-			log.Info("Savepoint by id not found - creating", "id", )
+			log.Info("Savepoint by id not found - creating", "id", savepointId)
 			return r.handleCreate(req, vpSavepoint)
 		}
 		// Other error, not good!
@@ -179,7 +173,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	log = log.WithValues("savepoint", savepoint.Metadata.Id)
 	log.Info("Update event")
-	log.Info("Warn: Updates are not supported through the Ververica Platform.")
+	log.Info("Warning: Updates are not supported through the Ververica Platform.")
 	return ctrl.Result{}, nil
 }
 

@@ -4,7 +4,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// VpMetadata represents all metadata from the VP API
+// VpMetadata represents the base metadata for VP resources
 type VpMetadata struct {
 	// +optional
 	Name string `json:"name,omitempty"`
