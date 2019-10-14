@@ -48,7 +48,7 @@ spec:
           description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
           properties:
             metadata:
-              description: VpMetadata represents all metadata from the VP API
+              description: VpMetadata represents the base metadata for VP resources
               properties:
                 annotations:
                   additionalProperties:
@@ -70,6 +70,9 @@ spec:
                   type: string
                 namespace:
                   type: string
+                resourceVersion:
+                  format: int32
+                  type: integer
               type: object
             spec:
               description: VpDeploymentTargetSpec allows a users to set defaults for

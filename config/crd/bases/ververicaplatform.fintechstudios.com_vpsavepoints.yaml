@@ -30,9 +30,81 @@ spec:
         metadata:
           type: object
         spec:
+          description: VpSavepointSpec defines the desired state of VpSavepoint
+          properties:
+            deploymentName:
+              description: DeploymentName is an extension on the VP API Must provide
+                a spec.metadata.deploymentId if not set
+              type: string
+            metadata:
+              properties:
+                annotations:
+                  additionalProperties:
+                    type: string
+                  type: object
+                createdAt:
+                  format: date-time
+                  type: string
+                deploymentId:
+                  description: Can be specified through the .spec.deploymentName
+                  type: string
+                id:
+                  type: string
+                jobId:
+                  type: string
+                labels:
+                  additionalProperties:
+                    type: string
+                  type: object
+                modifiedAt:
+                  format: date-time
+                  type: string
+                name:
+                  type: string
+                namespace:
+                  type: string
+                origin:
+                  enum:
+                  - USER_REQUEST
+                  - SUSPEND_AND_UPGRADE
+                  - SUSPEND
+                  - COPIED
+                  type: string
+                resourceVersion:
+                  format: int32
+                  type: integer
+              type: object
+            spec:
+              properties:
+                flinkSavepointId:
+                  type: string
+                savepointLocation:
+                  type: string
+              required:
+              - flinkSavepointId
+              - savepointLocation
+              type: object
           type: object
         status:
           description: VpSavepointStatus defines the observed state of VpSavepoint
+          properties:
+            failure:
+              properties:
+                failedAt:
+                  type: string
+                message:
+                  type: string
+                reason:
+                  type: string
+              type: object
+            state:
+              enum:
+              - STARTED
+              - COMPLETED
+              - FAILED
+              type: string
+          required:
+          - state
           type: object
       type: object
   versions:
