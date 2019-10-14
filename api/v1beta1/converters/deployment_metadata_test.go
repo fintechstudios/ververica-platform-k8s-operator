@@ -71,7 +71,7 @@ var _ = Describe("DeploymentMetadata", func() {
 		var labels map[string]string
 		var createdAt metav1.Time
 		var modifiedAt metav1.Time
-		var vpMetadata ververicaplatformv1beta1.VpDeploymentMetadata
+		var vpMetadata ververicaplatformv1beta1.VpMetadata
 
 		BeforeEach(func() {
 			createdAt = metav1.NewTime(time.Now())
@@ -83,7 +83,7 @@ var _ = Describe("DeploymentMetadata", func() {
 			labels = map[string]string{
 				"excellent": "adventure",
 			}
-			vpMetadata = ververicaplatformv1beta1.VpDeploymentMetadata{
+			vpMetadata = ververicaplatformv1beta1.VpMetadata{
 				ID:          deploymentId,
 				Annotations: annotations,
 				Labels:      labels,

@@ -302,7 +302,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 			return ctrl.Result{}, err
 		}
 
-		log.Info("No id set for deployment", "deployment", deployment)
+		log.Info("No id set for deployment", "deployment", deployment.Metadata.Name)
 		// Update in k8s but don't patch - should be handled by the update loop
 		err = r.updateResource(&vpDeployment, &deployment)
 		return ctrl.Result{}, err

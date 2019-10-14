@@ -21,7 +21,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 		reconciler = VpDeploymentTargetReconciler{
 			Client:      k8sClient,
 			Log:         logger,
-			VPAPIClient: vpAPIClient,
+			VPAPIClient: &vpAPIClient,
 		}
 	})
 
@@ -71,12 +71,12 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 						Namespace: "default",
 					},
 					DeploymentPatchSet: []vpAPI.JsonPatchGeneric{
-						vpAPI.JsonPatchGeneric{
+						{
 							Op:    "add",
 							Path:  "/test/field",
 							Value: "data",
 						},
-						vpAPI.JsonPatchGeneric{
+						{
 							Op:   "move",
 							From: "/test/field",
 							Path: "/test/field2",

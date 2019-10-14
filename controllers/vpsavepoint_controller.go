@@ -101,10 +101,6 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint verve
 		depId = deployment.Metadata.Id
 	}
 
-	savepointSpec, err := converters.SavepointSpecFromNative(vpSavepoint.Spec.Spec)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
 	createdSavepoint, res, err := r.VPAPIClient.SavepointsApi.CreateSavepoint(ctx, namespace, vpAPI.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
@@ -112,12 +108,12 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint verve
 			DeploymentId: depId,
 			Namespace:    namespace,
 		},
-		Spec: &savepointSpec,
 	})
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
-		return ctrl.Result{Requeue: false}, err
+		log.Error(err, "Bad request when creating savepoint - not requeueing")
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	if err != nil {

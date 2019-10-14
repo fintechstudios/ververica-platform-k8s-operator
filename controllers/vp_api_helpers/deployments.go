@@ -8,6 +8,7 @@ import (
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
+// GetDeploymentByName
 func GetDeploymentByName(apiClient *vpAPI.APIClient, ctx context.Context, namespace string, name string) (vpAPI.Deployment, error) {
 	var deployment vpAPI.Deployment
 	if len(namespace) == 0 || len(name) == 0 {
