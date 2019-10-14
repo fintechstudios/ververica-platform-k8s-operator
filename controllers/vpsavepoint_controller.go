@@ -19,13 +19,11 @@ package controllers
 import (
 	"context"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPIHelpers "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/vp_api_helpers"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
-	// "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
-	// "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,7 +42,7 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(vpSavepoint *ververicaplatformv1beta1.VpSavepoint, savepoint *vpAPI.Savepoint) error {
+func (r *VpSavepointReconciler) updateResource(vpSavepoint *v1beta1.VpSavepoint, savepoint *vpAPI.Savepoint) error {
 	ctx := context.Background()
 
 	metadata, err := converters.SavepointMetadataToNative(*savepoint.Metadata)
@@ -77,7 +75,7 @@ func (r *VpSavepointReconciler) updateResource(vpSavepoint *ververicaplatformv1b
 	return nil
 }
 
-func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint ververicaplatformv1beta1.VpSavepoint) (ctrl.Result, error) {
+func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1beta1.VpSavepoint) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.getLogger(req)
 
@@ -137,7 +135,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	ctx := context.Background()
 	log := r.getLogger(req)
 
-	var vpSavepoint ververicaplatformv1beta1.VpSavepoint
+	var vpSavepoint v1beta1.VpSavepoint
 	// If it's gone, it's gone!
 	if err := r.Get(ctx, req.NamespacedName, &vpSavepoint); err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -177,6 +175,6 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 // SetupWithManager registers the controller
 func (r *VpSavepointReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ververicaplatformv1beta1.VpSavepoint{}).
+		For(&v1beta1.VpSavepoint{}).
 		Complete(r)
 }

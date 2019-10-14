@@ -55,9 +55,9 @@ type VpDeploymentTargetObjectSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	Metadata *VpMetadata `json:"metadata,omitempty"`
+	Metadata VpMetadata `json:"metadata,omitempty"`
 	// +optional
-	Spec *VpDeploymentTargetSpec `json:"spec,omitempty"`
+	Spec VpDeploymentTargetSpec `json:"spec,omitempty"`
 }
 
 // +kubebuilder:object:root=true
