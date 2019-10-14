@@ -18,9 +18,11 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	vpAPIHelpers "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/vp_api_helpers"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
@@ -34,6 +36,33 @@ type VpSavepointReconciler struct {
 	client.Client
 	Log         logr.Logger
 	VPAPIClient *vpAPI.APIClient
+	pollerMap   map[string]*polling.Poller
+}
+
+func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
+	log := r.getLogger(req)
+	poller := polling.NewPoller(func() interface{} {
+		ctx := context.Background()
+		savepoint, _, err := r.VPAPIClient.SavepointsApi.GetSavepoint(ctx, vpSavepoint.Spec.Metadata.Namespace, vpSavepoint.Spec.Metadata.ID)
+		if err != nil {
+			return savepoint
+		}
+		log.Error(err, "Error while polling savepoint")
+		return nil
+	}, time.Second*5)
+
+	// On each channel callback, push the update through the k8s client
+	r.pollerMap[req.String()] = poller
+	poller.Start()
+}
+
+func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) {
+	log := r.getLogger(req)
+	poller := r.pollerMap[req.String()]
+	if poller != nil {
+		log.Info("Stopping poller")
+		poller.Stop()
+	}
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -124,6 +153,9 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		return ctrl.Result{}, err
 	}
 
+	// Create a poller to keep the savepoint up to date
+	r.addStatusPollerForResource(req, &vpSavepoint)
+
 	return ctrl.Result{}, nil
 }
 
@@ -144,6 +176,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if !vpSavepoint.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Being deleted
 		log.Info("Delete event")
+		r.removeStatusPollerForResource(req)
 		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned.")
 		return ctrl.Result{}, nil
 	}
