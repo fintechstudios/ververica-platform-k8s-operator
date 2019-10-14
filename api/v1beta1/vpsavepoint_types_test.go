@@ -30,17 +30,22 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("VpNamespace", func() {
+var _ = Describe("VpSavepoint", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *VpNamespace
+		created, fetched *VpSavepoint
 	)
 
 	It("should deep copy", func() {
-		created = &VpNamespace{
+		created = &VpSavepoint{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "foo",
 				Namespace: "default",
+			},
+			Spec: VpSavepointObjectSpec{
+				Metadata:       VpSavepointMetadata{},
+				Spec:           VpSavepointSpec{},
+				DeploymentName: "",
 			},
 		}
 		copied := created.DeepCopy()
@@ -51,13 +56,13 @@ var _ = Describe("VpNamespace", func() {
 	// your API definition.
 	// Avoid adding tests for vanilla CRUD operations because they would
 	// test Kubernetes API server, which isn't the goal here.
-	Context("Create Namespace", func() {
+	Context("Create Savepoint", func() {
 		It("should create an object successfully", func() {
 			key = types.NamespacedName{
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &VpNamespace{
+			created = &VpSavepoint{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
@@ -67,7 +72,7 @@ var _ = Describe("VpNamespace", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &VpNamespace{}
+			fetched = &VpSavepoint{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

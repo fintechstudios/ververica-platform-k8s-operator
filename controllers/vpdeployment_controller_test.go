@@ -22,7 +22,7 @@ var _ = Describe("VpDeployment Controller", func() {
 		reconciler = VpDeploymentReconciler{
 			Client:      k8sClient,
 			Log:         logger,
-			VPAPIClient: vpAPIClient,
+			VPAPIClient: &vpAPIClient,
 		}
 	})
 
@@ -43,7 +43,7 @@ var _ = Describe("VpDeployment Controller", func() {
 					Namespace: "default",
 				},
 				Spec: ververicaplatformv1beta1.VpDeploymentObjectSpec{
-					Metadata: ververicaplatformv1beta1.VpDeploymentMetadata{},
+					Metadata: ververicaplatformv1beta1.VpMetadata{},
 					Spec: ververicaplatformv1beta1.VpDeploymentSpec{
 						UpgradeStrategy: &ververicaplatformv1beta1.VpDeploymentUpgradeStrategy{
 							Kind: "STATELESS",

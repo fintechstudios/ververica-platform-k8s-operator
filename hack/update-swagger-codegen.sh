@@ -25,7 +25,7 @@ SWAGGER_FILE=ververica-platform-swagger.json
 CONFIG_FILE=swagger-gen-config.json
 OUT_DIR=ververica-platform-api
 
-rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !("${PROJECT_DIR:?}"/${OUT_DIR}/*_interface*) !("${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore)
+rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !"${PROJECT_DIR:?}"/${OUT_DIR}/model_any.go !"${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore
 mkdir -p "${PROJECT_DIR}"/${OUT_DIR}
 
 docker run --rm \

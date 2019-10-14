@@ -36,28 +36,6 @@ type JSONPatchGeneric struct {
 	From string `json:"from,omitempty"`
 }
 
-// VpDeploymentTargetMetadata represents all metadata from the VP API
-type VpDeploymentTargetMetadata struct {
-	// Taken from the K8s resource
-	// +optional
-	Name string `json:"name,omitempty"`
-	// +optional
-	Namespace string `json:"namespace,omitempty"`
-	// +optional
-	ID string `json:"id,omitempty"`
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-	// +optional
-	// +kubebuilder:validation:Minimum=1
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
-	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
-	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
 // VpKubernetesTarget allows a user to configure k8s specific options
 type VpKubernetesTarget struct {
 	// +optional
@@ -77,7 +55,7 @@ type VpDeploymentTargetObjectSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	Metadata VpDeploymentTargetMetadata `json:"metadata,omitempty"`
+	Metadata VpMetadata `json:"metadata,omitempty"`
 	// +optional
 	Spec VpDeploymentTargetSpec `json:"spec,omitempty"`
 }

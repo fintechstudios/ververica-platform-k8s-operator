@@ -51,7 +51,7 @@ var _ = Describe("VpDeployment", func() {
 					Namespace: "default",
 				},
 				Spec: VpDeploymentObjectSpec{
-					Metadata: VpDeploymentMetadata{},
+					Metadata: VpMetadata{},
 					Spec: VpDeploymentSpec{
 						UpgradeStrategy: &VpDeploymentUpgradeStrategy{
 							Kind: "STATELESS",
@@ -89,7 +89,7 @@ var _ = Describe("VpDeployment", func() {
 					Namespace: "default",
 				},
 				Spec: VpDeploymentObjectSpec{
-					Metadata: VpDeploymentMetadata{},
+					Metadata: VpMetadata{},
 					Spec: VpDeploymentSpec{
 						State: RunningState,
 						Template: &VpDeploymentTemplate{
@@ -116,7 +116,7 @@ var _ = Describe("VpDeployment", func() {
 					Namespace: "default",
 				},
 				Spec: VpDeploymentObjectSpec{
-					Metadata: VpDeploymentMetadata{},
+					Metadata: VpMetadata{},
 					Spec: VpDeploymentSpec{
 						UpgradeStrategy: &VpDeploymentUpgradeStrategy{
 							Kind: "STATELESS",
@@ -146,7 +146,7 @@ var _ = Describe("VpDeployment", func() {
 					Namespace: "default",
 				},
 				Spec: VpDeploymentObjectSpec{
-					Metadata: VpDeploymentMetadata{},
+					Metadata: VpMetadata{},
 					Spec: VpDeploymentSpec{
 						UpgradeStrategy: &VpDeploymentUpgradeStrategy{
 							Kind: "STATELESS",

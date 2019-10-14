@@ -107,14 +107,16 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+
+	version := GetVersion()
 	setupLog.Info("Starting Ververica Platform K8s controller",
-		"version", GetVersion().String())
+		"version", version.String())
 
 	// Build the Ververica Platform API Client
 	ververicaAPIClient := vpAPI.NewAPIClient(&vpAPI.Configuration{
 		BasePath:      *ververicaPlatformURL,
 		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
-		UserAgent:     "VervericaPlatformK8sController/1.0.0/go",
+		UserAgent:     fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion),
 	})
 
 	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
@@ -122,7 +124,7 @@ func main() {
 	err = (&controllers.VpNamespaceReconciler{
 		Client:      mgr.GetClient(),
 		Log:         ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		VPAPIClient: *ververicaAPIClient,
+		VPAPIClient: ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
@@ -131,7 +133,7 @@ func main() {
 	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:      mgr.GetClient(),
 		Log:         ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		VPAPIClient: *ververicaAPIClient,
+		VPAPIClient: ververicaAPIClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
@@ -140,9 +142,17 @@ func main() {
 	if err = (&controllers.VpDeploymentReconciler{
 		Client:      mgr.GetClient(),
 		Log:         ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		VPAPIClient: *ververicaAPIClient,
+		VPAPIClient: ververicaAPIClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
+		os.Exit(1)
+	}
+	if err = (&controllers.VpSavepointReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
+		VPAPIClient: ververicaAPIClient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

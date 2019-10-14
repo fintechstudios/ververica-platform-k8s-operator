@@ -4,30 +4,30 @@ import (
 	"encoding/json"
 	"errors"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 )
 
 // DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
-func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (ververicaplatformv1beta1.VpDeploymentMetadata, error) {
-	var vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata
+func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1beta1.VpMetadata, error) {
+	var vpMetadata v1beta1.VpMetadata
 	metadataJSON, err := json.Marshal(deploymentMetadata)
 	if err != nil {
-		return vpDeploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
+		return vpMetadata, errors.New("cannot encode Metadata: " + err.Error())
 	}
 
 	// now unmarshal it into the platform model
-	if err = json.Unmarshal(metadataJSON, &vpDeploymentMetadata); err != nil {
-		return vpDeploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
+	if err = json.Unmarshal(metadataJSON, &vpMetadata); err != nil {
+		return vpMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
 	}
 
-	return vpDeploymentMetadata, nil
+	return vpMetadata, nil
 }
 
 // DeploymentMetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.VpDeploymentMetadata) (vpAPI.DeploymentMetadata, error) {
+func DeploymentMetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.DeploymentMetadata, error) {
 	var deploymentMetadata vpAPI.DeploymentMetadata
-	vpMetadataJSON, err := json.Marshal(vpDeploymentMetadata)
+	vpMetadataJSON, err := json.Marshal(vpMetadata)
 	if err != nil {
 		return deploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())
 	}
@@ -38,11 +38,11 @@ func DeploymentMetadataFromNative(vpDeploymentMetadata ververicaplatformv1beta1.
 	}
 
 	// time.Time doesn't serialize correctly, so map over manually
-	if vpDeploymentMetadata.CreatedAt != nil {
-		deploymentMetadata.CreatedAt = vpDeploymentMetadata.CreatedAt.Time
+	if vpMetadata.CreatedAt != nil {
+		deploymentMetadata.CreatedAt = vpMetadata.CreatedAt.Time
 	}
-	if vpDeploymentMetadata.ModifiedAt != nil {
-		deploymentMetadata.ModifiedAt = vpDeploymentMetadata.ModifiedAt.Time
+	if vpMetadata.ModifiedAt != nil {
+		deploymentMetadata.ModifiedAt = vpMetadata.ModifiedAt.Time
 	}
 
 	return deploymentMetadata, nil

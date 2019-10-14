@@ -34,7 +34,7 @@ import (
 type VpDeploymentTargetReconciler struct {
 	client.Client
 	Log         logr.Logger
-	VPAPIClient vpAPI.APIClient
+	VPAPIClient *vpAPI.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
@@ -42,7 +42,7 @@ func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatfor
 	ctx := context.Background()
 
 	resource.Name = depTarget.Metadata.Name
-	resource.Spec.Metadata = ververicaplatformv1beta1.VpDeploymentTargetMetadata{
+	resource.Spec.Metadata = ververicaplatformv1beta1.VpMetadata{
 		Name:            depTarget.Metadata.Name,
 		Namespace:       depTarget.Metadata.Namespace,
 		ID:              depTarget.Metadata.Id,
