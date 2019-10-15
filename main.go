@@ -21,9 +21,9 @@ import (
 	"os"
 	"runtime"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	_ "github.com/joho/godotenv/autoload"
 	apiv1 "k8s.io/api/core/v1"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +74,7 @@ var (
 )
 
 func init() {
-	_ = ververicaplatformv1beta1.AddToScheme(scheme)
+	_ = v1beta1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -113,7 +113,7 @@ func main() {
 		"version", version.String())
 
 	// Build the Ververica Platform API Client
-	ververicaAPIClient := vpAPI.NewAPIClient(&vpAPI.Configuration{
+	ververicaAPIClient := appManager.NewAPIClient(&appManager.Configuration{
 		BasePath:      *ververicaPlatformURL,
 		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
 		UserAgent:     fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion),
@@ -148,8 +148,8 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.VpSavepointReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
+		Client:      mgr.GetClient(),
+		Log:         ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
 		VPAPIClient: ververicaAPIClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
