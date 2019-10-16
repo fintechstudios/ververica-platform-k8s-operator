@@ -67,7 +67,7 @@ var _ = Describe("VpNamespace Controller", func() {
 
 			fetched = &v1beta1.VpNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched.Status.State).To(Equal(namespace.Status.State))
+			Expect(string(fetched.Status.State)).To(Equal(namespace.Status.State))
 			Expect(fetched.Spec.Metadata.ResourceVersion).To(Equal(namespace.Metadata.ResourceVersion))
 			Expect(fetched.Spec.Metadata.ID).To(Equal(namespace.Metadata.Id))
 			Expect(fetched.ObjectMeta.Name).To(Equal(namespace.Metadata.Name))
