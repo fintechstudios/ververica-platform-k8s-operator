@@ -22,9 +22,10 @@ import (
 	"runtime"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	_ "github.com/joho/godotenv/autoload"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
+	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -84,14 +85,24 @@ func main() {
 		enableLeaderElection = flag.Bool("enable-leader-election", false,
 			"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 		enableDebugMode = flag.Bool("debug", false, "Enable debug mode for logging.")
-
 		watchNamespace = flag.String("watch-namespace", apiv1.NamespaceAll,
 			`Namespace to watch for resources. Default is to watch all namespaces`)
-
-		ververicaPlatformURL = flag.String("ververica-platform-url", "http://localhost:8081/api",
-			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol, host, and base path.")
+		appManagerApiUrl = flag.String("app-manager-api-url", "http://localhost:8081/api",
+			"The URL to the Ververica Platform AppManager API, without a trailing slash. Should include the protocol, host, and base path.")
+		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
 	flag.Parse()
+
+	if *envFile == "" {
+		// ignore error if just trying to autoload
+		_ = dotenv.Load()
+	} else {
+		err := dotenv.Load(*envFile)
+		if err != nil {
+			setupLog.Error(err, "unable to start manager")
+			os.Exit(1)
+		}
+	}
 
 	setupLog.Info("Watching namespace", "namespace", watchNamespace)
 
@@ -112,45 +123,50 @@ func main() {
 	setupLog.Info("Starting Ververica Platform K8s controller",
 		"version", version.String())
 
-	// Build the Ververica Platform API Client
-	ververicaAPIClient := appManager.NewAPIClient(&appManager.Configuration{
-		BasePath:      *ververicaPlatformURL,
-		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
+	appManagerClient := appManagerApi.NewAPIClient(&appManagerApi.Configuration{
+		BasePath:      *appManagerApiUrl,
+		DefaultHeader: make(map[string]string),
 		UserAgent:     fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion),
 	})
 
-	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
+	appManagerAuthStore := appManager.NewAuthStore()
+
+	setupLog.Info("Created AppManager API client", "client", appManagerClient)
 
 	err = (&controllers.VpNamespaceReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
 		os.Exit(1)
 	}
 	err = (&controllers.VpDeploymentTargetReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpDeploymentReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeployment"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpSavepointReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)

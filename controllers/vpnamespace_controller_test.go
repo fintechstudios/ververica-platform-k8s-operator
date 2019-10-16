@@ -19,9 +19,9 @@ var _ = Describe("VpNamespace Controller", func() {
 		vpAPIClient := vpAPI.APIClient{}
 
 		reconciler = VpNamespaceReconciler{
-			Client:      k8sClient,
-			Log:         logger,
-			VPAPIClient: &vpAPIClient,
+			Client:              k8sClient,
+			Log:                 logger,
+			AppManagerApiClient: &vpAPIClient,
 		}
 	})
 

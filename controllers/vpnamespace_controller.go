@@ -22,8 +22,9 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
 
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 
 	"github.com/go-logr/logr"
@@ -37,12 +38,13 @@ import (
 // VpNamespaceReconciler reconciles a VpNamespace object
 type VpNamespaceReconciler struct {
 	client.Client
-	Log         logr.Logger
-	VPAPIClient *appManager.APIClient
+	Log                 logr.Logger
+	AppManagerApiClient *appManagerApi.APIClient
+	AppManagerAuthStore *appManager.AuthStore
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *appManager.Namespace) error {
+func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *appManagerApi.Namespace) error {
 	ctx := context.Background()
 
 	resource.Name = namespace.Metadata.Name
@@ -77,21 +79,26 @@ func (r *VpNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 
 // handleCreate creates VP resources
 func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1beta1.VpNamespace) (ctrl.Result, error) {
-	ctx := context.Background()
 	log := r.getLogger(req)
+	nsName := req.Name
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	if err != nil {
+		log.Error(err, "cannot create context")
+		return ctrl.Result{Requeue:false}, nil
+	}
 
 	// create it
-	namespace, _, err := r.VPAPIClient.NamespacesApi.PostNamespace(ctx, &appManager.PostNamespaceOpts{
-		Body: optional.NewInterface(appManager.Namespace{
+	namespace, _, err := r.AppManagerApiClient.NamespacesApi.PostNamespace(ctx, &appManagerApi.PostNamespaceOpts{
+		Body: optional.NewInterface(appManagerApi.Namespace{
 			ApiVersion: "v1",
-			Metadata: &appManager.NamespaceMetadata{
+			Metadata: &appManagerApi.NamespaceMetadata{
 				Name: req.Name,
 			},
 		}),
 	})
 
 	if err != nil {
-		log.Error(err, "Error creating VP namespace")
+		log.Info("Error creating VP namespace")
 		return ctrl.Result{}, err
 	}
 	log.Info("Created namespace", "namespace", namespace)
@@ -105,7 +112,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, namespace appManager.Namespace) (ctrl.Result, error) {
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, namespace appManagerApi.Namespace) (ctrl.Result, error) {
 	// Now update the k8s resource and status as well
 	err := r.updateResource(&vpNamespace, &namespace)
 	return ctrl.Result{}, err
@@ -113,11 +120,16 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
 func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
 	log := r.getLogger(req)
+	nsName := req.Name
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	if err != nil {
+		log.Error(err, "cannot create context")
+		return ctrl.Result{Requeue:false}, nil
+	}
 	// Let's make sure it's deleted from the ververica platform
 	// Should be idempotent, so retrying shouldn't matter
-	namespace, _, err := r.VPAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
+	namespace, _, err := r.AppManagerApiClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
@@ -126,7 +138,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 
 	log.Info("Deleting namespace", "name", namespace.Metadata.Id)
 
-	if namespace.Status.State == "MARKED_FOR_DELETION" {
+	if namespace.Status.State == string(v1beta1.MarkedForDeletionNamespaceState) {
 		// Requeue for 5 seconds to wait for the namespace to be deleted
 		log.Info("Requeueing deletion request for 5 seconds")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
@@ -179,7 +191,12 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return res, nil
 	}
 
-	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(ctx, req.Name)
+	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(req.Name)
+	if err != nil {
+		log.Error(err, "cannot create context")
+		return ctrl.Result{Requeue:false}, nil
+	}
+	namespace, _, err := r.AppManagerApiClient.NamespacesApi.GetNamespace(appManagerCtx, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it

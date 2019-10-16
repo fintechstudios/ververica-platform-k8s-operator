@@ -22,5 +22,5 @@ bin
 vendor
 
 # Other dev files
-.env
+*.env
 resources.yaml

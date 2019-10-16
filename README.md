@@ -39,13 +39,22 @@ Look in [docs/mappings](./docs/mappings) for information on each supported resou
 
 To run the binary directly, after building run `./bin/manager`.
 
-Flags:
+**Flags:**
 * `--help` prints usage
-* `--ververica-platform-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform Service API
+* `--app-manager-api-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform's AppManager API
 * `--debug` debug mode for logging
 * `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
 * `--metrics-addr=:8080` address to bind metrics to 
 * `--watch-namespace=all-namespaces` the namespace to watch resources on
+* `[--env-file]` the path to an environment (`.env`) file to be loaded
+
+For authorization with the AppManager's API, a token is needed. This needs to be provided in the environment on either a
+per-namespace or one-token-to-rule-them-all basis.
+
+**Environment:**
+* `VP_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
+* `VP_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
+
 
 ## Docker
 
@@ -74,7 +83,7 @@ Also built as a Go 1.11 module - no vendor files here.
 System Pre-requisites:
 - `go` >= `1.12`
 - `make` >= `4`
-- `kubebuilder` == [`v2.0.0-beta.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0-beta.0)
+- `kubebuilder` == [`v2.x`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0)
 - [`kustomize`](https://github.com/kubernetes-sigs/kustomize) >= `v3.0.1`
 - `docker` >= `19`
 

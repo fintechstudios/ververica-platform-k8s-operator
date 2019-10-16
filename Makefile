@@ -93,7 +93,7 @@ swagger-gen:
 # Create the test cluster using kind
 .PHONY: test-cluster-create
 test-cluster-create:
-	kind create cluster --name $(TEST_CLUSTER_NAME)
+	kind create cluster --name $(TEST_CLUSTER_NAME) && $(MAKE) install
 
 # Delete the test cluster using kind
 .PHONY: test-cluster-delete
