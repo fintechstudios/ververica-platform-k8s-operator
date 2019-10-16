@@ -21,9 +21,9 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager-helpers"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
-	vpAPIHelpers "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/vp_api_helpers"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,7 +33,7 @@ import (
 type VpSavepointReconciler struct {
 	client.Client
 	Log         logr.Logger
-	VPAPIClient *vpAPI.APIClient
+	VPAPIClient *appManager.APIClient
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -42,7 +42,7 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(vpSavepoint *v1beta1.VpSavepoint, savepoint *vpAPI.Savepoint) error {
+func (r *VpSavepointReconciler) updateResource(vpSavepoint *v1beta1.VpSavepoint, savepoint *appManager.Savepoint) error {
 	ctx := context.Background()
 
 	metadata, err := converters.SavepointMetadataToNative(*savepoint.Metadata)
@@ -85,7 +85,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		// no deployment id has been explicitly set
 		// try to find one
 		depName := vpSavepoint.Spec.DeploymentName
-		deployment, err := vpAPIHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, depName)
+		deployment, err := appManagerHelpers.GetDeploymentByName(r.VPAPIClient, ctx, namespace, depName)
 
 		if utils.IsNotFoundError(err) {
 			log.Error(err, "No deployment by name %s", depName)
@@ -99,10 +99,10 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		depId = deployment.Metadata.Id
 	}
 
-	createdSavepoint, res, err := r.VPAPIClient.SavepointsApi.CreateSavepoint(ctx, namespace, vpAPI.Savepoint{
+	createdSavepoint, res, err := r.VPAPIClient.SavepointsApi.CreateSavepoint(ctx, namespace, appManager.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
-		Metadata: &vpAPI.SavepointMetadata{
+		Metadata: &appManager.SavepointMetadata{
 			DeploymentId: depId,
 			Namespace:    namespace,
 		},

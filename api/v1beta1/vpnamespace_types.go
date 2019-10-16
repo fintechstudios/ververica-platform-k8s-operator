@@ -48,13 +48,23 @@ type VpNamespaceSpec struct {
 	Metadata VpNamespaceMetadata `json:"metadata,omitempty"`
 }
 
+// NamespaceState is the enum of all possible namespace states
+// Only one of the following states may be specified.
+// +kubebuilder:validation:Enum=ACTIVE;MARKED_FOR_DELETION
+type NamespaceState string
+
+const (
+	ActiveNamespaceState = NamespaceState("ACTIVE")
+	MarkedForDeletionNamespaceState = NamespaceState("MARKED_FOR_DELETION")
+)
+
 // VpNamespaceStatus defines the observed state of VpNamespace
 type VpNamespaceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	State string `json:"state,omitempty"`
+	State NamespaceState `json:"state,omitempty"`
 }
 
 // +kubebuilder:object:root=true
