@@ -21,7 +21,7 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/go-logr/logr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"

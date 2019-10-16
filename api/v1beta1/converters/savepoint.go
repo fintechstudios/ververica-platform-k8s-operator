@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 )
 
 func SavepointSpecToNative(savepointSpec vpAPI.SavepointSpec) (v1beta1.VpSavepointSpec, error) {

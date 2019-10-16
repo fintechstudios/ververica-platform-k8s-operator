@@ -8,7 +8,7 @@
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
-Built for Ververica Platform version `1.4.x`.
+Built for Ververica Platform version `2.x`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
 [Ververica Platform Docs](https://docs.ververica.com/)
@@ -27,10 +27,6 @@ custom VP Resources will all be prefixed with `Vp`.
 
 * `Job`
 * `Event`
-* `Role Binding`
-* `Role`
-* `Cluster Role Binding`
-* `Cluster Role`
 * `Secret Value`
 * `Status`
 
@@ -45,7 +41,7 @@ To run the binary directly, after building run `./bin/manager`.
 
 Flags:
 * `--help` prints usage
-* `--ververica-platform-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform API  
+* `--ververica-platform-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform Service API
 * `--debug` debug mode for logging
 * `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
 * `--metrics-addr=:8080` address to bind metrics to 
@@ -153,7 +149,7 @@ Affected files:
 
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
-you must manually change [`model_any.go`](./ververica-platform-api/model_any.go) to:
+you must manually change [`model_any.go`](appmanager-api-client/model_any.go) to:
 
 ```go
 package ververicaplatformapi

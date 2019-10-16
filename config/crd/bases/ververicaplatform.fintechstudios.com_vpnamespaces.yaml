@@ -70,6 +70,11 @@ spec:
           description: VpNamespaceStatus defines the observed state of VpNamespace
           properties:
             state:
+              description: NamespaceState is the enum of all possible namespace states
+                Only one of the following states may be specified.
+              enum:
+              - ACTIVE
+              - MARKED_FOR_DELETION
               type: string
           type: object
       type: object

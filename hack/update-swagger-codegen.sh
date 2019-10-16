@@ -21,9 +21,9 @@ set -o pipefail
 
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")
 PROJECT_DIR="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
-SWAGGER_FILE=ververica-platform-swagger.json
+SWAGGER_FILE=appmanager-api-client-swagger.json
 CONFIG_FILE=swagger-gen-config.json
-OUT_DIR=ververica-platform-api
+OUT_DIR=appmanager-api-client
 
 rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !"${PROJECT_DIR:?}"/${OUT_DIR}/model_any.go !"${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore
 mkdir -p "${PROJECT_DIR}"/${OUT_DIR}
