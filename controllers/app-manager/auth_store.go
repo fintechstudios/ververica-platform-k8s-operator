@@ -11,27 +11,45 @@ import (
 
 const DefaultTokenEnvVar = "VP_API_TOKEN"
 
-type AuthStore struct {
-	namespaceTokenCache map[string]*string
+// One token per namespace
+const TokenName = "vp-k8s-controller-admin-token"
+
+type TokenData struct {
+	Name       string
+	value      string
+	wasCreated bool
 }
 
-// AuthNotFoundError represents when no auth token can be found for a namespace
-type AuthNotFoundError struct {
+// TokenNotFoundError represents when no auth token can be found for a namespace
+type TokenNotFoundError struct {
 	Namespace string
+	Name      string
 }
 
-func (err AuthNotFoundError) Error() string {
-	return fmt.Sprintf("no VP API token found for namespace %s", err.Namespace)
+func (err TokenNotFoundError) Error() string {
+	return fmt.Sprintf("no API token by name %s found in namespace %s", err.Name, err.Namespace)
 }
 
-func NewAuthStore() *AuthStore {
+type TokenManager interface {
+	TokenExists(ctx context.Context, name, namespace string) (bool, error)
+	CreateToken(ctx context.Context, name, role, namespace string) (string, error)
+	RemoveToken(ctx context.Context, name, namespace string) (bool, error)
+}
+
+type AuthStore struct {
+	namespaceTokenCache map[string]*TokenData
+	tokenManager        TokenManager
+}
+
+func NewAuthStore(tokenManager TokenManager) *AuthStore {
 	return &AuthStore{
-		namespaceTokenCache: make(map[string]*string),
+		namespaceTokenCache: make(map[string]*TokenData),
+		tokenManager:        tokenManager,
 	}
 }
 
 func (s *AuthStore) findTokenForNamespaceInEnv(namespace string) *string {
-	namespaceTokenEnvVar := fmt.Sprintf("VP_API_TOKEN_%s", namespace)
+	namespaceTokenEnvVar := fmt.Sprintf("VP_API_TOKEN_%s", strings.ToUpper(namespace))
 
 	for _, e := range os.Environ() {
 		pair := strings.SplitN(e, "=", 2)
@@ -47,30 +65,82 @@ func (s *AuthStore) findTokenForNamespaceInEnv(namespace string) *string {
 	return nil
 }
 
-func (s *AuthStore) getTokenForNamespace(namespace string) (string, error) {
+func (s *AuthStore) getTokenForNamespace(ctx context.Context, namespace string) (string, error) {
 	// search chain:
 	// - memory cache
 	// - environment in form VP_API_TOKEN_{NAMESPACE}
 	// - environment in form VP_API_TOKEN
-	capNamespace := strings.ToUpper(namespace)
-	if s.namespaceTokenCache[capNamespace] != nil {
-		return *s.namespaceTokenCache[capNamespace], nil
+	// if none are found, will attempt to create a token
+	if s.namespaceTokenCache[namespace] != nil {
+		return s.namespaceTokenCache[namespace].value, nil
 	}
 
-	if token := s.findTokenForNamespaceInEnv(capNamespace); token != nil {
-		s.namespaceTokenCache[capNamespace] = token
+	if token := s.findTokenForNamespaceInEnv(namespace); token != nil {
+		s.namespaceTokenCache[namespace] = &TokenData{
+			value:      *token,
+			Name:       "Env Provided",
+			wasCreated: false,
+		}
 		return *token, nil
 	}
 
-	return "", AuthNotFoundError{Namespace: namespace}
+	var err error
+	if tokenData, err := s.getOrCreateTokenForNamespace(ctx, namespace); err == nil {
+		s.namespaceTokenCache[namespace] = tokenData
+		return tokenData.value, nil
+	}
+
+	return "", err
 }
 
-func (s *AuthStore) ContextForNamespace(namespace string) (context.Context, error) {
-	var apiToken string
-	var err error
-	if apiToken, err = s.getTokenForNamespace(namespace); err != nil {
+// getOrCreateTokenForNamespace gets a token for a namespace from the token manager or creates one if none are found
+func (s *AuthStore) getOrCreateTokenForNamespace(ctx context.Context, namespace string) (*TokenData, error) {
+	exists, err := s.tokenManager.TokenExists(ctx, TokenName, namespace)
+	if err != nil {
 		return nil, err
 	}
 
-	return context.WithValue(context.Background(), appManagerApi.ContextAccessToken, apiToken), nil
+	if exists {
+		// a token already exists -- must delete it as
+		// TODO: perhaps we should implement a SecretStore backed by K8s secrets for created tokens
+		if _, err = s.tokenManager.RemoveToken(ctx, TokenName, namespace); err != nil {
+			return nil, err
+		}
+	}
+
+	// we always want full-access tokens
+	token, err := s.tokenManager.CreateToken(ctx, TokenName, "owner", namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenData{
+		Name:       TokenName,
+		value:      token,
+		wasCreated: true,
+	}, nil
+}
+
+func (s *AuthStore) ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error) {
+	var token string
+	var err error
+	if token, err = s.getTokenForNamespace(baseCtx, namespace); err != nil {
+		return nil, err
+	}
+
+	return context.WithValue(baseCtx, appManagerApi.ContextAccessToken, token), nil
+}
+
+func (s *AuthStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
+	var deletedTokens []string
+	for namespace, tokenData := range s.namespaceTokenCache {
+		wasDeleted, err := s.tokenManager.RemoveToken(ctx, tokenData.Name, namespace)
+		if err != nil {
+			return deletedTokens, err
+		}
+		if wasDeleted {
+			deletedTokens = append(deletedTokens, namespace+"/"+tokenData.Name)
+		}
+	}
+	return deletedTokens, nil
 }

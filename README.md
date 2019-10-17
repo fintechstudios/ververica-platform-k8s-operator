@@ -52,8 +52,8 @@ For authorization with the AppManager's API, a token is needed. This needs to be
 per-namespace or one-token-to-rule-them-all basis.
 
 **Environment:**
-* `VP_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
-* `VP_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
+* `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
+* `APPMANAGER_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
 
 
 ## Docker
@@ -115,11 +115,12 @@ To use the default test cluster, you'll need to store a `KUBECONFIG` env var poi
 
 [`godotenv`](https://github.com/joho/godotenv) automatically loads this when running `main`.
 
-### Ververica Platform API
+### AppManager + Platform APIs
 
-The API Client is auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
+The API Clients are auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
 
-#### Pre-Generation Changes
+#### AppManager
+##### Pre-Generation Changes
 
 The original Swagger file was taken from their live API documentation (available at `${VP_URL}/api/swagger`),
 but the docs don't exactly match their API, which makes the generated client incorrect.
@@ -135,7 +136,7 @@ Main changes necessary:
 * `POST /namespaces/{namespace}/deployment-targets` needs a `201` response with a `DeploymenTarget` in the body
 * `model_pods.go` needs to be updated with the proper Kubernetes types
 
-#### Post-Generation Changes
+##### Post-Generation Changes
 
 The `optional` package is missing from many of the imports in the generated code, as must be added manually.
 
@@ -150,7 +151,6 @@ import (
 ```
 
 Affected files:
-- `api_api_tokens.go`
 - `api_events.go`
 - `api_jobs.go`
 - `api_namespaces.go`

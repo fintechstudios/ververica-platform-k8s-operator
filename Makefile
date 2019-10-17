@@ -88,7 +88,8 @@ kustomize-build: kustomize-patch-image
 # Update the Swagger Client API
 .PHONY: swagger-gen
 swagger-gen:
-	./hack/update-swagger-codegen.sh
+	./hack/update-app-manager-swagger-codegen.sh && \
+	./hack/update-platform-swagger-codegen.sh
 
 # Create the test cluster using kind
 .PHONY: test-cluster-create

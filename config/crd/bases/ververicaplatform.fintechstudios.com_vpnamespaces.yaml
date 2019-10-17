@@ -7,18 +7,12 @@ metadata:
   name: vpnamespaces.ververicaplatform.fintechstudios.com
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.metadata.id
-    name: Id
-    type: string
-  - JSONPath: .spec.metadata.resourceVersion
-    name: Resource-Version
-    type: integer
-  - JSONPath: .spec.metadata.createdAt
+  - JSONPath: .metadata.creationTimestamp
     name: Created
     type: date
-  - JSONPath: .spec.metadata.modifiedAt
-    name: Modified
-    type: date
+  - JSONPath: .status.lifecyclePhase
+    name: LifecyclePhase
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpNamespace
@@ -45,36 +39,29 @@ spec:
         spec:
           description: VpNamespaceSpec defines the desired state of VpNamespace
           properties:
-            metadata:
-              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                Important: Run "make" to regenerate code after modifying this file
-                Kind and ApiVersion are mapped automatically Status is mapped to a
-                subresource'
-              properties:
-                createdAt:
-                  format: date-time
-                  type: string
-                id:
-                  type: string
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
-              type: object
+            roleBindings:
+              items:
+                properties:
+                  members:
+                    items:
+                      type: string
+                    type: array
+                  role:
+                    type: string
+                type: object
+              type: array
           type: object
         status:
           description: VpNamespaceStatus defines the observed state of VpNamespace
           properties:
-            state:
-              description: NamespaceState is the enum of all possible namespace states
-                Only one of the following states may be specified.
+            lifecyclePhase:
+              description: NamespaceLifecyclePhase is the enum of all possible namespace
+                lifecycle phase Only one of the following states may be specified.
               enum:
-              - ACTIVE
-              - MARKED_FOR_DELETION
+              - LIFECYCLE_PHASE_INVALID
+              - LIFECYCLE_PHASE_ACTIVE
+              - LIFECYCLE_PHASE_TERMINATING
+              - UNRECOGNIZED
               type: string
           type: object
       type: object

@@ -80,7 +80,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	log := r.getLogger(req)
 
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil
@@ -161,7 +161,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil

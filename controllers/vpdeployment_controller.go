@@ -114,7 +114,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue: false}, nil
@@ -165,7 +165,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue: false}, nil
@@ -207,7 +207,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	// First must make sure the deployment is canceled, then must delete it.
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue: false}, nil
@@ -297,7 +297,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil

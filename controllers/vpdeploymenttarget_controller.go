@@ -84,7 +84,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	ctx := context.Background()
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil
@@ -145,7 +145,7 @@ func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarge
 func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget) (ctrl.Result, error) {
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil
@@ -202,7 +202,7 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
-	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(nsName)
+	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
 		return ctrl.Result{Requeue:false}, nil
