@@ -148,7 +148,7 @@ var _ = Describe("AuthStore", func() {
 			It("should create a new token and delete the old if one already exist", func() {
 				token, err := authStore.getTokenForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
-				Expect(token).To(Equal(fakeTokenSecret("owner", "test", 2)))
+				Expect(token).To(Equal(fakeTokenSecret("owner", "test", 1)))
 				Expect(len(manager.tokens)).To(Equal(1))
 			})
 		})
