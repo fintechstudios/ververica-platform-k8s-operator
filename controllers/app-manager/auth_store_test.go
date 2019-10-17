@@ -159,12 +159,5 @@ var _ = Describe("AuthStore", func() {
 				Expect(ctx.Value(appManagerApi.ContextAccessToken)).To(Equal(TestNsToken))
 			})
 		})
-
-		It("should return an error if no token could be found", func() {
-			ctx, err := authStore.ContextForNamespace(ctx, "test")
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(ContainSubstring("namespace test"))
-			Expect(ctx).To(BeNil())
-		})
 	})
 })
