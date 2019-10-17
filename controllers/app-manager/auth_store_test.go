@@ -40,8 +40,14 @@ func (m *testTokenManager) TokenExists(ctx context.Context, name, namespace stri
 }
 
 func (m *testTokenManager) CreateToken(ctx context.Context, name, role, namespace string) (string, error) {
-	lastTokenData := m.tokens[len(m.tokens)-1]
-	id := lastTokenData.id + 1
+	var id int
+	if len(m.tokens) == 0 {
+		lastTokenData := m.tokens[len(m.tokens)-1]
+		id = lastTokenData.id + 1
+	} else {
+		id = 1
+	}
+
 	m.tokens = append(m.tokens, testTokenData{
 		namespace,
 		name,
