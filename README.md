@@ -48,8 +48,11 @@ To run the binary directly, after building run `./bin/manager`.
 * `--watch-namespace=all-namespaces` the namespace to watch resources on
 * `[--env-file]` the path to an environment (`.env`) file to be loaded
 
-For authorization with the AppManager's API, a token is needed. This needs to be provided in the environment on either a
-per-namespace or one-token-to-rule-them-all basis.
+For authorization with the AppManager's API, a token is needed. This can be provided in the environment on either a
+per-namespace or one-token-to-rule-them-all basis. If it is not provided in the environment, an "owner" token will be created
+for each namespace that resources are managed in.
+
+Specifying in the environment is a good way to integrate with namespaces that aren't defined in Kubernetes.
 
 **Environment:**
 * `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased

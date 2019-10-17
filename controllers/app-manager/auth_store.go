@@ -9,7 +9,7 @@ import (
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 )
 
-const DefaultTokenEnvVar = "VP_API_TOKEN"
+const DefaultTokenEnvVar = "APPMANAGER_API_TOKEN"
 
 // One token per namespace
 const TokenName = "vp-k8s-controller-admin-token"
@@ -49,7 +49,7 @@ func NewAuthStore(tokenManager TokenManager) *AuthStore {
 }
 
 func (s *AuthStore) findTokenForNamespaceInEnv(namespace string) *string {
-	namespaceTokenEnvVar := fmt.Sprintf("VP_API_TOKEN_%s", strings.ToUpper(namespace))
+	namespaceTokenEnvVar := fmt.Sprintf("%s_%s", DefaultTokenEnvVar, strings.ToUpper(namespace))
 
 	for _, e := range os.Environ() {
 		pair := strings.SplitN(e, "=", 2)
