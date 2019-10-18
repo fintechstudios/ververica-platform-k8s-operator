@@ -13,14 +13,8 @@ spec:
   - JSONPath: .spec.metadata.namespace
     name: Namespace
     type: string
-  - JSONPath: .spec.metadata.resourceVersion
-    name: Resource-Version
-    type: integer
-  - JSONPath: .spec.metadata.createdAt
-    name: Created
-    type: date
-  - JSONPath: .spec.metadata.modifiedAt
-    name: Modified
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
     type: date
   group: ververicaplatform.fintechstudios.com
   names:
@@ -56,25 +50,12 @@ spec:
                   additionalProperties:
                     type: string
                   type: object
-                createdAt:
-                  format: date-time
-                  type: string
-                id:
-                  type: string
                 labels:
                   additionalProperties:
                     type: string
                   type: object
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  type: string
                 namespace:
                   type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
               type: object
             spec:
               description: VpDeploymentTargetSpec allows a users to set defaults for

@@ -53,12 +53,6 @@ type VpSavepointMetadata struct {
 	// Can be specified through the .spec.deploymentName
 	// +optional
 	DeploymentID string `json:"deploymentId,omitempty"`
-
-	// +optional
-	JobID string `json:"jobId,omitempty"`
-
-	// +optional
-	Origin SavepointOrigin `json:"origin,omitempty"`
 }
 
 // VpSavepointSpec defines the desired state of VpSavepoint
@@ -93,6 +87,8 @@ type VpSavepointStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 
 // VpSavepoint is the Schema for the vpsavepoints API
 type VpSavepoint struct {

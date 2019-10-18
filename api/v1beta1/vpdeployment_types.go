@@ -234,14 +234,12 @@ type VpDeploymentStatus struct {
 	// 		- list of Jobs
 	//		- list of Events
 	//		- list of K8s Pods created
-	//		- potentially all dynamic data (id, etc.) ?
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
-// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
-// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Flink-Version",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
 // +kubebuilder:printcolumn:name="Flink-Image-Tag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
 // +kubebuilder:printcolumn:name="Flink-Image-Registry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"

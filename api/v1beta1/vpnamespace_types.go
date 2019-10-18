@@ -64,7 +64,7 @@ type VpNamespaceStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="LifecyclePhase",type="string",JSONPath=".status.lifecyclePhase"
 
 // VpNamespace is the Schema for the vpnamespaces API

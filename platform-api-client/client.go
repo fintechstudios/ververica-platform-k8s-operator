@@ -424,3 +424,8 @@ func (e GenericSwaggerError) StatusCode() int {
 func (e GenericSwaggerError) Model() interface{} {
 	return e.model
 }
+
+func (e GenericSwaggerError) WithStatusCode(statusCode int) GenericSwaggerError {
+	e.statusCode = statusCode
+	return e
+}

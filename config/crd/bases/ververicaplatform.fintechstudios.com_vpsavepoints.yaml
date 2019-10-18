@@ -6,6 +6,13 @@ metadata:
   creationTimestamp: null
   name: vpsavepoints.ververicaplatform.fintechstudios.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  - JSONPath: .status.state
+    name: State
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpSavepoint
@@ -44,37 +51,15 @@ spec:
                   additionalProperties:
                     type: string
                   type: object
-                createdAt:
-                  format: date-time
-                  type: string
                 deploymentId:
                   description: Can be specified through the .spec.deploymentName
-                  type: string
-                id:
-                  type: string
-                jobId:
                   type: string
                 labels:
                   additionalProperties:
                     type: string
                   type: object
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  type: string
                 namespace:
                   type: string
-                origin:
-                  enum:
-                  - USER_REQUEST
-                  - SUSPEND_AND_UPGRADE
-                  - SUSPEND
-                  - COPIED
-                  type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
               type: object
             spec:
               properties:

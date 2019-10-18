@@ -8,7 +8,7 @@ metadata:
 spec:
   additionalPrinterColumns:
   - JSONPath: .metadata.creationTimestamp
-    name: Created
+    name: Age
     type: date
   - JSONPath: .status.lifecyclePhase
     name: LifecyclePhase
