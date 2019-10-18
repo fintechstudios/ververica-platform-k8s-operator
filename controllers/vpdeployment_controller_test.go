@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -20,8 +20,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 

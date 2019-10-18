@@ -12,14 +12,14 @@ func IsNotFoundError(err error) bool {
 		return false
 	}
 
-	switch err.(type) {
+	switch err := err.(type) {
 	// internal
 	case DeploymentNotFoundError:
 		return true
 	case platformApiClient.GenericSwaggerError:
-		return err.(platformApiClient.GenericSwaggerError).StatusCode() == 404
+		return err.StatusCode() == 404
 	case appManagerApiClient.GenericSwaggerError:
-		return err.(appManagerApiClient.GenericSwaggerError).StatusCode() == 404
+		return err.StatusCode() == 404
 	// external
 	default:
 		return apierrors.IsNotFound(err) // K8s
