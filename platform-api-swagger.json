@@ -1,0 +1,560 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "The Ververica Platform APIs, excluding Application Manager.",
+    "version": "2.0.0",
+    "title": "Ververica Platform API",
+    "contact": {
+      "name": "Ververica GmbH",
+      "url": "https://www.ververica.com",
+      "email": "platform@ververica.com"
+    },
+    "license": {
+      "name": "Proprietary"
+    }
+  },
+  "host": "localhost:8081",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "api-tokens",
+      "description": "Api Tokens"
+    },
+    {
+      "name": "namespaces",
+      "description": "Namespaces"
+    }
+  ],
+  "paths": {
+    "/apitokens/v1/namespaces/{ns}/apitokens": {
+      "get": {
+        "tags": [
+          "api-tokens"
+        ],
+        "summary": "listApiTokens",
+        "operationId": "listApiTokens",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListApiTokensResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "api-tokens"
+        ],
+        "summary": "createApiToken",
+        "operationId": "createApiToken",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "apiToken",
+            "description": "apiToken",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ApiToken"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateApiTokenResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/apitokens/v1/namespaces/{ns}/apitokens/{apiTokenName}": {
+      "get": {
+        "tags": [
+          "api-tokens"
+        ],
+        "summary": "getApiToken",
+        "operationId": "getApiToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "apiTokenName",
+            "in": "path",
+            "description": "apiTokenName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetApiTokenResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "api-tokens"
+        ],
+        "summary": "deleteApiToken",
+        "operationId": "deleteApiToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "apiTokenName",
+            "in": "path",
+            "description": "apiTokenName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteApiTokenResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/namespaces/v1/namespaces": {
+      "get": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "listNamespaces",
+        "operationId": "listNamespaces",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListNamespacesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "createNamespace",
+        "operationId": "createNamespace",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "namespace",
+            "description": "namespace",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Namespace"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateNamespaceResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/namespaces/v1/namespaces/{ns}": {
+      "get": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "getNamespace",
+        "operationId": "getNamespace",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetNamespaceResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "updateNamespace",
+        "operationId": "updateNamespace",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "namespace",
+            "description": "namespace",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Namespace"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateNamespaceResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "deleteNamespace",
+        "operationId": "deleteNamespace",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteNamespaceResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "ApiToken": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        }
+      },
+      "title": "ApiToken"
+    },
+    "CreateApiTokenResponse": {
+      "type": "object",
+      "properties": {
+        "apiToken": {
+          "$ref": "#/definitions/ApiToken"
+        }
+      },
+      "title": "CreateApiTokenResponse"
+    },
+    "CreateNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/definitions/Namespace"
+        }
+      },
+      "title": "CreateNamespaceResponse"
+    },
+    "DeleteApiTokenResponse": {
+      "type": "object",
+      "title": "DeleteApiTokenResponse"
+    },
+    "DeleteNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/definitions/Namespace"
+        }
+      },
+      "title": "DeleteNamespaceResponse"
+    },
+    "GetApiTokenResponse": {
+      "type": "object",
+      "properties": {
+        "apiToken": {
+          "$ref": "#/definitions/ApiToken"
+        }
+      },
+      "title": "GetApiTokenResponse"
+    },
+    "GetNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/definitions/Namespace"
+        }
+      },
+      "title": "GetNamespaceResponse"
+    },
+    "ListApiTokensResponse": {
+      "type": "object",
+      "properties": {
+        "apiTokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ApiToken"
+          }
+        }
+      },
+      "title": "ListApiTokensResponse"
+    },
+    "ListNamespacesResponse": {
+      "type": "object",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Namespace"
+          }
+        }
+      },
+      "title": "ListNamespacesResponse"
+    },
+    "Namespace": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lifecyclePhase": {
+          "type": "string",
+          "enum": [
+            "LIFECYCLE_PHASE_INVALID",
+            "LIFECYCLE_PHASE_ACTIVE",
+            "LIFECYCLE_PHASE_TERMINATING",
+            "UNRECOGNIZED"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "roleBindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RoleBinding"
+          }
+        }
+      },
+      "title": "Namespace"
+    },
+    "RoleBinding": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "title": "RoleBinding"
+    },
+    "UpdateNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/definitions/Namespace"
+        }
+      },
+      "title": "UpdateNamespaceResponse"
+    }
+  }
+}

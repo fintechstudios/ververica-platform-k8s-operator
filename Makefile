@@ -17,7 +17,7 @@ all: manager
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.0-beta.4
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.1
 CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
@@ -88,12 +88,13 @@ kustomize-build: kustomize-patch-image
 # Update the Swagger Client API
 .PHONY: swagger-gen
 swagger-gen:
-	./hack/update-swagger-codegen.sh
+	./hack/update-app-manager-swagger-codegen.sh && \
+	./hack/update-platform-swagger-codegen.sh
 
 # Create the test cluster using kind
 .PHONY: test-cluster-create
 test-cluster-create:
-	kind create cluster --name $(TEST_CLUSTER_NAME)
+	kind create cluster --name $(TEST_CLUSTER_NAME) && $(MAKE) install
 
 # Delete the test cluster using kind
 .PHONY: test-cluster-delete

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"strings"
+
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -16,7 +18,9 @@ func IsNotFoundError(err error) bool {
 		return true
 	// external
 	default:
-		return err.Error() == "404 Not Found" || // Swagger
+		errMsg := strings.TrimSpace(err.Error())
+		return errMsg == "404 Not Found" || // AppManager API
+			errMsg == "404" || // Platform API
 			apierrs.IsNotFound(err) // K8s
 	}
 }

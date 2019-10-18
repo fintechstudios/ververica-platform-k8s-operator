@@ -19,9 +19,9 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 		vpAPIClient := vpAPI.APIClient{}
 
 		reconciler = VpDeploymentTargetReconciler{
-			Client:      k8sClient,
-			Log:         logger,
-			VPAPIClient: &vpAPIClient,
+			Client:              k8sClient,
+			Log:                 logger,
+			AppManagerApiClient: &vpAPIClient,
 		}
 	})
 

@@ -2,6 +2,7 @@ package converters
 
 import (
 	"errors"
+	"fmt"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
@@ -29,7 +30,7 @@ func parseDeploymentPatchValue(value vpAPI.Any) (*string, bool) {
 
 	switch value.(type) {
 	case string:
-		str := value.(string)
+		str := fmt.Sprintf("%s", value)
 		return &str, true
 	default:
 		return nil, false

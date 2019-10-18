@@ -20,14 +20,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
-
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,29 +35,17 @@ import (
 // VpNamespaceReconciler reconciles a VpNamespace object
 type VpNamespaceReconciler struct {
 	client.Client
-	Log         logr.Logger
-	VPAPIClient *appManager.APIClient
+	Log                 logr.Logger
+	AppManagerAuthStore *appManager.AuthStore
+	PlatformApiClient   *platformApiClient.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *appManager.Namespace) error {
+func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *platformApiClient.Namespace) error {
 	ctx := context.Background()
 
-	resource.Name = namespace.Metadata.Name
-	resource.Spec.Metadata = v1beta1.VpNamespaceMetadata{
-		Name:            namespace.Metadata.Name,
-		ID:              namespace.Metadata.Id,
-		CreatedAt:       &metav1.Time{Time: namespace.Metadata.CreatedAt},
-		ModifiedAt:      &metav1.Time{Time: namespace.Metadata.ModifiedAt},
-		ResourceVersion: namespace.Metadata.ResourceVersion,
-	}
-
 	var err error
-	if resource.Status.State, err = converters.NamespaceStateToNative(namespace.Status.State); err != nil {
-		return err
-	}
-
-	if err := r.Update(ctx, resource); err != nil {
+	if resource.Status.LifecyclePhase, err = converters.NamespaceLifecyclePhaseToNative(*namespace.LifecyclePhase); err != nil {
 		return err
 	}
 
@@ -77,27 +63,22 @@ func (r *VpNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 
 // handleCreate creates VP resources
 func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1beta1.VpNamespace) (ctrl.Result, error) {
-	ctx := context.Background()
 	log := r.getLogger(req)
-
+	ctx := context.Background()
 	// create it
-	namespace, _, err := r.VPAPIClient.NamespacesApi.PostNamespace(ctx, &appManager.PostNamespaceOpts{
-		Body: optional.NewInterface(appManager.Namespace{
-			ApiVersion: "v1",
-			Metadata: &appManager.NamespaceMetadata{
-				Name: req.Name,
-			},
-		}),
+	createRes, _, err := r.PlatformApiClient.NamespacesApi.CreateNamespace(ctx, platformApiClient.Namespace{
+		Name:         "namespaces/" + req.Name,
+		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
 
 	if err != nil {
-		log.Error(err, "Error creating VP namespace")
+		log.Info("Error creating VP namespace")
 		return ctrl.Result{}, err
 	}
-	log.Info("Created namespace", "namespace", namespace)
+	log.Info("Created namespace", "namespace", createRes.Namespace)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(&vpNamespace, &namespace); err != nil {
+	if err := r.updateResource(&vpNamespace, createRes.Namespace); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -105,28 +86,44 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, namespace appManager.Namespace) (ctrl.Result, error) {
-	// Now update the k8s resource and status as well
-	err := r.updateResource(&vpNamespace, &namespace)
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, currentNamespace platformApiClient.Namespace) (ctrl.Result, error) {
+	ctx := context.Background()
+
+	// lifecyclePhase and createTime must be left nil
+	updatedNamespace := platformApiClient.Namespace{
+		Name:           "namespaces/" + req.Name,
+		RoleBindings:   converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
+	}
+	updateRes, _, err := r.PlatformApiClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = r.updateResource(&vpNamespace, updateRes.Namespace)
 	return ctrl.Result{}, err
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
 func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
 	log := r.getLogger(req)
+	ctx := context.Background()
 	// Let's make sure it's deleted from the ververica platform
 	// Should be idempotent, so retrying shouldn't matter
-	namespace, _, err := r.VPAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
+	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, "namespaces/"+req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
-	log.Info("Deleting namespace", "name", namespace.Metadata.Id)
+	log.Info("Deleting namespace")
 
-	if namespace.Status.State == "MARKED_FOR_DELETION" {
+	lifecylePhase, err := converters.NamespaceLifecyclePhaseToNative(*namespaceRes.Namespace.LifecyclePhase)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if lifecylePhase == v1beta1.TerminatingNamespaceLifecyclePhase {
 		// Requeue for 5 seconds to wait for the namespace to be deleted
 		log.Info("Requeueing deletion request for 5 seconds")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
@@ -179,7 +176,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return res, nil
 	}
 
-	namespace, _, err := r.VPAPIClient.NamespacesApi.GetNamespace(ctx, req.Name)
+	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.GetNamespace(context.Background(), req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it
@@ -189,8 +186,8 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Update event", "vp namespace", namespace.Metadata.Name)
-	return r.handleUpdate(req, vpNamespace, namespace)
+	log.Info("Update event", "vp namespace", namespaceRes.Namespace.Name)
+	return r.handleUpdate(req, vpNamespace, *namespaceRes.Namespace)
 }
 
 // SetupWithManager is a helper function to initial on manager boot
