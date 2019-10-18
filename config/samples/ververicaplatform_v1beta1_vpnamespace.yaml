@@ -2,3 +2,8 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpNamespace
 metadata:
   name: doc-ingestion
+spec:
+  roleBindings:
+    - role: "owner"
+      members:
+        - "system:authenticated"

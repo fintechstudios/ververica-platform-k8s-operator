@@ -16,15 +16,18 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	_ "github.com/joho/godotenv/autoload"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -84,14 +87,26 @@ func main() {
 		enableLeaderElection = flag.Bool("enable-leader-election", false,
 			"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 		enableDebugMode = flag.Bool("debug", false, "Enable debug mode for logging.")
-
-		watchNamespace = flag.String("watch-namespace", apiv1.NamespaceAll,
+		watchNamespace  = flag.String("watch-namespace", apiv1.NamespaceAll,
 			`Namespace to watch for resources. Default is to watch all namespaces`)
-
-		ververicaPlatformURL = flag.String("ververica-platform-url", "http://localhost:8081/api",
+		platformApiUrl = flag.String("platform-api-url", "http://localhost:8081",
 			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol, host, and base path.")
+		appManagerApiUrl = flag.String("app-manager-api-url", "http://localhost:8081/api",
+			"The URL to the Ververica Platform AppManager API, without a trailing slash. Should include the protocol, host, and base path.")
+		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
 	flag.Parse()
+
+	if *envFile == "" {
+		// ignore error if just trying to autoload
+		_ = dotenv.Load()
+	} else {
+		err := dotenv.Load(*envFile)
+		if err != nil {
+			setupLog.Error(err, "unable to load env file")
+			os.Exit(1)
+		}
+	}
 
 	setupLog.Info("Watching namespace", "namespace", watchNamespace)
 
@@ -112,54 +127,76 @@ func main() {
 	setupLog.Info("Starting Ververica Platform K8s controller",
 		"version", version.String())
 
-	// Build the Ververica Platform API Client
-	ververicaAPIClient := appManager.NewAPIClient(&appManager.Configuration{
-		BasePath:      *ververicaPlatformURL,
-		DefaultHeader: make(map[string]string), // TODO: allow users to pass these in dynamically
-		UserAgent:     fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion),
+	// Create clients
+	userAgent := fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion)
+	platformClient := platformApiClient.NewAPIClient(&platformApiClient.Configuration{
+		BasePath:      *platformApiUrl,
+		DefaultHeader: make(map[string]string),
+		UserAgent:     userAgent,
 	})
 
-	setupLog.Info("Created VP API client", "client", ververicaAPIClient)
+	appManagerClient := appManagerApi.NewAPIClient(&appManagerApi.Configuration{
+		BasePath:      *appManagerApiUrl,
+		DefaultHeader: make(map[string]string),
+		UserAgent:     userAgent,
+	})
+	appManagerAuthStore := appManager.NewAuthStore(&appManager.PlatformTokenManager{PlatformApiClient: platformClient})
+
+	cleanup := func(ctx context.Context) {
+		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
+		if err != nil {
+			setupLog.Error(err, "error cleaning up")
+		}
+		setupLog.Info("Removed %i authe  tokens", len(tokens))
+	}
 
 	err = (&controllers.VpNamespaceReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+		// AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
+		PlatformApiClient:   platformClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
 		os.Exit(1)
 	}
 	err = (&controllers.VpDeploymentTargetReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpDeploymentReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeployment"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpSavepointReconciler{
-		Client:      mgr.GetClient(),
-		Log:         ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
-		VPAPIClient: ververicaAPIClient,
+		Client:              mgr.GetClient(),
+		Log:                 ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
+		AppManagerApiClient: appManagerClient,
+		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
+	// after the manager has quit, make sure to clean up created resources
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
+		cleanup(context.Background())
 		os.Exit(1)
 	}
+	 cleanup(context.Background())
 }
