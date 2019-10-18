@@ -42,6 +42,7 @@ To run the binary directly, after building run `./bin/manager`.
 **Flags:**
 * `--help` prints usage
 * `--app-manager-api-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform's AppManager API
+* `--platform-api-url=http://localhost:8081` the url, without trailing slash, for the Ververica Platform's AppManager API
 * `--debug` debug mode for logging
 * `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
 * `--metrics-addr=:8080` address to bind metrics to 

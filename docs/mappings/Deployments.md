@@ -3,7 +3,7 @@
 Somewhat more difficult than, namespaces, as arbitrary JSON doesn't 
 seem to play nicely with the K8s code generators.
 
-[Official Ververica Docs](https://docs.ververica.com/application_manager/deployments/deployments/index.html)
+[Official Ververica Docs](https://docs.ververica.com/user_guide/deployments/index.html)
 
 ## Ververica Platform Definition
 
