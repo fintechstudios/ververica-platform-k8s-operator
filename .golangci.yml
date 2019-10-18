@@ -2,6 +2,7 @@ run:
   skip-dirs:
     # Don't lint the generated api client
     - appmanager-api-client
+    - platform-api-client
 
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"

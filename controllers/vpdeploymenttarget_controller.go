@@ -81,7 +81,6 @@ func (r *VpDeploymentTargetReconciler) getLogger(req ctrl.Request) logr.Logger {
 
 // handleCreate creates VP resources
 func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget) (ctrl.Result, error) {
-	ctx := context.Background()
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
 	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
