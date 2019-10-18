@@ -3,7 +3,6 @@ package converters
 import (
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"reflect"
 	"time"
@@ -48,13 +47,7 @@ var _ = Describe("DeploymentMetadata", func() {
 		It("should map an API deployment metadata to K8s native", func() {
 			vpMetadata, err := DeploymentMetadataToNative(metadata)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(vpMetadata.Name).To(Equal(deploymentName))
 			Expect(vpMetadata.Namespace).To(Equal(deploymentNamespace))
-			Expect(vpMetadata.ID).To(Equal(deploymentId))
-			createdAtTime := metav1.NewTime(createdAt)
-			modifiedAtTime := metav1.NewTime(modifiedAt)
-			Expect(vpMetadata.CreatedAt.Equal(&createdAtTime)).To(BeTrue())
-			Expect(vpMetadata.ModifiedAt.Equal(&modifiedAtTime)).To(BeTrue())
 			Expect(reflect.DeepEqual(vpMetadata.Labels, labels)).To(BeTrue())
 			Expect(reflect.DeepEqual(vpMetadata.Annotations, annotations)).To(BeTrue())
 		})
@@ -69,13 +62,9 @@ var _ = Describe("DeploymentMetadata", func() {
 	Describe("DeploymentMetadataFromNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
-		var createdAt metav1.Time
-		var modifiedAt metav1.Time
 		var vpMetadata ververicaplatformv1beta1.VpMetadata
 
 		BeforeEach(func() {
-			createdAt = metav1.NewTime(time.Now())
-			modifiedAt = metav1.NewTime(time.Now())
 			annotations = map[string]string{
 				"testing":           "true",
 				"high-availability": "false",
@@ -84,24 +73,16 @@ var _ = Describe("DeploymentMetadata", func() {
 				"excellent": "adventure",
 			}
 			vpMetadata = ververicaplatformv1beta1.VpMetadata{
-				ID:          deploymentId,
 				Annotations: annotations,
 				Labels:      labels,
-				Name:        deploymentName,
 				Namespace:   deploymentNamespace,
-				CreatedAt:   &createdAt,
-				ModifiedAt:  &modifiedAt,
 			}
 		})
 
 		It("should map an API deployment metadata to K8s native", func() {
 			metadata, err := DeploymentMetadataFromNative(vpMetadata)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(metadata.Name).To(Equal(deploymentName))
 			Expect(metadata.Namespace).To(Equal(deploymentNamespace))
-			Expect(metadata.Id).To(Equal(deploymentId))
-			Expect(metadata.CreatedAt.Equal(createdAt.Time)).To(BeTrue())
-			Expect(metadata.ModifiedAt.Equal(modifiedAt.Time)).To(BeTrue())
 			Expect(reflect.DeepEqual(metadata.Labels, labels)).To(BeTrue())
 			Expect(reflect.DeepEqual(metadata.Annotations, annotations)).To(BeTrue())
 		})

@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"strings"
-
-	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	appManagerApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // IsNotFoundError returns if an error is a 404
@@ -12,15 +12,16 @@ func IsNotFoundError(err error) bool {
 		return false
 	}
 
-	switch err.(type) {
+	switch err := err.(type) {
 	// internal
 	case DeploymentNotFoundError:
 		return true
+	case platformApiClient.GenericSwaggerError:
+		return err.StatusCode() == 404
+	case appManagerApiClient.GenericSwaggerError:
+		return err.StatusCode() == 404
 	// external
 	default:
-		errMsg := strings.TrimSpace(err.Error())
-		return errMsg == "404 Not Found" || // AppManager API
-			errMsg == "404" || // Platform API
-			apierrs.IsNotFound(err) // K8s
+		return apierrors.IsNotFound(err) // K8s
 	}
 }

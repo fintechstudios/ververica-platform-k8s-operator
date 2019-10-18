@@ -95,8 +95,9 @@ func (a *NamespacesApiService) DeleteNamespace(ctx context.Context, name string)
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -189,8 +190,9 @@ func (a *NamespacesApiService) GetNamespace(ctx context.Context, name string) (N
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -281,8 +283,9 @@ func (a *NamespacesApiService) ListNamespaces(ctx context.Context) (ResourceList
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -389,8 +392,9 @@ func (a *NamespacesApiService) PostNamespace(ctx context.Context, localVarOption
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {

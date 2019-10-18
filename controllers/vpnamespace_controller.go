@@ -91,8 +91,8 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 
 	// lifecyclePhase and createTime must be left nil
 	updatedNamespace := platformApiClient.Namespace{
-		Name:           "namespaces/" + req.Name,
-		RoleBindings:   converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
+		Name:         "namespaces/" + req.Name,
+		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
 	updateRes, _, err := r.PlatformApiClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
 	if err != nil {
@@ -109,7 +109,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 	ctx := context.Background()
 	// Let's make sure it's deleted from the ververica platform
 	// Should be idempotent, so retrying shouldn't matter
-	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, "namespaces/"+req.Name)
+	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!

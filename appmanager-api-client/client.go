@@ -26,7 +26,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"golang.org/x/oauth2"
 )
@@ -444,20 +443,17 @@ func CacheExpires(r *http.Response) time.Time {
 	return expires
 }
 
-func strlen(s string) int {
-	return utf8.RuneCountInString(s)
-}
-
 // GenericSwaggerError Provides access to the body, error and model on returned errors.
 type GenericSwaggerError struct {
-	body  []byte
-	error string
-	model interface{}
+	body       []byte
+	error      string
+	statusCode int
+	model      interface{}
 }
 
 // Error returns non-empty string if there was an error.
 func (e GenericSwaggerError) Error() string {
-	return e.error
+	return fmt.Sprintf("%s: %s", e.error, e.Body())
 }
 
 // Body returns the raw bytes of the response
@@ -465,7 +461,17 @@ func (e GenericSwaggerError) Body() []byte {
 	return e.body
 }
 
+// StatusCode returns the response status code
+func (e GenericSwaggerError) StatusCode() int {
+	return e.statusCode
+}
+
 // Model returns the unpacked model of the error
 func (e GenericSwaggerError) Model() interface{} {
 	return e.model
+}
+
+func (e GenericSwaggerError) WithStatusCode(statusCode int) GenericSwaggerError {
+	e.statusCode = statusCode
+	return e
 }

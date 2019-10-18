@@ -19,11 +19,13 @@ package controllers
 import (
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	annotations "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	"github.com/go-logr/logr"
@@ -48,6 +50,10 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 
 // getDeploymentTargetID gets the id of a deployment
 func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment v1beta1.VpDeployment, ctx context.Context) (string, error) {
+	if annotations.Has(vpDeployment.Annotations, annotations.DeploymentTargetID) {
+		return annotations.Get(vpDeployment.Annotations, annotations.DeploymentTargetID), nil
+	}
+
 	if len(vpDeployment.Spec.Spec.DeploymentTargetID) > 0 {
 		// an id has been set, just return it
 		return vpDeployment.Spec.Spec.DeploymentTargetID, nil
@@ -71,28 +77,24 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment v1beta1.VpDe
 func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appManagerApi.Deployment) error {
 	ctx := context.Background()
 
-	metadata, err := converters.DeploymentMetadataToNative(*deployment.Metadata)
+	if resource.Annotations == nil {
+		resource.Annotations = make(map[string]string)
+	}
+	// save dynamic information as annotations
+	annotations.Set(resource.Annotations,
+		annotations.Pair(annotations.ID, deployment.Metadata.Id),
+		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(deployment.Metadata.ResourceVersion))),
+		annotations.Pair(annotations.DeploymentTargetID, deployment.Spec.DeploymentTargetId))
 
-	if err != nil {
+	if err := r.Update(ctx, resource); err != nil {
 		return err
 	}
-	resource.Spec.Metadata = metadata
-
-	spec, err := converters.DeploymentSpecToNative(*deployment.Spec)
-	if err != nil {
-		return err
-	}
-	resource.Spec.Spec = spec
 
 	state, err := converters.DeploymentStateToNative(deployment.Status.State)
 	if err != nil {
 		return err
 	}
 	resource.Status.State = state
-
-	if err := r.Update(ctx, resource); err != nil {
-		return err
-	}
 
 	if err := r.Status().Update(ctx, resource); err != nil {
 		return err
@@ -214,8 +216,9 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 	}
 
 	var deployment appManagerApi.Deployment
-	if len(vpDeployment.Spec.Metadata.ID) > 0 {
-		deployment, _, err = r.AppManagerApiClient.DeploymentsApi.GetDeployment(ctx, nsName, vpDeployment.Spec.Metadata.ID)
+	if annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
+		id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
+		deployment, _, err = r.AppManagerApiClient.DeploymentsApi.GetDeployment(ctx, nsName, id)
 	} else {
 		deployment, err = appManager.GetDeploymentByName(r.AppManagerApiClient, ctx, nsName, vpDeployment.Name)
 	}
@@ -227,12 +230,12 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	// If the desired state is cancelled, we're good - just have to wait
 	if deployment.Status.State != string(v1beta1.CancelledState) {
-		// If the desired state is not cancelled, we're not good - must cancel and then wait
+		// If the desired state is not cancelled, we're ~not~ good - must cancel and then wait
 		if deployment.Spec.State != string(v1beta1.CancelledState) {
 			// must cancel it
 			log.Info("Cancelling Deployment")
 			deployment.Spec.State = string(v1beta1.CancelledState)
-			deployment, _, err = r.AppManagerApiClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, vpDeployment.Spec.Metadata.ID, deployment)
+			deployment, _, err = r.AppManagerApiClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, deployment)
 
 			if err != nil {
 				return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -240,8 +243,12 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 		}
 		// Just have to wait now
 		err = r.updateResource(&vpDeployment, &deployment)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 		// Can take a while to tear down
-		return ctrl.Result{RequeueAfter: time.Second * 30}, err
+		log.Info("Requeue-ing after 30 seconds")
+		return ctrl.Result{RequeueAfter: time.Second * 30}, nil
 	}
 
 	deployment, _, err = r.AppManagerApiClient.DeploymentsApi.DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
@@ -300,10 +307,10 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
-	id := vpDeployment.Spec.Metadata.ID
-	if len(id) == 0 {
+
+	if !annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		// no id has been set
 		deployment, err := appManager.GetDeploymentByName(r.AppManagerApiClient, appManagerCtx, nsName, req.Name)
 
@@ -321,6 +328,8 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		err = r.updateResource(&vpDeployment, &deployment)
 		return ctrl.Result{}, err
 	}
+
+	id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
 
 	deployment, _, err := r.AppManagerApiClient.DeploymentsApi.GetDeployment(appManagerCtx, nsName, id)
 	if err != nil {

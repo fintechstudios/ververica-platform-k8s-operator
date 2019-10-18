@@ -18,13 +18,16 @@ package controllers
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	"github.com/go-logr/logr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -43,29 +46,13 @@ type VpDeploymentTargetReconciler struct {
 func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *appManagerApi.DeploymentTarget) error {
 	ctx := context.Background()
 
-	resource.Name = depTarget.Metadata.Name
-	resource.Spec.Metadata = ververicaplatformv1beta1.VpMetadata{
-		Name:            depTarget.Metadata.Name,
-		Namespace:       depTarget.Metadata.Namespace,
-		ID:              depTarget.Metadata.Id,
-		CreatedAt:       &metav1.Time{Time: depTarget.Metadata.CreatedAt},
-		ModifiedAt:      &metav1.Time{Time: depTarget.Metadata.ModifiedAt},
-		ResourceVersion: depTarget.Metadata.ResourceVersion,
-		Labels:          depTarget.Metadata.Labels,
-		Annotations:     depTarget.Metadata.Annotations,
+	if resource.Annotations == nil {
+		resource.Annotations = make(map[string]string)
 	}
 
-	vpPatchSet, err := converters.DeploymentTargetPatchSetToNative(depTarget.Spec.DeploymentPatchSet)
-	if err != nil {
-		return err
-	}
-
-	resource.Spec.Spec = ververicaplatformv1beta1.VpDeploymentTargetSpec{
-		Kubernetes: ververicaplatformv1beta1.VpKubernetesTarget{
-			Namespace: depTarget.Spec.Kubernetes.Namespace,
-		},
-		DeploymentPatchSet: vpPatchSet,
-	}
+	annotations.Set(resource.Annotations,
+		annotations.Pair(annotations.ID, depTarget.Metadata.Id),
+		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(depTarget.Metadata.ResourceVersion))))
 
 	if err := r.Update(ctx, resource); err != nil {
 		return err
@@ -122,7 +109,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Created depTarget", "depTarget", createdDepTarget)
+	log.Info("Created deployment target")
 
 	// Now update the k8s resource and status as well
 	if err := r.updateResource(&vpDepTarget, &createdDepTarget); err != nil {
@@ -135,7 +122,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 // handleUpdate updates the k8s resource when it already exists in the VP
 // updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
 func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget ververicaplatformv1beta1.VpDeploymentTarget, depTarget appManagerApi.DeploymentTarget) (ctrl.Result, error) {
-	// First delete the resource in VP and then re-create it
+	r.getLogger(req).Info("cannot update deployment targets in the Ververica Platform - must delete and recreate")
 	err := r.updateResource(&vpDepTarget, &depTarget)
 	return ctrl.Result{}, err
 }
@@ -151,7 +138,13 @@ func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarge
 	}
 
 	// Let's make sure it's deleted from the ververica platform
-	depTarget, _, err := r.AppManagerApiClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, nsName, req.Name)
+	depTarget, res, err := r.AppManagerApiClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, nsName, req.Name)
+
+	if res != nil && res.StatusCode == 409 {
+		// Conflict - still have deployments referenced
+		// Can take a while to tear down
+		return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+	}
 
 	if err != nil {
 		// If it's already gone, great!

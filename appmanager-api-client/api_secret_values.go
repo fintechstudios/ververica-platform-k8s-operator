@@ -96,8 +96,9 @@ func (a *SecretValuesApiService) CreateSecretValue(ctx context.Context, namespac
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -192,8 +193,9 @@ func (a *SecretValuesApiService) DeleteSecretValue(ctx context.Context, namespac
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -288,8 +290,9 @@ func (a *SecretValuesApiService) GetSecretValue(ctx context.Context, namespace s
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -382,8 +385,9 @@ func (a *SecretValuesApiService) GetSecretValues(ctx context.Context, namespace 
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -481,8 +485,9 @@ func (a *SecretValuesApiService) UpdateSecretValue(ctx context.Context, namespac
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {

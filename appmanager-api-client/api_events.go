@@ -110,8 +110,9 @@ func (a *EventsApiService) GetEvents(ctx context.Context, namespace string, loca
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {

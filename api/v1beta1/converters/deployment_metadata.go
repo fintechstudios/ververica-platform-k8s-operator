@@ -37,13 +37,5 @@ func DeploymentMetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.Deployme
 		return deploymentMetadata, errors.New("cannot encode Deployment Metadata: " + err.Error())
 	}
 
-	// time.Time doesn't serialize correctly, so map over manually
-	if vpMetadata.CreatedAt != nil {
-		deploymentMetadata.CreatedAt = vpMetadata.CreatedAt.Time
-	}
-	if vpMetadata.ModifiedAt != nil {
-		deploymentMetadata.ModifiedAt = vpMetadata.ModifiedAt.Time
-	}
-
 	return deploymentMetadata, nil
 }

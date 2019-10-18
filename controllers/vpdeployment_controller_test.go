@@ -7,6 +7,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -107,13 +108,7 @@ var _ = Describe("VpDeployment Controller", func() {
 
 			fetched = &v1beta1.VpDeployment{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched.Spec.Metadata.ID).To(Equal(dep.Metadata.Id))
-			Expect(fetched.Spec.Metadata.Labels).To(Equal(dep.Metadata.Labels))
-			Expect(fetched.Spec.Metadata.Annotations).To(Equal(dep.Metadata.Annotations))
-			Expect(fetched.ObjectMeta.Name).To(Equal(dep.Metadata.Name))
-			Expect(fetched.Spec.DeploymentTargetName).To(Equal(created.Spec.DeploymentTargetName))
-			state, _ := converters.DeploymentStateToNative(dep.Spec.State)
-			Expect(fetched.Spec.Spec.State).To(Equal(state))
+			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(dep.Metadata.Id))
 			statusState, _ := converters.DeploymentStateToNative(dep.Status.State)
 			Expect(fetched.Status.State).To(Equal(statusState))
 		})
