@@ -112,13 +112,5 @@ func SavepointMetadataFromNative(vpSavepointMeta v1beta1.VpSavepointMetadata) (v
 		return savepointMeta, errors.New("cannot encode Savepoint Metadata: " + err.Error())
 	}
 
-	// time.Time doesn't serialize correctly, so map over manually
-	if vpSavepointMeta.CreatedAt != nil {
-		savepointMeta.CreatedAt = vpSavepointMeta.CreatedAt.Time
-	}
-	if vpSavepointMeta.ModifiedAt != nil {
-		savepointMeta.ModifiedAt = vpSavepointMeta.ModifiedAt.Time
-	}
-
 	return savepointMeta, nil
 }

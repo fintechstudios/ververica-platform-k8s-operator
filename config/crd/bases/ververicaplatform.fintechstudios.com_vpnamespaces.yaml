@@ -16,7 +16,9 @@ spec:
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpNamespace
+    listKind: VpNamespaceList
     plural: vpnamespaces
+    singular: vpnamespace
   scope: ""
   subresources:
     status: {}
@@ -65,6 +67,7 @@ spec:
               type: string
           type: object
       type: object
+  version: v1beta1
   versions:
   - name: v1beta1
     served: true

@@ -25,7 +25,9 @@ spec:
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeploymentTarget
+    listKind: VpDeploymentTargetList
     plural: vpdeploymenttargets
+    singular: vpdeploymenttarget
   scope: ""
   subresources: {}
   validation:
@@ -110,6 +112,7 @@ spec:
               type: object
           type: object
       type: object
+  version: v1beta1
   versions:
   - name: v1beta1
     served: true

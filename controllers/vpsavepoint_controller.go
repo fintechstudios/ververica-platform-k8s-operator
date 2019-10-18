@@ -20,9 +20,10 @@ import (
 	"context"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -43,33 +44,30 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(vpSavepoint *v1beta1.VpSavepoint, savepoint *appManagerApi.Savepoint) error {
+func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, savepoint *appManagerApi.Savepoint) error {
 	ctx := context.Background()
 
-	metadata, err := converters.SavepointMetadataToNative(*savepoint.Metadata)
 
-	if err != nil {
+	if resource.Annotations == nil {
+		resource.Annotations = make(map[string]string)
+	}
+
+	annotations.Set(resource.Annotations,
+		annotations.Pair(annotations.ID, savepoint.Metadata.Id),
+		annotations.Pair(annotations.DeploymentId, savepoint.Metadata.DeploymentId),
+		annotations.Pair(annotations.JobId, savepoint.Metadata.JobId))
+
+	if err := r.Update(ctx, resource); err != nil {
 		return err
 	}
-	vpSavepoint.Spec.Metadata = metadata
-
-	spec, err := converters.SavepointSpecToNative(*savepoint.Spec)
-	if err != nil {
-		return err
-	}
-	vpSavepoint.Spec.Spec = spec
 
 	state, err := converters.SavepointStateToNative(savepoint.Status.State)
 	if err != nil {
 		return err
 	}
-	vpSavepoint.Status.State = state
+	resource.Status.State = state
 
-	if err := r.Update(ctx, vpSavepoint); err != nil {
-		return err
-	}
-
-	if err := r.Status().Update(ctx, vpSavepoint); err != nil {
+	if err := r.Status().Update(ctx, resource); err != nil {
 		return err
 	}
 
@@ -83,7 +81,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 	depId := vpSavepoint.Spec.Metadata.DeploymentID
 	if depId == "" {
@@ -154,17 +152,17 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	}
 
 	// Id has not been set - must be creating
-	savepointId := vpSavepoint.Spec.Metadata.ID
-	if vpSavepoint.Spec.Metadata.ID == "" {
+	if annotations.Has(vpSavepoint.Annotations, annotations.ID) {
 		log.Info("Creating savepoint")
 		return r.handleCreate(req, vpSavepoint)
 	}
 
+	savepointId := annotations.Get(vpSavepoint.Annotations, annotations.ID)
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
 	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	savepoint, _, err := r.AppManagerApiClient.SavepointsApi.GetSavepoint(appManagerCtx, nsName, savepointId)

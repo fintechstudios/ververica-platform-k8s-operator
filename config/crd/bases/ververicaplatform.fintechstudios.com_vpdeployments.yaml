@@ -31,7 +31,9 @@ spec:
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeployment
+    listKind: VpDeploymentList
     plural: vpdeployments
+    singular: vpdeployment
   scope: ""
   subresources:
     status: {}
@@ -2870,9 +2872,11 @@ spec:
                           type: object
                         numberOfTaskManagers:
                           format: int32
+                          minimum: 1
                           type: integer
                         parallelism:
                           format: int32
+                          minimum: 1
                           type: integer
                         resources:
                           additionalProperties:
@@ -2910,6 +2914,14 @@ spec:
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
+            createdAt:
+              format: date-time
+              type: string
+            id:
+              type: string
+            modifiedAt:
+              format: date-time
+              type: string
             resourceVersion:
               format: int32
               type: integer
@@ -2928,6 +2940,7 @@ spec:
       - metadata
       - spec
       type: object
+  version: v1beta1
   versions:
   - name: v1beta1
     served: true

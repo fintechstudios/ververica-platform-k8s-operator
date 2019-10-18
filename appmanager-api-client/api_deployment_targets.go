@@ -96,8 +96,9 @@ func (a *DeploymentTargetsApiService) CreateDeploymentTarget(ctx context.Context
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 201 {
@@ -192,8 +193,9 @@ func (a *DeploymentTargetsApiService) DeleteDeploymentTarget(ctx context.Context
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -288,8 +290,9 @@ func (a *DeploymentTargetsApiService) GetDeploymentTarget(ctx context.Context, n
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {
@@ -382,8 +385,9 @@ func (a *DeploymentTargetsApiService) GetDeploymentTargets(ctx context.Context, 
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {

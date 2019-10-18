@@ -81,8 +81,9 @@ func (a *StatusApiService) GetStatus(ctx context.Context) (*http.Response, error
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		return localVarHttpResponse, newErr
@@ -157,8 +158,9 @@ func (a *StatusApiService) GetSystemInfo(ctx context.Context) (SystemInformation
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			body:       localVarBody,
+			error:      localVarHttpResponse.Status,
+			statusCode: localVarHttpResponse.StatusCode,
 		}
 
 		if localVarHttpResponse.StatusCode == 200 {

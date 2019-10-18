@@ -12,6 +12,7 @@ package platformApiClient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -24,12 +25,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
-	"context"
 	"golang.org/x/oauth2"
 )
 
@@ -73,10 +71,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	return c
 }
 
-func atoi(in string) (int, error) {
-	return strconv.Atoi(in)
-}
-
 // selectHeaderContentType select a content type from the available list.
 func selectHeaderContentType(contentTypes []string) string {
 	if len(contentTypes) == 0 {
@@ -109,42 +103,6 @@ func contains(haystack []string, needle string) bool {
 		}
 	}
 	return false
-}
-
-// Verify optional parameters are of the correct type.
-func typeCheckParameter(obj interface{}, expected string, name string) error {
-	// Make sure there is an object.
-	if obj == nil {
-		return nil
-	}
-
-	// Check the type is as expected.
-	if reflect.TypeOf(obj).String() != expected {
-		return fmt.Errorf("Expected %s to be of type %s but received %s.", name, expected, reflect.TypeOf(obj).String())
-	}
-	return nil
-}
-
-// parameterToString convert interface{} parameters to string, using a delimiter if format is provided.
-func parameterToString(obj interface{}, collectionFormat string) string {
-	var delimiter string
-
-	switch collectionFormat {
-	case "pipes":
-		delimiter = "|"
-	case "ssv":
-		delimiter = " "
-	case "tsv":
-		delimiter = "\t"
-	case "csv":
-		delimiter = ","
-	}
-
-	if reflect.TypeOf(obj).Kind() == reflect.Slice {
-		return strings.Trim(strings.Replace(fmt.Sprint(obj), " ", delimiter, -1), "[]")
-	}
-
-	return fmt.Sprintf("%v", obj)
 }
 
 // callAPI do the request.
@@ -206,7 +164,6 @@ func (c *APIClient) prepareRequest(
 		}
 		if len(fileBytes) > 0 && fileName != "" {
 			w.Boundary()
-			//_, fileNm := filepath.Split(fileName)
 			part, err := w.CreateFormFile("file", filepath.Base(fileName))
 			if err != nil {
 				return nil, err
@@ -304,17 +261,17 @@ func (c *APIClient) prepareRequest(
 }
 
 func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err error) {
-		if strings.Contains(contentType, "application/xml") {
-			if err = xml.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
-		} else if strings.Contains(contentType, "application/json") {
-			if err = json.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
+	if strings.Contains(contentType, "application/xml") {
+		if err = xml.Unmarshal(b, v); err != nil {
+			return err
 		}
+		return nil
+	} else if strings.Contains(contentType, "application/json") {
+		if err = json.Unmarshal(b, v); err != nil {
+			return err
+		}
+		return nil
+	}
 	return errors.New("undefined response type")
 }
 
@@ -441,25 +398,26 @@ func CacheExpires(r *http.Response) time.Time {
 	return expires
 }
 
-func strlen(s string) int {
-	return utf8.RuneCountInString(s)
-}
-
 // GenericSwaggerError Provides access to the body, error and model on returned errors.
 type GenericSwaggerError struct {
-	body  []byte
-	error string
-	model interface{}
+	body       []byte
+	error      string
+	statusCode int
+	model      interface{}
 }
 
 // Error returns non-empty string if there was an error.
 func (e GenericSwaggerError) Error() string {
-	return e.error
+	return fmt.Sprintf("%s: %s", e.error, e.Body())
 }
 
 // Body returns the raw bytes of the response
 func (e GenericSwaggerError) Body() []byte {
 	return e.body
+}
+
+func (e GenericSwaggerError) StatusCode() int {
+	return e.statusCode
 }
 
 // Model returns the unpacked model of the error

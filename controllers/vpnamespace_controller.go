@@ -20,8 +20,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 
@@ -91,8 +91,8 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 
 	// lifecyclePhase and createTime must be left nil
 	updatedNamespace := platformApiClient.Namespace{
-		Name:           "namespaces/" + req.Name,
-		RoleBindings:   converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
+		Name:         "namespaces/" + req.Name,
+		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
 	updateRes, _, err := r.PlatformApiClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
 	if err != nil {

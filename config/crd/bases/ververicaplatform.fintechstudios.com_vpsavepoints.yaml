@@ -9,7 +9,9 @@ spec:
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpSavepoint
+    listKind: VpSavepointList
     plural: vpsavepoints
+    singular: vpsavepoint
   scope: ""
   subresources:
     status: {}
@@ -107,6 +109,7 @@ spec:
           - state
           type: object
       type: object
+  version: v1beta1
   versions:
   - name: v1beta1
     served: true

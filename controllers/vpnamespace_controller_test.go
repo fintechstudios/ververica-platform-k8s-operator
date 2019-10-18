@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/converters"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

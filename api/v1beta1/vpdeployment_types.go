@@ -85,51 +85,6 @@ type VpLogging struct {
 	Log4jLoggers map[string]string `json:"log4jLoggers,omitempty"`
 }
 
-type VpJsonNode struct {
-	// +optional
-	ValueNode bool `json:"valueNode,omitempty"`
-	// +optional
-	ContainerNode bool `json:"containerNode,omitempty"`
-	// +optional
-	MissingNode bool `json:"missingNode,omitempty"`
-	// +optional
-	Object bool `json:"object,omitempty"`
-	// +optional
-	NodeType string `json:"nodeType,omitempty"`
-	// +optional
-	Pojo bool `json:"pojo,omitempty"`
-	// +optional
-	Number bool `json:"number,omitempty"`
-	// +optional
-	IntegralNumber bool `json:"integralNumber,omitempty"`
-	// +optional
-	FloatingPointNumber bool `json:"floatingPointNumber,omitempty"`
-	// +optional
-	Short bool `json:"short,omitempty"`
-	// +optional
-	Int_ bool `json:"int,omitempty"`
-	// +optional
-	Long bool `json:"long,omitempty"`
-	// +optional
-	Float bool `json:"float,omitempty"`
-	// +optional
-	Double bool `json:"double,omitempty"`
-	// +optional
-	BigDecimal bool `json:"bigDecimal,omitempty"`
-	// +optional
-	BigInteger bool `json:"bigInteger,omitempty"`
-	// +optional
-	Textual bool `json:"textual,omitempty"`
-	// +optional
-	Boolean bool `json:"boolean,omitempty"`
-	// +optional
-	Binary bool `json:"binary,omitempty"`
-	// +optional
-	Array bool `json:"array,omitempty"`
-	// +optional
-	Null bool `json:"null,omitempty"`
-}
-
 // VpVolumeAndMount is a wrapper around both core.Volume and core.VolumeMount
 type VpVolumeAndMount struct {
 	Name        string            `json:"name"`
@@ -266,6 +221,14 @@ type VpDeploymentStatus struct {
 
 	// +optional
 	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+
+	// +optional
+	ID string `json:"id,omitempty"`
+
+	// +optional
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	// +optional
+	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
 
 	// TODO: think about adding other information here, ie:
 	// 		- list of Jobs
