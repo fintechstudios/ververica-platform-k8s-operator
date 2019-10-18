@@ -109,7 +109,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 	ctx := context.Background()
 	// Let's make sure it's deleted from the ververica platform
 	// Should be idempotent, so retrying shouldn't matter
-	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, "namespaces/"+req.Name)
+	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
