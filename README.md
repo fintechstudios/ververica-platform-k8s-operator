@@ -81,10 +81,10 @@ though something like `minikube` will also do.
 More on the design of the controller and its resources can be found
 in [docs/design.md](./docs/design.md).
 
-Also built as a Go 1.11 module - no vendor files here.
+Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= `1.12`
+- `go` >= `1.12.x`
 - `make` >= `4`
 - `kubebuilder` == [`v2.x`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0)
 - [`kustomize`](https://github.com/kubernetes-sigs/kustomize) >= `v3.0.1`
