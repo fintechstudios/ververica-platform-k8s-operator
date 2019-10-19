@@ -5,29 +5,29 @@ metadata:
   creationTimestamp: null
   annotations:
     "helm.sh/hook": crd-install
-          {{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
+{{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
-        {{- end }}
+{{- end }}
 spec:
   additionalPrinterColumns:
-    - JSONPath: .spec.metadata.id
-      name: Id
-      type: string
-    - JSONPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-    - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
-      name: Flink-Version
-      type: string
-    - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
-      name: Flink-Image-Tag
-      type: string
-    - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
-      name: Flink-Image-Registry
-      type: string
-    - JSONPath: .spec.spec.template.spec.artifact.flinkImageRepository
-      name: Flink-Image-Repository
-      type: string
+  - JSONPath: .spec.metadata.id
+    name: Id
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
+    name: Flink-Version
+    type: string
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
+    name: Flink-Image-Tag
+    type: string
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
+    name: Flink-Image-Registry
+    type: string
+  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRepository
+    name: Flink-Image-Repository
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeployment
@@ -105,11 +105,11 @@ spec:
                   description: DeploymentState is the enum of all possible deployment
                     states Only one of the following states may be specified.
                   enum:
-                    - CANCELLED
-                    - RUNNING
-                    - TRANSITIONING
-                    - SUSPENDED
-                    - FAILED
+                  - CANCELLED
+                  - RUNNING
+                  - TRANSITIONING
+                  - SUSPENDED
+                  - FAILED
                   type: string
                 template:
                   description: VpDeploymentTemplate is the template for Deployment
@@ -148,8 +148,8 @@ spec:
                             mainArgs:
                               type: string
                           required:
-                            - jarUri
-                            - kind
+                          - jarUri
+                          - kind
                           type: object
                         flinkConfiguration:
                           additionalProperties:
@@ -242,8 +242,8 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                   matchFields:
@@ -289,8 +289,8 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                 type: object
@@ -301,8 +301,8 @@ spec:
                                                 format: int32
                                                 type: integer
                                             required:
-                                              - preference
-                                              - weight
+                                            - preference
+                                            - weight
                                             type: object
                                           type: array
                                         requiredDuringSchedulingIgnoredDuringExecution:
@@ -369,8 +369,8 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                   matchFields:
@@ -416,14 +416,14 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                 type: object
                                               type: array
                                           required:
-                                            - nodeSelectorTerms
+                                          - nodeSelectorTerms
                                           type: object
                                       type: object
                                     podAffinity:
@@ -510,8 +510,8 @@ spec:
                                                                 type: string
                                                               type: array
                                                           required:
-                                                            - key
-                                                            - operator
+                                                          - key
+                                                          - operator
                                                           type: object
                                                         type: array
                                                       matchLabels:
@@ -553,7 +553,7 @@ spec:
                                                       is not allowed.
                                                     type: string
                                                 required:
-                                                  - topologyKey
+                                                - topologyKey
                                                 type: object
                                               weight:
                                                 description: weight associated with
@@ -562,8 +562,8 @@ spec:
                                                 format: int32
                                                 type: integer
                                             required:
-                                              - podAffinityTerm
-                                              - weight
+                                            - podAffinityTerm
+                                            - weight
                                             type: object
                                           type: array
                                         requiredDuringSchedulingIgnoredDuringExecution:
@@ -635,8 +635,8 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                   matchLabels:
@@ -675,7 +675,7 @@ spec:
                                                   topologyKey is not allowed.
                                                 type: string
                                             required:
-                                              - topologyKey
+                                            - topologyKey
                                             type: object
                                           type: array
                                       type: object
@@ -763,8 +763,8 @@ spec:
                                                                 type: string
                                                               type: array
                                                           required:
-                                                            - key
-                                                            - operator
+                                                          - key
+                                                          - operator
                                                           type: object
                                                         type: array
                                                       matchLabels:
@@ -806,7 +806,7 @@ spec:
                                                       is not allowed.
                                                     type: string
                                                 required:
-                                                  - topologyKey
+                                                - topologyKey
                                                 type: object
                                               weight:
                                                 description: weight associated with
@@ -815,8 +815,8 @@ spec:
                                                 format: int32
                                                 type: integer
                                             required:
-                                              - podAffinityTerm
-                                              - weight
+                                            - podAffinityTerm
+                                            - weight
                                             type: object
                                           type: array
                                         requiredDuringSchedulingIgnoredDuringExecution:
@@ -888,8 +888,8 @@ spec:
                                                             type: string
                                                           type: array
                                                       required:
-                                                        - key
-                                                        - operator
+                                                      - key
+                                                      - operator
                                                       type: object
                                                     type: array
                                                   matchLabels:
@@ -928,7 +928,7 @@ spec:
                                                   topologyKey is not allowed.
                                                 type: string
                                             required:
-                                              - topologyKey
+                                            - topologyKey
                                             type: object
                                           type: array
                                       type: object
@@ -982,7 +982,7 @@ spec:
                                                   or it's key must be defined
                                                 type: boolean
                                             required:
-                                              - key
+                                            - key
                                             type: object
                                           fieldRef:
                                             description: 'Selects a field of the pod:
@@ -1001,7 +1001,7 @@ spec:
                                                   select in the specified API version.
                                                 type: string
                                             required:
-                                              - fieldPath
+                                            - fieldPath
                                             type: object
                                           resourceFieldRef:
                                             description: 'Selects a resource of the
@@ -1025,7 +1025,7 @@ spec:
                                                   select'
                                                 type: string
                                             required:
-                                              - resource
+                                            - resource
                                             type: object
                                           secretKeyRef:
                                             description: Selects a key of a secret
@@ -1047,11 +1047,11 @@ spec:
                                                   or it's key must be defined
                                                 type: boolean
                                             required:
-                                              - key
+                                            - key
                                             type: object
                                         type: object
                                     required:
-                                      - name
+                                    - name
                                     type: object
                                   type: array
                                 imagePullSecrets:
@@ -1185,8 +1185,8 @@ spec:
                                             description: Value of a property to set
                                             type: string
                                         required:
-                                          - name
-                                          - value
+                                        - name
+                                        - value
                                         type: object
                                       type: array
                                   type: object
@@ -1293,7 +1293,7 @@ spec:
                                                   volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore'
                                                 type: string
                                             required:
-                                              - volumeID
+                                            - volumeID
                                             type: object
                                           azureDisk:
                                             description: AzureDisk represents an Azure
@@ -1334,8 +1334,8 @@ spec:
                                                   setting in VolumeMounts.
                                                 type: boolean
                                             required:
-                                              - diskName
-                                              - diskURI
+                                            - diskName
+                                            - diskURI
                                             type: object
                                           azureFile:
                                             description: AzureFile represents an Azure
@@ -1356,8 +1356,8 @@ spec:
                                                 description: Share Name
                                                 type: string
                                             required:
-                                              - secretName
-                                              - shareName
+                                            - secretName
+                                            - shareName
                                             type: object
                                           cephfs:
                                             description: CephFS represents a Ceph
@@ -1407,7 +1407,7 @@ spec:
                                                   More info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it'
                                                 type: string
                                             required:
-                                              - monitors
+                                            - monitors
                                             type: object
                                           cinder:
                                             description: 'Cinder represents a cinder
@@ -1446,7 +1446,7 @@ spec:
                                                   https://releases.k8s.io/HEAD/examples/mysql-cinder-pd/README.md'
                                                 type: string
                                             required:
-                                              - volumeID
+                                            - volumeID
                                             type: object
                                           configMap:
                                             description: ConfigMap represents a configMap
@@ -1509,8 +1509,8 @@ spec:
                                                         start with the string '..'.
                                                       type: string
                                                   required:
-                                                    - key
-                                                    - path
+                                                  - key
+                                                  - path
                                                   type: object
                                                 type: array
                                               name:
@@ -1578,7 +1578,7 @@ spec:
                                                   supported values.
                                                 type: object
                                             required:
-                                              - driver
+                                            - driver
                                             type: object
                                           downwardAPI:
                                             description: DownwardAPI represents downward
@@ -1623,7 +1623,7 @@ spec:
                                                             specified API version.
                                                           type: string
                                                       required:
-                                                        - fieldPath
+                                                      - fieldPath
                                                       type: object
                                                     mode:
                                                       description: 'Optional: mode
@@ -1672,10 +1672,10 @@ spec:
                                                             resource to select'
                                                           type: string
                                                       required:
-                                                        - resource
+                                                      - resource
                                                       type: object
                                                   required:
-                                                    - path
+                                                  - path
                                                   type: object
                                                 type: array
                                             type: object
@@ -1797,7 +1797,7 @@ spec:
                                                     type: string
                                                 type: object
                                             required:
-                                              - driver
+                                            - driver
                                             type: object
                                           flocker:
                                             description: Flocker represents a Flocker
@@ -1859,7 +1859,7 @@ spec:
                                                   Defaults to false. More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk'
                                                 type: boolean
                                             required:
-                                              - pdName
+                                            - pdName
                                             type: object
                                           gitRepo:
                                             description: 'GitRepo represents a git
@@ -1887,7 +1887,7 @@ spec:
                                                   revision.
                                                 type: string
                                             required:
-                                              - repository
+                                            - repository
                                             type: object
                                           glusterfs:
                                             description: 'Glusterfs represents a Glusterfs
@@ -1910,8 +1910,8 @@ spec:
                                                   to false. More info: https://releases.k8s.io/HEAD/examples/volumes/glusterfs/README.md#create-a-pod'
                                                 type: boolean
                                             required:
-                                              - endpoints
-                                              - path
+                                            - endpoints
+                                            - path
                                             type: object
                                           hostPath:
                                             description: 'HostPath represents a pre-existing
@@ -1938,7 +1938,7 @@ spec:
                                                   Defaults to "" More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath'
                                                 type: string
                                             required:
-                                              - path
+                                            - path
                                             type: object
                                           iscsi:
                                             description: 'ISCSI represents an ISCSI
@@ -2018,9 +2018,9 @@ spec:
                                                   (typically TCP ports 860 and 3260).
                                                 type: string
                                             required:
-                                              - iqn
-                                              - lun
-                                              - targetPortal
+                                            - iqn
+                                            - lun
+                                            - targetPortal
                                             type: object
                                           name:
                                             description: 'Volume''s name. Must be
@@ -2048,8 +2048,8 @@ spec:
                                                   More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs'
                                                 type: string
                                             required:
-                                              - path
-                                              - server
+                                            - path
+                                            - server
                                             type: object
                                           persistentVolumeClaim:
                                             description: 'PersistentVolumeClaimVolumeSource
@@ -2068,7 +2068,7 @@ spec:
                                                   false.
                                                 type: boolean
                                             required:
-                                              - claimName
+                                            - claimName
                                             type: object
                                           photonPersistentDisk:
                                             description: PhotonPersistentDisk represents
@@ -2087,7 +2087,7 @@ spec:
                                                   Controller persistent disk
                                                 type: string
                                             required:
-                                              - pdID
+                                            - pdID
                                             type: object
                                           portworxVolume:
                                             description: PortworxVolume represents
@@ -2112,7 +2112,7 @@ spec:
                                                   a Portworx volume
                                                 type: string
                                             required:
-                                              - volumeID
+                                            - volumeID
                                             type: object
                                           projected:
                                             description: Items for all in one resources
@@ -2202,8 +2202,8 @@ spec:
                                                                   '..'.
                                                                 type: string
                                                             required:
-                                                              - key
-                                                              - path
+                                                            - key
+                                                            - path
                                                             type: object
                                                           type: array
                                                         name:
@@ -2257,7 +2257,7 @@ spec:
                                                                       API version.
                                                                     type: string
                                                                 required:
-                                                                  - fieldPath
+                                                                - fieldPath
                                                                 type: object
                                                               mode:
                                                                 description: 'Optional:
@@ -2320,10 +2320,10 @@ spec:
                                                                       select'
                                                                     type: string
                                                                 required:
-                                                                  - resource
+                                                                - resource
                                                                 type: object
                                                             required:
-                                                              - path
+                                                            - path
                                                             type: object
                                                           type: array
                                                       type: object
@@ -2391,8 +2391,8 @@ spec:
                                                                   '..'.
                                                                 type: string
                                                             required:
-                                                              - key
-                                                              - path
+                                                            - key
+                                                            - path
                                                             type: object
                                                           type: array
                                                         name:
@@ -2453,12 +2453,12 @@ spec:
                                                             the token into.
                                                           type: string
                                                       required:
-                                                        - path
+                                                      - path
                                                       type: object
                                                   type: object
                                                 type: array
                                             required:
-                                              - sources
+                                            - sources
                                             type: object
                                           quobyte:
                                             description: Quobyte represents a Quobyte
@@ -2500,8 +2500,8 @@ spec:
                                                   volume by name.
                                                 type: string
                                             required:
-                                              - registry
-                                              - volume
+                                            - registry
+                                            - volume
                                             type: object
                                           rbd:
                                             description: 'RBD represents a Rados Block
@@ -2564,8 +2564,8 @@ spec:
                                                   Default is admin. More info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it'
                                                 type: string
                                             required:
-                                              - image
-                                              - monitors
+                                            - image
+                                            - monitors
                                             type: object
                                           scaleIO:
                                             description: ScaleIO represents a ScaleIO
@@ -2632,9 +2632,9 @@ spec:
                                                   source.
                                                 type: string
                                             required:
-                                              - gateway
-                                              - secretRef
-                                              - system
+                                            - gateway
+                                            - secretRef
+                                            - system
                                             type: object
                                           secret:
                                             description: 'Secret represents a secret
@@ -2698,8 +2698,8 @@ spec:
                                                         start with the string '..'.
                                                       type: string
                                                   required:
-                                                    - key
-                                                    - path
+                                                  - key
+                                                  - path
                                                   type: object
                                                 type: array
                                               optional:
@@ -2790,10 +2790,10 @@ spec:
                                                   vSphere volume vmdk
                                                 type: string
                                             required:
-                                              - volumePath
+                                            - volumePath
                                             type: object
                                         required:
-                                          - name
+                                        - name
                                         type: object
                                       volumeMount:
                                         description: VolumeMount describes a mounting
@@ -2838,13 +2838,13 @@ spec:
                                               field is alpha in 1.14.
                                             type: string
                                         required:
-                                          - mountPath
-                                          - name
+                                        - mountPath
+                                        - name
                                         type: object
                                     required:
-                                      - name
-                                      - volume
-                                      - volumeMount
+                                    - name
+                                    - volume
+                                    - volumeMount
                                     type: object
                                   type: array
                               type: object
@@ -2877,10 +2877,10 @@ spec:
                             type: object
                           type: object
                       required:
-                        - artifact
+                      - artifact
                       type: object
                   required:
-                    - spec
+                  - spec
                   type: object
                 upgradeStrategy:
                   description: VpDeploymentUpgradeStrategy describes how to upgrade
@@ -2890,13 +2890,13 @@ spec:
                       type: string
                   type: object
               required:
-                - state
-                - template
-                - upgradeStrategy
+              - state
+              - template
+              - upgradeStrategy
               type: object
           required:
-            - metadata
-            - spec
+          - metadata
+          - spec
           type: object
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
@@ -2916,22 +2916,22 @@ spec:
               description: DeploymentState is the enum of all possible deployment
                 states Only one of the following states may be specified.
               enum:
-                - CANCELLED
-                - RUNNING
-                - TRANSITIONING
-                - SUSPENDED
-                - FAILED
+              - CANCELLED
+              - RUNNING
+              - TRANSITIONING
+              - SUSPENDED
+              - FAILED
               type: string
           type: object
       required:
-        - metadata
-        - spec
+      - metadata
+      - spec
       type: object
   version: v1beta1
   versions:
-    - name: v1beta1
-      served: true
-      storage: true
+  - name: v1beta1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""
