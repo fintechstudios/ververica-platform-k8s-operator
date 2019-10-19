@@ -4,7 +4,7 @@ metadata:
   name: vpnamespaces.ververicaplatform.fintechstudios.com
   creationTimestamp: null
   annotations:
-    "helm.sh/hook": crd-install
+    "helm.sh/hook": pre-install
 {{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
 {{- end }}
