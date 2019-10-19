@@ -1,7 +1,7 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
+  name: vpsavepoints.ververicaplatform.fintechstudios.com
   creationTimestamp: null
   annotations:
     "helm.sh/hook": pre-install
@@ -10,26 +10,24 @@ metadata:
 {{- end }}
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.metadata.id
-    name: Id
-    type: string
-  - JSONPath: .spec.metadata.namespace
-    name: Namespace
-    type: string
   - JSONPath: .metadata.creationTimestamp
     name: Age
     type: date
+  - JSONPath: .status.state
+    name: State
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
-    kind: VpDeploymentTarget
-    listKind: VpDeploymentTargetList
-    plural: vpdeploymenttargets
-    singular: vpdeploymenttarget
+    kind: VpSavepoint
+    listKind: VpSavepointList
+    plural: vpsavepoints
+    singular: vpsavepoint
   scope: ""
-  subresources: {}
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
-      description: VpDeploymentTarget is the Schema for the vpdeploymenttargets API
+      description: VpSavepoint is the Schema for the vpsavepoints API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -44,15 +42,21 @@ spec:
         metadata:
           type: object
         spec:
-          description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
+          description: VpSavepointSpec defines the desired state of VpSavepoint
           properties:
+            deploymentName:
+              description: DeploymentName is an extension on the VP API Must provide
+                a spec.metadata.deploymentId if not set
+              type: string
             metadata:
-              description: VpMetadata represents the base metadata for VP resources
               properties:
                 annotations:
                   additionalProperties:
                     type: string
                   type: object
+                deploymentId:
+                  description: Can be specified through the .spec.deploymentName
+                  type: string
                 labels:
                   additionalProperties:
                     type: string
@@ -61,39 +65,36 @@ spec:
                   type: string
               type: object
             spec:
-              description: VpDeploymentTargetSpec allows a users to set defaults for
-                deployments and configure K8s
               properties:
-                deploymentPatchSet:
-                  items:
-                    description: JSONPatchGeneric is a generic JSON-Patch object
-                    properties:
-                      from:
-                        type: string
-                      op:
-                        type: string
-                      path:
-                        type: string
-                      value:
-                        description: "TODO: support any type of JSON as an interface
-                          \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528
-                          \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
-                        type: string
-                    required:
-                    - op
-                    - path
-                    type: object
-                  type: array
-                kubernetes:
-                  description: VpKubernetesTarget allows a user to configure k8s specific
-                    options
-                  properties:
-                    namespace:
-                      type: string
-                  type: object
+                flinkSavepointId:
+                  type: string
+                savepointLocation:
+                  type: string
               required:
-              - kubernetes
+              - flinkSavepointId
+              - savepointLocation
               type: object
+          type: object
+        status:
+          description: VpSavepointStatus defines the observed state of VpSavepoint
+          properties:
+            failure:
+              properties:
+                failedAt:
+                  type: string
+                message:
+                  type: string
+                reason:
+                  type: string
+              type: object
+            state:
+              enum:
+              - STARTED
+              - COMPLETED
+              - FAILED
+              type: string
+          required:
+          - state
           type: object
       type: object
   version: v1beta1

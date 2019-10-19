@@ -4,28 +4,24 @@ metadata:
   name: vpnamespaces.ververicaplatform.fintechstudios.com
   creationTimestamp: null
   annotations:
-    "helm.sh/hook": crd-install
+    "helm.sh/hook": pre-install
 {{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
 {{- end }}
 spec:
   additionalPrinterColumns:
-    - JSONPath: .spec.metadata.id
-      name: Id
-      type: string
-    - JSONPath: .spec.metadata.resourceVersion
-      name: Resource-Version
-      type: integer
-    - JSONPath: .spec.metadata.createdAt
-      name: Created
-      type: date
-    - JSONPath: .spec.metadata.modifiedAt
-      name: Modified
-      type: date
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  - JSONPath: .status.lifecyclePhase
+    name: LifecyclePhase
+    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpNamespace
+    listKind: VpNamespaceList
     plural: vpnamespaces
+    singular: vpnamespace
   scope: ""
   subresources:
     status: {}
@@ -48,38 +44,37 @@ spec:
         spec:
           description: VpNamespaceSpec defines the desired state of VpNamespace
           properties:
-            metadata:
-              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                Important: Run "make" to regenerate code after modifying this file
-                Kind and ApiVersion are mapped automatically Status is mapped to a
-                subresource'
-              properties:
-                createdAt:
-                  format: date-time
-                  type: string
-                id:
-                  type: string
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
-              type: object
+            roleBindings:
+              items:
+                properties:
+                  members:
+                    items:
+                      type: string
+                    type: array
+                  role:
+                    type: string
+                type: object
+              type: array
           type: object
         status:
           description: VpNamespaceStatus defines the observed state of VpNamespace
           properties:
-            state:
+            lifecyclePhase:
+              description: NamespaceLifecyclePhase is the enum of all possible namespace
+                lifecycle phase Only one of the following states may be specified.
+              enum:
+              - LIFECYCLE_PHASE_INVALID
+              - LIFECYCLE_PHASE_ACTIVE
+              - LIFECYCLE_PHASE_TERMINATING
+              - UNRECOGNIZED
               type: string
           type: object
       type: object
+  version: v1beta1
   versions:
-    - name: v1beta1
-      served: true
-      storage: true
+  - name: v1beta1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""

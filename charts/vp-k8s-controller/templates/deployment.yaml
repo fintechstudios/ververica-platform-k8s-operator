@@ -37,7 +37,8 @@ spec:
             - /manager
           args:
             - --metrics-addr={{.Values.controller.metricsHost}}:{{.Values.controller.metricsPort}}
-            - --ververica-platform-url={{.Values.controller.vpApiUrl}}
+            - --platform-api-url={{.Values.controller.platformApiUrl}}
+            - --app-manager-api-url={{.Values.controller.appManagerApiUrl}}
           resources:
             limits:
               cpu: 100m
