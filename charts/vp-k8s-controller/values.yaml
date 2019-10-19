@@ -9,14 +9,6 @@ rbacProxy:
   imagePullPolicy: IfNotPresent
   port: 8443
 
-##  Hyperkube image to use when cleaning up
-##
-hyperkubeImage:
-  repository: k8s.gcr.io/hyperkube
-  tag: v1.12.1
-  pullPolicy: IfNotPresent
-
-
 controller:
   cleanupCustomResourceBeforeInstall: false
   imageRepository: fintechstudios/ververica-platform-k8s-controller
@@ -24,4 +16,5 @@ controller:
   imagePullPolicy: IfNotPresent
   metricsHost: 127.0.0.1
   metricsPort: 8080
-  vpApiUrl: http://ververica-platform-appmanager/api
+  appManagerApiUrl: http://ververica-platform-ververica-platform/api
+  platformApiUrl: http://ververica-platform-ververica-platform

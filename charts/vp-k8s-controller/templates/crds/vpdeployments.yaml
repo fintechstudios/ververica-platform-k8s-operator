@@ -5,19 +5,16 @@ metadata:
   creationTimestamp: null
   annotations:
     "helm.sh/hook": crd-install
-{{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
+          {{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
-{{- end }}
+        {{- end }}
 spec:
   additionalPrinterColumns:
     - JSONPath: .spec.metadata.id
       name: Id
       type: string
-    - JSONPath: .spec.metadata.createdAt
-      name: Created
-      type: date
-    - JSONPath: .spec.metadata.modifiedAt
-      name: Modified
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
       type: date
     - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
       name: Flink-Version
@@ -34,7 +31,9 @@ spec:
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeployment
+    listKind: VpDeploymentList
     plural: vpdeployments
+    singular: vpdeployment
   scope: ""
   subresources:
     status: {}
@@ -68,21 +67,10 @@ spec:
                   additionalProperties:
                     type: string
                   type: object
-                createdAt:
-                  format: date-time
-                  type: string
-                id:
-                  type: string
                 labels:
                   additionalProperties:
                     type: string
                   type: object
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  description: Set through K8s obj meta name
-                  type: string
                 namespace:
                   type: string
               type: object
@@ -2871,9 +2859,11 @@ spec:
                           type: object
                         numberOfTaskManagers:
                           format: int32
+                          minimum: 1
                           type: integer
                         parallelism:
                           format: int32
+                          minimum: 1
                           type: integer
                         resources:
                           additionalProperties:
@@ -2911,6 +2901,14 @@ spec:
         status:
           description: VpDeploymentStatus defines the observed state of VpDeployment
           properties:
+            createdAt:
+              format: date-time
+              type: string
+            id:
+              type: string
+            modifiedAt:
+              format: date-time
+              type: string
             resourceVersion:
               format: int32
               type: integer
@@ -2929,6 +2927,7 @@ spec:
         - metadata
         - spec
       type: object
+  version: v1beta1
   versions:
     - name: v1beta1
       served: true
