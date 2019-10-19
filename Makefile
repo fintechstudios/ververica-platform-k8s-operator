@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-VERSION?=v0.3.2
+VERSION?=v0.4.0
 IMG?=fintechstudios/ververica-platform-k8s-controller
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
 VERSION_PKG=main
