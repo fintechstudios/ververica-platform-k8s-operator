@@ -32,19 +32,46 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// VpSavepointReconciler reconciles a VpSavepoint object
+type VpSavepointReconciler struct {
+	client.Client
+	Log                 logr.Logger
+	AppManagerApiClient *appManagerApi.APIClient
+	AppManagerAuthStore *appManager.AuthStore
+	pollerMap   map[string]*polling.Poller
+}
+
+
 func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
 	log := r.getLogger(req)
+	// On each channel callback, push the update through the k8s client
+	vpNamespace := vpSavepoint.Spec.Metadata.Namespace
+	vpID := vpSavepoint.Spec.Metadata.ID
 	poller := polling.NewPoller(func() interface{} {
 		ctx := context.Background()
-		savepoint, _, err := r.VPAPIClient.SavepointsApi.GetSavepoint(ctx, vpSavepoint.Spec.Metadata.Namespace, vpSavepoint.Spec.Metadata.ID)
+		savepoint, _, err := r.VPAPIClient.SavepointsApi.GetSavepoint(ctx, vpNamespace, vpID)
 		if err != nil {
-			return savepoint
+			log.Error(err, "Error while polling savepoint")
 		}
-		log.Error(err, "Error while polling savepoint")
-		return nil
+		
+		var vpSavepointUpdated v1beta1.VpSavepoint
+		if err = r.Get(ctx, req.NamespacedName, &vpSavepointUpdated); err != nil {
+			 if utils.IsNotFoundError(err) {
+				 // TODO: should we force stop polling?
+				log.Error(err, "VpSavepoint not found while polling")
+			 } else {
+				log.Error(err, "Error getting VpSavepoint while polling")
+			 }
+			 return
+		}
+		
+		if err = r.updateResource(res, savepoint); err != nil {
+			log.Error(err, "Error while updating VpSavepoint from poller")
+		}
+
+		return
 	}, time.Second*5)
 
-	// On each channel callback, push the update through the k8s client
 	r.pollerMap[req.String()] = poller
 	poller.Start()
 }
@@ -56,13 +83,6 @@ func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) 
 		log.Info("Stopping poller")
 		poller.Stop()
 	}
-// VpSavepointReconciler reconciles a VpSavepoint object
-type VpSavepointReconciler struct {
-	client.Client
-	Log                 logr.Logger
-	AppManagerApiClient *appManagerApi.APIClient
-	AppManagerAuthStore *appManager.AuthStore
-	pollerMap   map[string]*polling.Poller
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -178,7 +198,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		// Being deleted
 		log.Info("Delete event")
 		r.removeStatusPollerForResource(req)
-		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned.")
+		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned up.")
 		return ctrl.Result{}, nil
 	}
 

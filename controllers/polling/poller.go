@@ -33,7 +33,7 @@ func (p *Poller) sendResult(result interface{}) {
 	}
 }
 
-// runPolling is the actual
+// runPolling is the actual polling mechanism that handles control flow
 func (p *Poller) runPolling() {
 	for !p.isStopped {
 		p.sendResult(p.Poll())
