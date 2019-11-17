@@ -87,8 +87,8 @@ func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) 
 	if poller != nil {
 		log.Info("Stopping poller")
 		poller.Stop()
+		delete(r.pollerMap, req.String())
 	}
-	delete(r.pollerMap, req.String())
 }
 
 // getLogger creates a logger for the controller with the request name
