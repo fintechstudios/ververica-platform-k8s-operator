@@ -4,31 +4,27 @@ metadata:
   name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
   creationTimestamp: null
   annotations:
-    "helm.sh/hook": crd-install
+    "helm.sh/hook": pre-install
 {{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
 {{- end }}
 spec:
   additionalPrinterColumns:
-    - JSONPath: .spec.metadata.id
-      name: Id
-      type: string
-    - JSONPath: .spec.metadata.namespace
-      name: Namespace
-      type: string
-    - JSONPath: .spec.metadata.resourceVersion
-      name: Resource-Version
-      type: integer
-    - JSONPath: .spec.metadata.createdAt
-      name: Created
-      type: date
-    - JSONPath: .spec.metadata.modifiedAt
-      name: Modified
-      type: date
+  - JSONPath: .spec.metadata.id
+    name: Id
+    type: string
+  - JSONPath: .spec.metadata.namespace
+    name: Namespace
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeploymentTarget
+    listKind: VpDeploymentTargetList
     plural: vpdeploymenttargets
+    singular: vpdeploymenttarget
   scope: ""
   subresources: {}
   validation:
@@ -51,33 +47,18 @@ spec:
           description: VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
           properties:
             metadata:
-              description: VpDeploymentTargetMetadata represents all metadata from
-                the VP API
+              description: VpMetadata represents the base metadata for VP resources
               properties:
                 annotations:
                   additionalProperties:
                     type: string
                   type: object
-                createdAt:
-                  format: date-time
-                  type: string
-                id:
-                  type: string
                 labels:
                   additionalProperties:
                     type: string
                   type: object
-                modifiedAt:
-                  format: date-time
-                  type: string
-                name:
-                  description: Taken from the K8s resource
-                  type: string
                 namespace:
                   type: string
-                resourceVersion:
-                  format: int32
-                  type: integer
               type: object
             spec:
               description: VpDeploymentTargetSpec allows a users to set defaults for
@@ -99,8 +80,8 @@ spec:
                           \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
                         type: string
                     required:
-                      - op
-                      - path
+                    - op
+                    - path
                     type: object
                   type: array
                 kubernetes:
@@ -111,14 +92,15 @@ spec:
                       type: string
                   type: object
               required:
-                - kubernetes
+              - kubernetes
               type: object
           type: object
       type: object
+  version: v1beta1
   versions:
-    - name: v1beta1
-      served: true
-      storage: true
+  - name: v1beta1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""

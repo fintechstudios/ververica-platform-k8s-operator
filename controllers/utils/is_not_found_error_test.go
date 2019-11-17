@@ -3,6 +3,8 @@ package utils
 import (
 	"errors"
 
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	platformApi "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,7 +19,8 @@ var _ = Describe("IsNotFoundError", func() {
 
 	notFoundErrors := []error{
 		DeploymentNotFoundError{Namespace: "grumpy", Name: "goose"},
-		errors.New("404 Not Found"),
+		appManagerApi.GenericSwaggerError{}.WithStatusCode(404),
+		platformApi.GenericSwaggerError{}.WithStatusCode(404),
 		apiErrors.NewNotFound(schema.GroupResource{
 			Group:    "api.fts.com",
 			Resource: "tools",

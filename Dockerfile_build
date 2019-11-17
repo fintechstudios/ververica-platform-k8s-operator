@@ -1,14 +1,14 @@
 # A development environment in an image to run tests on, build, etc.
-FROM golang:1.12.5-stretch
+FROM golang:1.12-stretch
 
 ENV CGO_ENABLED 0
 ENV GOOS linux
 ENV GOARCH amd64
 ENV GO111MODULE on
 ENV GOPATH /go
-ENV GOLANGCI_LINT_VERSION 1.17.1
-ENV KUSTOMIZE_VERSION 3.0.1
-ENV KUBEBUILDER_VERSION 2.0.0-beta.0
+ENV GOLANGCI_LINT_VERSION 1.21.0
+ENV KUSTOMIZE_VERSION 3.1.0
+ENV KUBEBUILDER_VERSION 2.0.1
 ENV KUBEBUILDER_DIR /usr/local/kubebuilder
 ENV PATH ${KUBEBUILDER_DIR}/bin:${PATH}
 
@@ -51,4 +51,5 @@ COPY config/ config/
 COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
-COPY ververica-platform-api/ ververica-platform-api/
+COPY appmanager-api-client appmanager-api-client/
+COPY platform-api-client platform-api-client/

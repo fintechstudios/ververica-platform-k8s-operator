@@ -21,13 +21,13 @@ spec:
       spec:
         artifact:
           kind: JAR
-          jarUri: http://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.8.0/flink-examples-streaming_2.11-1.8.0-TopSpeedWindowing.jar
+          jarUri: http://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.9.0/flink-examples-streaming_2.11-1.9.0-TopSpeedWindowing.jar
           mainArgs: --windowSize 10 --windowUnit minutes
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
-          flinkVersion: "1.8"
-          flinkImageRegistry: registry.platform.data-artisans.net/dist
+          flinkVersion: "1.9"
+          flinkImageRegistry: registry.platform.data-artisans.net/v2.0
           flinkImageRepository: flink
-          flinkImageTag: 1.8.0-stream2-scala_2.11-slim
+          flinkImageTag: 1.9.0-stream1-scala_2.11
         parallelism: 1
         numberOfTaskManagers: 1
         resources:
@@ -46,15 +46,15 @@ spec:
             "com.fintechstudios": DEBUG
         kubernetes:
           pods:
-            volumeMounts:
-              - name: config
-                volume:
-                  name: config
-                  configMap:
-                    name: test-configmap
-                volumeMount:
-                  name: config
-                  mountPath: /opt/flink/conf
+#            volumeMounts:
+#              - name: config
+#                volume:
+#                  name: config
+#                  configMap:
+#                    name: test-configmap
+#                volumeMount:
+#                  name: config
+#                  mountPath: /opt/flink/conf
             annotations:
               "iam.amazonaws.com/role": k8s-flink-job
 

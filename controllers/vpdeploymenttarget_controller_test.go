@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,9 +21,9 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 		vpAPIClient := vpAPI.APIClient{}
 
 		reconciler = VpDeploymentTargetReconciler{
-			Client:      k8sClient,
-			Log:         logger,
-			VPAPIClient: &vpAPIClient,
+			Client:              k8sClient,
+			Log:                 logger,
+			AppManagerApiClient: &vpAPIClient,
 		}
 	})
 
@@ -40,6 +42,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
+					Annotations: make(map[string]string),
 				},
 			}
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
@@ -89,25 +92,8 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 
 			fetched = &ververicaplatformv1beta1.VpDeploymentTarget{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched.Spec.Metadata.ResourceVersion).To(Equal(depTarget.Metadata.ResourceVersion))
-			Expect(fetched.Spec.Metadata.ID).To(Equal(depTarget.Metadata.Id))
-			Expect(fetched.Spec.Metadata.Labels).To(Equal(depTarget.Metadata.Labels))
-			Expect(fetched.Spec.Metadata.Annotations).To(Equal(depTarget.Metadata.Annotations))
-			Expect(fetched.Spec.Spec.DeploymentPatchSet).To(HaveLen(len(depTarget.Spec.DeploymentPatchSet)))
-			for i, patch := range fetched.Spec.Spec.DeploymentPatchSet {
-				depPatch := depTarget.Spec.DeploymentPatchSet[i]
-				Expect(patch.From).To(Equal(depPatch.From))
-				Expect(patch.Op).To(Equal(depPatch.Op))
-				Expect(patch.Path).To(Equal(depPatch.Path))
-
-				if depPatch.Value == nil {
-					Expect(patch.Value).To(BeNil())
-				} else {
-					Expect(*patch.Value).To(Equal(depPatch.Value))
-				}
-			}
-			Expect(fetched.Spec.Spec.Kubernetes.Namespace).To(Equal(depTarget.Spec.Kubernetes.Namespace))
-			Expect(fetched.ObjectMeta.Name).To(Equal(depTarget.Metadata.Name))
+			Expect(annotations.Get(fetched.Annotations, annotations.ResourceVersion)).To(Equal(fmt.Sprint(depTarget.Metadata.ResourceVersion)))
+			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(depTarget.Metadata.Id))
 		})
 	})
 })

@@ -4,31 +4,41 @@ import (
 	"context"
 	"time"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
+func timeMustParse(layout, value string) *time.Time {
+	date, err := time.Parse(layout, value)
+	if err != nil {
+		panic(err)
+	}
+
+	return &date
+}
+
 var _ = Describe("VpNamespace Controller", func() {
 	var reconciler VpNamespaceReconciler
 
 	BeforeEach(func() {
-		vpAPIClient := vpAPI.APIClient{}
+		platformClient := &platformApiClient.APIClient{}
 
 		reconciler = VpNamespaceReconciler{
-			Client:      k8sClient,
-			Log:         logger,
-			VPAPIClient: &vpAPIClient,
+			Client:            k8sClient,
+			Log:               logger,
+			PlatformApiClient: platformClient,
 		}
 	})
 
 	Describe("updateResource", func() {
 		var (
 			key              types.NamespacedName
-			created, fetched *ververicaplatformv1beta1.VpNamespace
+			created, fetched *v1beta1.VpNamespace
 		)
 
 		BeforeEach(func() {
@@ -36,10 +46,22 @@ var _ = Describe("VpNamespace Controller", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &ververicaplatformv1beta1.VpNamespace{
+			created = &v1beta1.VpNamespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
+				},
+				Spec: v1beta1.VpNamespaceSpec{
+					RoleBindings: []v1beta1.NamespaceRoleBinding{
+						{
+							Members: []string{"system:authenticated"},
+							Role:    "owner",
+						},
+						{
+							Members: []string{"austin@fintechstudios.com"},
+							Role:    "viewer",
+						},
+					},
 				},
 			}
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
@@ -49,28 +71,31 @@ var _ = Describe("VpNamespace Controller", func() {
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 		})
 
-		It("should update a k8s namespace with a VP namespace", func() {
-			namespace := &vpAPI.Namespace{
-				Kind:       "Namespace",
-				ApiVersion: "v1",
-				Metadata: &vpAPI.NamespaceMetadata{
-					Id:              "2da2f867-5899-4bef-8ad0-9771bbac38b4",
-					Name:            created.Name,
-					CreatedAt:       time.Now(),
-					ModifiedAt:      time.Now(),
-					ResourceVersion: 1,
+		It("should update a k8s vp namespace with a Platform namespace", func() {
+			phase := "LIFECYCLE_PHASE_ACTIVE"
+			namespace := &platformApiClient.Namespace{
+				CreateTime:     timeMustParse(time.RFC3339, "2019-10-18T14:27:58.328Z"),
+				LifecyclePhase: &phase,
+				Name:           "foo",
+				RoleBindings: []platformApiClient.RoleBinding{
+					{
+						Members: []string{"system:authenticated"},
+						Role:    "owner",
+					},
+					{
+						Members: []string{"austin@fintechstudios.com"},
+						Role:    "viewer",
+					},
 				},
-				Status: &vpAPI.NamespaceStatus{State: "RUNNING"},
 			}
 
 			Expect(reconciler.updateResource(created, namespace)).To(Succeed())
 
-			fetched = &ververicaplatformv1beta1.VpNamespace{}
+			fetched = &v1beta1.VpNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched.Status.State).To(Equal(namespace.Status.State))
-			Expect(fetched.Spec.Metadata.ResourceVersion).To(Equal(namespace.Metadata.ResourceVersion))
-			Expect(fetched.Spec.Metadata.ID).To(Equal(namespace.Metadata.Id))
-			Expect(fetched.ObjectMeta.Name).To(Equal(namespace.Metadata.Name))
+			updatedPhase, err := converters.NamespaceLifecyclePhaseFromNative(fetched.Status.LifecyclePhase)
+			Expect(err).To(BeNil())
+			Expect(updatedPhase).To(Equal(phase))
 		})
 	})
 })

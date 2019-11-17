@@ -8,7 +8,7 @@
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
-Built for Ververica Platform version `1.4.x`.
+Built for Ververica Platform version `2.x`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
 [Ververica Platform Docs](https://docs.ververica.com/)
@@ -27,10 +27,6 @@ custom VP Resources will all be prefixed with `Vp`.
 
 * `Job`
 * `Event`
-* `Role Binding`
-* `Role`
-* `Cluster Role Binding`
-* `Cluster Role`
 * `Secret Value`
 * `Status`
 
@@ -43,13 +39,26 @@ Look in [docs/mappings](./docs/mappings) for information on each supported resou
 
 To run the binary directly, after building run `./bin/manager`.
 
-Flags:
+**Flags:**
 * `--help` prints usage
-* `--ververica-platform-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform API  
+* `--app-manager-api-url=http://localhost:8081/api` the url, without trailing slash, for the Ververica Platform's AppManager API
+* `--platform-api-url=http://localhost:8081` the url, without trailing slash, for the Ververica Platform's AppManager API
 * `--debug` debug mode for logging
 * `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
 * `--metrics-addr=:8080` address to bind metrics to 
 * `--watch-namespace=all-namespaces` the namespace to watch resources on
+* `[--env-file]` the path to an environment (`.env`) file to be loaded
+
+For authorization with the AppManager's API, a token is needed. This can be provided in the environment on either a
+per-namespace or one-token-to-rule-them-all basis. If it is not provided in the environment, an "owner" token will be created
+for each namespace that resources are managed in.
+
+Specifying in the environment is a good way to integrate with namespaces that aren't defined in Kubernetes.
+
+**Environment:**
+* `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
+* `APPMANAGER_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
+
 
 ## Docker
 
@@ -73,12 +82,12 @@ though something like `minikube` will also do.
 More on the design of the controller and its resources can be found
 in [docs/design.md](./docs/design.md).
 
-Also built as a Go 1.11 module - no vendor files here.
+Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= `1.12`
+- `go` >= `1.12.x`
 - `make` >= `4`
-- `kubebuilder` == [`v2.0.0-beta.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0-beta.0)
+- `kubebuilder` == [`v2.x`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0)
 - [`kustomize`](https://github.com/kubernetes-sigs/kustomize) >= `v3.0.1`
 - `docker` >= `19`
 
@@ -110,11 +119,12 @@ To use the default test cluster, you'll need to store a `KUBECONFIG` env var poi
 
 [`godotenv`](https://github.com/joho/godotenv) automatically loads this when running `main`.
 
-### Ververica Platform API
+### AppManager + Platform APIs
 
-The API Client is auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
+The API Clients are auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
 
-#### Pre-Generation Changes
+#### AppManager
+##### Pre-Generation Changes
 
 The original Swagger file was taken from their live API documentation (available at `${VP_URL}/api/swagger`),
 but the docs don't exactly match their API, which makes the generated client incorrect.
@@ -130,7 +140,7 @@ Main changes necessary:
 * `POST /namespaces/{namespace}/deployment-targets` needs a `201` response with a `DeploymenTarget` in the body
 * `model_pods.go` needs to be updated with the proper Kubernetes types
 
-#### Post-Generation Changes
+##### Post-Generation Changes
 
 The `optional` package is missing from many of the imports in the generated code, as must be added manually.
 
@@ -145,7 +155,6 @@ import (
 ```
 
 Affected files:
-- `api_api_tokens.go`
 - `api_events.go`
 - `api_jobs.go`
 - `api_namespaces.go`
@@ -153,7 +162,7 @@ Affected files:
 
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
-you must manually change [`model_any.go`](./ververica-platform-api/model_any.go) to:
+you must manually change [`model_any.go`](appmanager-api-client/model_any.go) to:
 
 ```go
 package ververicaplatformapi

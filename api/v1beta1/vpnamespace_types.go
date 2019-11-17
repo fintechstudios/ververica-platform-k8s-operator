@@ -23,19 +23,11 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// VpNamespaceMetadata represents all metadata from the VP API
-type VpNamespaceMetadata struct {
+type NamespaceRoleBinding struct {
 	// +optional
-	Name string `json:"name"`
+	Members []string `json:"members,omitempty"`
 	// +optional
-	ID string `json:"id,omitempty"`
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-	// +optional
-	// +kubebuilder:validation:Minimum=1
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+	Role string `json:"role,omitempty"`
 }
 
 // VpNamespaceSpec defines the desired state of VpNamespace
@@ -44,9 +36,22 @@ type VpNamespaceSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	// Kind and ApiVersion are mapped automatically
 	// Status is mapped to a subresource
+
 	// +optional
-	Metadata VpNamespaceMetadata `json:"metadata,omitempty"`
+	RoleBindings []NamespaceRoleBinding `json:"roleBindings,omitempty"`
 }
+
+// NamespaceLifecyclePhase is the enum of all possible namespace lifecycle phase
+// Only one of the following states may be specified.
+// +kubebuilder:validation:Enum=LIFECYCLE_PHASE_INVALID;LIFECYCLE_PHASE_ACTIVE;LIFECYCLE_PHASE_TERMINATING;UNRECOGNIZED
+type NamespaceLifecyclePhase string
+
+const (
+	InvalidNamespaceLifecyclePhase      = NamespaceLifecyclePhase("LIFECYCLE_PHASE_INVALID")
+	ActiveNamespaceLifecyclePhase       = NamespaceLifecyclePhase("LIFECYCLE_PHASE_ACTIVE")
+	TerminatingNamespaceLifecyclePhase  = NamespaceLifecyclePhase("LIFECYCLE_PHASE_TERMINATING")
+	UnrecognizedNamespaceLifecyclePhase = NamespaceLifecyclePhase("UNRECOGNIZED")
+)
 
 // VpNamespaceStatus defines the observed state of VpNamespace
 type VpNamespaceStatus struct {
@@ -54,15 +59,13 @@ type VpNamespaceStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	State string `json:"state,omitempty"`
+	LifecyclePhase NamespaceLifecyclePhase `json:"lifecyclePhase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
-// +kubebuilder:printcolumn:name="Resource-Version",type="integer",JSONPath=".spec.metadata.resourceVersion"
-// +kubebuilder:printcolumn:name="Created",type="date",JSONPath=".spec.metadata.createdAt"
-// +kubebuilder:printcolumn:name="Modified",type="date",JSONPath=".spec.metadata.modifiedAt"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="LifecyclePhase",type="string",JSONPath=".status.lifecyclePhase"
 
 // VpNamespace is the Schema for the vpnamespaces API
 type VpNamespace struct {

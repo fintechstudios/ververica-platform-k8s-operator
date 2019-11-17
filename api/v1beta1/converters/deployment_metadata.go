@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/ververica-platform-api"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 )
 
 // DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
@@ -35,14 +35,6 @@ func DeploymentMetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.Deployme
 	// now unmarshal it into the platform model
 	if err = json.Unmarshal(vpMetadataJSON, &deploymentMetadata); err != nil {
 		return deploymentMetadata, errors.New("cannot encode Deployment Metadata: " + err.Error())
-	}
-
-	// time.Time doesn't serialize correctly, so map over manually
-	if vpMetadata.CreatedAt != nil {
-		deploymentMetadata.CreatedAt = vpMetadata.CreatedAt.Time
-	}
-	if vpMetadata.ModifiedAt != nil {
-		deploymentMetadata.ModifiedAt = vpMetadata.ModifiedAt.Time
 	}
 
 	return deploymentMetadata, nil
