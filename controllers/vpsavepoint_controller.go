@@ -44,6 +44,11 @@ type VpSavepointReconciler struct {
 
 func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
 	log := r.getLogger(req)
+	if r.pollerMap[req.String()] != nil {
+		log.Info("A status poller already exists, removing...")
+		r.removeStatusPollerForResource(req)
+	}
+
 	// On each channel callback, push the update through the k8s client
 	vpNamespace := vpSavepoint.Spec.Metadata.Namespace
 	vpID := vpSavepoint.Spec.Metadata.ID
@@ -83,6 +88,7 @@ func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) 
 		log.Info("Stopping poller")
 		poller.Stop()
 	}
+	delete(r.pollerMap, req.String())
 }
 
 // getLogger creates a logger for the controller with the request name
