@@ -12,6 +12,7 @@ type Poller struct {
 	isStopped    bool
 	isFinished   bool
 	group        *sync.WaitGroup
+	stopMutex    *sync.Mutex
 }
 
 func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
@@ -22,20 +23,23 @@ func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
 		isStopped:    false,
 		isFinished:   false,
 		group:        &sync.WaitGroup{},
+		stopMutex:	  &sync.Mutex{},
 	}
 }
 
 // sendResult forwards on a polling result if the channel is not closed
 // which could happen during the polling request
 func (p *Poller) sendResult(result interface{}) {
-	if !p.isStopped {
+	p.stopMutex.Lock()
+	if !p.IsStopped() {
 		p.Channel <- result
 	}
+	p.stopMutex.Unlock()
 }
 
 // runPolling is the actual polling mechanism that handles control flow
 func (p *Poller) runPolling() {
-	for !p.isStopped {
+	for !p.IsStopped() {
 		p.sendResult(p.Poll())
 		time.Sleep(p.WaitInterval)
 	}
@@ -45,7 +49,7 @@ func (p *Poller) runPolling() {
 
 // Start starts the polling process -- cannot be restarted after stopping
 func (p *Poller) Start() {
-	if p.isStopped {
+	if p.IsStopped() {
 		panic("cannot restart poller after it has been stopped")
 	}
 
@@ -56,8 +60,10 @@ func (p *Poller) Start() {
 // Stop exits the polling loop on the next attempt, waits for it to finish,
 // and closes the channel
 func (p *Poller) Stop() {
+	p.stopMutex.Lock()
 	p.isStopped = true
 	close(p.Channel)
+	p.stopMutex.Unlock()
 }
 
 // StopAndBlock stops the poller and blocks until it is closed
@@ -69,4 +75,9 @@ func (p *Poller) StopAndBlock() {
 // IsFinished returns whether or not the polling worker has completed
 func (p *Poller) IsFinished() bool {
 	return p.isFinished
+}
+
+// IsStopped returns whether or not the polling worker has been stopped
+func (p *Poller) IsStopped() bool {
+	return p.isStopped
 }
