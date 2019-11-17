@@ -49,14 +49,16 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 		r.removeStatusPollerForResource(req)
 	}
 
+	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
+	
 	// On each polling callback, push the update through the k8s client
-	vpNamespace := vpSavepoint.Spec.Metadata.Namespace
-	vpID := vpSavepoint.Spec.Metadata.ID
 	poller := polling.NewPoller(func() interface{} {
 		ctx := context.Background()
-		savepoint, _, err := r.AppManagerApiClient.SavepointsApi.GetSavepoint(ctx, vpNamespace, vpID)
+		savepoint, _, err := r.AppManagerApiClient.SavepointsApi.GetSavepoint(ctx, nsName, vpID)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
+			return nil
 		}
 		
 		var vpSavepointUpdated v1beta1.VpSavepoint
@@ -67,14 +69,14 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 			 } else {
 				log.Error(err, "Error getting VpSavepoint while polling")
 			 }
-			 return
+			 return savepoint
 		}
 		
 		if err = r.updateResource(&vpSavepointUpdated, &savepoint); err != nil {
 			log.Error(err, "Error while updating VpSavepoint from poller")
 		}
 
-		return
+		return nil
 	}, time.Second*5)
 
 	r.pollerMap[req.String()] = poller
