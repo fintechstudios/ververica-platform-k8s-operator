@@ -54,7 +54,7 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 	vpID := vpSavepoint.Spec.Metadata.ID
 	poller := polling.NewPoller(func() interface{} {
 		ctx := context.Background()
-		savepoint, _, err := r.VPAPIClient.SavepointsApi.GetSavepoint(ctx, vpNamespace, vpID)
+		savepoint, _, err := r.AppManagerApiClient.SavepointsApi.GetSavepoint(ctx, vpNamespace, vpID)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
 		}
@@ -70,7 +70,7 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 			 return
 		}
 		
-		if err = r.updateResource(res, savepoint); err != nil {
+		if err = r.updateResource(res, &vpSavepointUpdated, &savepoint); err != nil {
 			log.Error(err, "Error while updating VpSavepoint from poller")
 		}
 
