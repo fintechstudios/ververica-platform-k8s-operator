@@ -49,7 +49,7 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 		r.removeStatusPollerForResource(req)
 	}
 
-	// On each channel callback, push the update through the k8s client
+	// On each polling callback, push the update through the k8s client
 	vpNamespace := vpSavepoint.Spec.Metadata.Namespace
 	vpID := vpSavepoint.Spec.Metadata.ID
 	poller := polling.NewPoller(func() interface{} {
@@ -70,7 +70,7 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 			 return
 		}
 		
-		if err = r.updateResource(res, &vpSavepointUpdated, &savepoint); err != nil {
+		if err = r.updateResource(&vpSavepointUpdated, &savepoint); err != nil {
 			log.Error(err, "Error while updating VpSavepoint from poller")
 		}
 
