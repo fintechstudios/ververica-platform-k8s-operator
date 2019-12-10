@@ -11,7 +11,7 @@ require (
 	github.com/googleapis/gnostic v0.3.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/onsi/ginkgo v1.8.0
-	github.com/onsi/gomega v1.5.0
+	github.com/onsi/gomega v1.7.1
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
