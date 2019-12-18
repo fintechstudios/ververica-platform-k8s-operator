@@ -25,7 +25,7 @@ endif
 
 # find or download kustomize
 .PHONY: kustomize
-controller-gen:
+kustomize:
 ifeq (, $(shell which kustomize))
 	go get sigs.k8s.io/kustomize/kustomize/v3@v3.3.0
 KUSTOMIZE=$(shell go env GOPATH)/bin/kustomize
