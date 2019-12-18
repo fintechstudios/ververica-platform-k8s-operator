@@ -18,7 +18,7 @@ const (
 )
 
 func Pair(attr AnnotationName, val string) AnnotationPair {
-	return AnnotationPair{attr, val }
+	return AnnotationPair{attr, val}
 }
 
 func Has(annotations map[string]string, attr AnnotationName) bool {

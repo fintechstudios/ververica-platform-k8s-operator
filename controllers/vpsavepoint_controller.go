@@ -18,12 +18,14 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,6 +38,59 @@ type VpSavepointReconciler struct {
 	Log                 logr.Logger
 	AppManagerApiClient *appManagerApi.APIClient
 	AppManagerAuthStore *appManager.AuthStore
+	pollerMap   map[string]*polling.Poller
+}
+
+
+func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
+	log := r.getLogger(req)
+	if r.pollerMap[req.String()] != nil {
+		log.Info("A status poller already exists, removing...")
+		r.removeStatusPollerForResource(req)
+	}
+
+	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
+	
+	// On each polling callback, push the update through the k8s client
+	poller := polling.NewPoller(func() interface{} {
+		ctx := context.Background()
+		savepoint, _, err := r.AppManagerApiClient.SavepointsApi.GetSavepoint(ctx, nsName, vpID)
+		if err != nil {
+			log.Error(err, "Error while polling savepoint")
+			return nil
+		}
+		
+		var vpSavepointUpdated v1beta1.VpSavepoint
+		if err = r.Get(ctx, req.NamespacedName, &vpSavepointUpdated); err != nil {
+			 if utils.IsNotFoundError(err) {
+				 // TODO: should we force stop polling?
+				log.Error(err, "VpSavepoint not found while polling")
+			 } else {
+				log.Error(err, "Error getting VpSavepoint while polling")
+			 }
+			 return savepoint
+		}
+		
+		if err = r.updateResource(&vpSavepointUpdated, &savepoint); err != nil {
+			log.Error(err, "Error while updating VpSavepoint from poller")
+		}
+
+		return nil
+	}, time.Second*5)
+
+	r.pollerMap[req.String()] = poller
+	poller.Start()
+}
+
+func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) {
+	log := r.getLogger(req)
+	poller := r.pollerMap[req.String()]
+	if poller != nil {
+		log.Info("Stopping poller")
+		poller.Stop()
+		delete(r.pollerMap, req.String())
+	}
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -127,6 +182,9 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		return ctrl.Result{}, err
 	}
 
+	// Create a poller to keep the savepoint up to date
+	r.addStatusPollerForResource(req, &vpSavepoint)
+
 	return ctrl.Result{}, nil
 }
 
@@ -147,7 +205,8 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if !vpSavepoint.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Being deleted
 		log.Info("Delete event")
-		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned.")
+		r.removeStatusPollerForResource(req)
+		log.Info("Warning: Deletion is not supported through the Ververica Platform. All savepoints must be manually cleaned up.")
 		return ctrl.Result{}, nil
 	}
 
