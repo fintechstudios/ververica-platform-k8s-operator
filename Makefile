@@ -70,7 +70,7 @@ fmt:
 
 .PHONY: lint
 lint:
-	golangci-lint run
+	golangci-lint run --timeout=60s
 
 # Generate code
 .PHONY: generate
