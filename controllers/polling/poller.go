@@ -15,6 +15,8 @@ type Poller struct {
 	stopMutex    *sync.Mutex
 }
 
+// NewPoller creates a new poller for a function with a polling interval
+// NOTE: the polling function cannot return `nil`
 func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
 	return &Poller{
 		Channel:      make(chan interface{}),
@@ -31,16 +33,18 @@ func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
 // which could happen during the polling request
 func (p *Poller) sendResult(result interface{}) {
 	p.stopMutex.Lock()
+	defer p.stopMutex.Unlock()
 	if !p.IsStopped() {
 		p.Channel <- result
 	}
-	p.stopMutex.Unlock()
 }
 
 // runPolling is the actual polling mechanism that handles control flow
 func (p *Poller) runPolling() {
 	for !p.IsStopped() {
-		p.sendResult(p.Poll())
+		if res := p.Poll(); res != nil {
+			p.sendResult(res)
+		}
 		time.Sleep(p.WaitInterval)
 	}
 	p.group.Done()
@@ -61,9 +65,10 @@ func (p *Poller) Start() {
 // and closes the channel
 func (p *Poller) Stop() {
 	p.stopMutex.Lock()
+	defer p.stopMutex.Unlock()
+
 	p.isStopped = true
 	close(p.Channel)
-	p.stopMutex.Unlock()
 }
 
 // StopAndBlock stops the poller and blocks until it is closed
