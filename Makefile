@@ -17,19 +17,20 @@ all: manager
 .PHONY: controller-gen
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.1
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4
 CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-.PHONY: kube-config
-kube-config:
-ifeq (, $(shell which kind))
-# default
-KUBECONFIG=~/.kube/config
+# find or download kustomize
+.PHONY: kustomize
+controller-gen:
+ifeq (, $(shell which kustomize))
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.3.0
+KUSTOMIZE=$(shell go env GOPATH)/bin/kustomize
 else
-KUBECONFIG=$(shell kind get kubeconfig-path --name=$(TEST_CLUSTER_NAME))
+KUSTOMIZE=$(shell which kustomize)
 endif
 
 # Run tests
@@ -44,18 +45,18 @@ manager: generate
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
-run: generate kube-config
-	KUBECONFIG=$(KUBECONFIG) go run -ldflags $(LD_FLAGS) ./main.go
+run: generate
+	go run -ldflags $(LD_FLAGS) ./main.go
 
 # Install CRDs into a cluster
 .PHONY: install
-install: manifests kube-config
-	kubectl --kubeconfig $(KUBECONFIG) apply -f config/crd/bases
+install: manifests
+	kubectl apply -f config/crd/bases
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 .PHONY: deploy
-deploy: install kube-config
-	kustomize build config/default | kubectl --kubeconfig $(KUBECONFIG) apply -f -
+deploy: install
+	kustomize build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
@@ -77,13 +78,13 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
 
 # Patch the latest image version into the default kustomize image patch
-.PHONY: kustomize-patch-image
-kustomize-patch-image:
+.PHONY: patch-image
+patch-image:
 	sed -i'' -e 's@image: .*@image: '"$(IMG):$(VERSION)"'@' ./config/default/manager_image_patch.yaml
 
 # Build the k8s resources for deployment
-kustomize-build: kustomize-patch-image
-	kustomize build config/default > resources.yaml
+kustomize-build: patch-image
+	$(KUSTOMIZE) build config/default > resources.yaml
 
 # Update the Swagger Client API
 .PHONY: swagger-gen
@@ -100,10 +101,4 @@ test-cluster-create:
 .PHONY: test-cluster-delete
 test-cluster-delete:
 	kind delete cluster --name $(TEST_CLUSTER_NAME)
-
-# store dev enviornment config in a .env file
-.PHONY: dotenv
-dotenv:
-	rm -f .env
-	echo "KUBECONFIG=$(KUBECONFIG)" > .env
 

@@ -8,7 +8,7 @@
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
-Built for Ververica Platform version `2.x`.
+Built for Ververica Platform version `2.x` with go version `1.13`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
 [Ververica Platform Docs](https://docs.ververica.com/)
@@ -85,11 +85,11 @@ in [docs/design.md](./docs/design.md).
 Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= `1.12.x`
+- `go` >= `1.13.x`
 - `make` >= `4`
-- `kubebuilder` == [`v2.x`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.0.0)
-- [`kustomize`](https://github.com/kubernetes-sigs/kustomize) >= `v3.0.1`
+- `kubebuilder` == [`v2.2.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.2.0)
 - `docker` >= `19`
+- `kind` >= `0.6.0`
 
 ### `make` Scripts
 
@@ -109,8 +109,7 @@ System Pre-requisites:
 - `make test` runs the test suites with coverage
 - `make test-cluster-create` initializes a cluster for testing, using kind
 - `make test-cluster-delete` deletes the testing cluster
-- `make dotenv` stores the test cluster config in a `.env` file - warning, it will overwrite the file.
-- `make kustomize-patch-image` sets the current version as the default deployment image tag
+- `make patch-image` sets the current version as the default deployment image tag
 - `make kustomize-build` builds the default k8s resources for deployment
 
 ### Environment
