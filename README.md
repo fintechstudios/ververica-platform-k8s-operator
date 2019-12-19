@@ -1,9 +1,9 @@
 # Ververica Platform K8s Operator
 
 [![go reportcard](https://goreportcard.com/badge/github.com/fintechstudios/ververica-platform-k8s-operator)](https://goreportcard.com/report/github.com/fintechstudios/ververica-platform-k8s-operator)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller?ref=badge_shield)
-[![pipeline status](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/badges/master/pipeline.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/commits/master)
-[![coverage report](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/badges/master/coverage.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/commits/master)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator?ref=badge_shield)
+[![pipeline status](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/badges/master/pipeline.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/commits/master)
+[![coverage report](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/badges/master/coverage.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/commits/master)
 
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
@@ -62,14 +62,14 @@ Specifying in the environment is a good way to integrate with namespaces that ar
 
 ## Docker
 
-Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ververica-platform-k8s-controller).
+Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ververica-platform-k8s-operator).
 *  The `latest` tag always refers to the current HEAD in the master branch.
 * Each master commit hash is also tagged and published.
 * Git tags are published with the same tag. 
 
 ## Helm
 
-A base Helm chart is provided in [`./charts/vp-k8s-controller`](charts/vp-k8s-operator).
+A base Helm chart is provided in [`./charts/vp-k8s-operator`](charts/vp-k8s-operator).
 
 This sets up a deployment with a metrics server, RBAC policies, CRDs, and, optionally, an RBAC proxy for the metrics over HTTPS.
 
@@ -202,4 +202,4 @@ Other OSS that influenced this project:
 
 
 ## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator?ref=badge_large)

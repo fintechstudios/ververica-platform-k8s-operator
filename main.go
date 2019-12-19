@@ -128,7 +128,7 @@ func main() {
 		"operatorVersion", version.String())
 
 	// Create clients
-	userAgent := fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.OperatorVersion, version.GoVersion)
+	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
 	platformClient := platformApiClient.NewAPIClient(&platformApiClient.Configuration{
 		BasePath:      *platformApiUrl,
 		DefaultHeader: make(map[string]string),
