@@ -2,7 +2,7 @@ package converters
 
 import (
 	"errors"
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 )
 
 // DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation

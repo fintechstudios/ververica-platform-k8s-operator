@@ -1,7 +1,7 @@
 # Image URL to use all building/pushing image targets
 VERSION?=v0.4.0
-IMG?=fintechstudios/ververica-platform-k8s-controller
-PKG=github.com/fintechstudios.com/ververica-platform-k8s-controller
+IMG?=fintechstudios/ververica-platform-k8s-operator
+PKG=github.com/fintechstudios.com/ververica-platform-k8s-operator
 VERSION_PKG=main
 BUILD=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -9,7 +9,7 @@ CRD_OPTIONS?="crd:trivialVersions=true"
 
 LD_FLAGS="-X $(VERSION_PKG).controllerVersion='$(VERSION)' -X $(VERSION_PKG).gitCommit='$(GIT_COMMIT)' -X $(VERSION_PKG).buildDate='$(BUILD)'"
 
-TEST_CLUSTER_NAME=ververica-platform-k8s-controller-cluster
+TEST_CLUSTER_NAME=ververica-platform-k8s-operator-cluster
 
 all: manager
 

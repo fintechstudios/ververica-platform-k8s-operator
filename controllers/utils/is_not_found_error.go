@@ -1,8 +1,8 @@
 package utils
 
 import (
-	appManagerApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	appManagerApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 

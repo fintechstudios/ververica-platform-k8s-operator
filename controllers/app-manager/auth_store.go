@@ -6,13 +6,13 @@ import (
 	"os"
 	"strings"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 const defaultTokenEnvVar = "APPMANAGER_API_TOKEN"
 
 // One token per namespace
-const tokenName = "vp-k8s-controller-admin-token"
+const tokenName = "vp-k8s-operator-admin-token"
 
 type TokenData struct {
 	Name       string

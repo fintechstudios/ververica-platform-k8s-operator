@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 )
 
 func formatTokenNameForNamespace(name, namespace string) string {

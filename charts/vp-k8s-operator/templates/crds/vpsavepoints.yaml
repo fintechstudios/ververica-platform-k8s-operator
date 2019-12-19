@@ -5,7 +5,7 @@ metadata:
   creationTimestamp: null
   annotations:
     "helm.sh/hook": pre-install
-{{- if .Values.controller.cleanupCustomResourceBeforeInstall }}
+{{- if .Values.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
 {{- end }}
 spec:

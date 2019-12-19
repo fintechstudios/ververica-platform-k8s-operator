@@ -6,9 +6,9 @@ import (
 )
 
 var _ = Describe("Main", func() {
-	Context("version", func() {
+	Context("operatorVersion", func() {
 		Describe("GetVersion", func() {
-			It("should create a version object", func() {
+			It("should create a operatorVersion object", func() {
 				version := GetVersion()
 				Expect(len(version.BuildDate)).ToNot(BeZero())
 			})
@@ -20,7 +20,7 @@ var _ = Describe("Main", func() {
 				version = GetVersion()
 			})
 
-			It("should create a version string", func() {
+			It("should create a operatorVersion string", func() {
 				Expect(len(version.String())).ToNot(BeZero())
 			})
 		})

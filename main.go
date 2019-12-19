@@ -22,11 +22,11 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
 	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
@@ -37,36 +37,36 @@ import (
 )
 
 var (
-	controllerVersion = "unknown"
-	goos              = runtime.GOOS
-	goarch            = runtime.GOARCH
-	gitCommit         = "$Format:%H$"          // sha1 from git, output of $(git rev-parse HEAD)
-	buildDate         = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+	operatorVersion = "unknown"
+	goos            = runtime.GOOS
+	goarch          = runtime.GOARCH
+	gitCommit       = "$Format:%H$"          // sha1 from git, output of $(git rev-parse HEAD)
+	buildDate       = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
 )
 
-// Version is a simple representation of the current application and runtime version
+// Version is a simple representation of the current application and runtime operatorVersion
 type Version struct {
-	ControllerVersion string `json:"controllerVersion"`
-	GitCommit         string `json:"gitCommit"`
-	BuildDate         string `json:"buildDate"`
-	GoVersion         string `json:"goVersion"`
-	GoOs              string `json:"goOs"`
-	GoArch            string `json:"goArch"`
+	OperatorVersion string `json:"operatorVersion"`
+	GitCommit       string `json:"gitCommit"`
+	BuildDate       string `json:"buildDate"`
+	GoVersion       string `json:"goVersion"`
+	GoOs            string `json:"goOs"`
+	GoArch          string `json:"goArch"`
 }
 
-// GetVersion constructs the current version
+// GetVersion constructs the current operatorVersion
 func GetVersion() Version {
 	return Version{
-		ControllerVersion: controllerVersion,
-		GitCommit:         gitCommit,
-		BuildDate:         buildDate,
-		GoVersion:         runtime.Version(),
-		GoOs:              goos,
-		GoArch:            goarch,
+		OperatorVersion: operatorVersion,
+		GitCommit:       gitCommit,
+		BuildDate:       buildDate,
+		GoVersion:       runtime.Version(),
+		GoOs:            goos,
+		GoArch:          goarch,
 	}
 }
 
-// String gets a simple string representation of the version
+// String gets a simple string representation of the operatorVersion
 func (v Version) String() string {
 	return fmt.Sprintf("%#v", v)
 }
@@ -125,10 +125,10 @@ func main() {
 
 	version := GetVersion()
 	setupLog.Info("Starting Ververica Platform K8s controller",
-		"version", version.String())
+		"operatorVersion", version.String())
 
 	// Create clients
-	userAgent := fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.ControllerVersion, version.GoVersion)
+	userAgent := fmt.Sprintf("VervericaPlatformK8sController/%s/go-%s", version.OperatorVersion, version.GoVersion)
 	platformClient := platformApiClient.NewAPIClient(&platformApiClient.Configuration{
 		BasePath:      *platformApiUrl,
 		DefaultHeader: make(map[string]string),
@@ -151,8 +151,8 @@ func main() {
 	}
 
 	err = (&controllers.VpNamespaceReconciler{
-		Client:              mgr.GetClient(),
-		Log:                 ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VpNamespace"),
 		// AppManagerApiClient: appManagerClient,
 		AppManagerAuthStore: appManagerAuthStore,
 		PlatformApiClient:   platformClient,
@@ -198,5 +198,5 @@ func main() {
 		cleanup(context.Background())
 		os.Exit(1)
 	}
-	 cleanup(context.Background())
+	cleanup(context.Background())
 }

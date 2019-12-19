@@ -1,6 +1,6 @@
-# Ververica Platform K8s Controller
+# Ververica Platform K8s Operator
 
-[![go reportcard](https://goreportcard.com/badge/github.com/fintechstudios/ververica-platform-k8s-controller)](https://goreportcard.com/report/github.com/fintechstudios/ververica-platform-k8s-controller)
+[![go reportcard](https://goreportcard.com/badge/github.com/fintechstudios/ververica-platform-k8s-operator)](https://goreportcard.com/report/github.com/fintechstudios/ververica-platform-k8s-operator)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-controller?ref=badge_shield)
 [![pipeline status](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/badges/master/pipeline.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/commits/master)
 [![coverage report](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/badges/master/coverage.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-controller/commits/master)
@@ -69,7 +69,7 @@ Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ver
 
 ## Helm
 
-A base Helm chart is provided in [`./charts/vp-k8s-controller`](./charts/vp-k8s-controller).
+A base Helm chart is provided in [`./charts/vp-k8s-controller`](charts/vp-k8s-operator).
 
 This sets up a deployment with a metrics server, RBAC policies, CRDs, and, optionally, an RBAC proxy for the metrics over HTTPS.
 

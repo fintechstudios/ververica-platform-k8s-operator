@@ -1,6 +1,6 @@
 version: "2"
 domain: fintechstudios.com
-repo: github.com/fintechstudios/ververica-platform-k8s-controller
+repo: github.com/fintechstudios/ververica-platform-k8s-operator
 resources:
 - group: ververicaplatform
   version: v1beta1

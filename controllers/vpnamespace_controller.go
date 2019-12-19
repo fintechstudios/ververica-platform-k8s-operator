@@ -20,16 +20,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 )
 
 // VpNamespaceReconciler reconciles a VpNamespace object
