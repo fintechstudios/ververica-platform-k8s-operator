@@ -3,8 +3,8 @@
 
 Ensure the controller is running:
 
-kubectl get -n {{ .Release.Namespace }} deployments/{{ template "vp-k8s-controller.fullname" . }}-controller-manager
+kubectl get -n {{ .Release.Namespace }} deployments/{{ template "vp-k8s-operator.fullname" . }}-controller-manager
 
 And the metrics service:
 
-kubectl get -n {{ .Release.Namespace }} services/{{ template "vp-k8s-controller.name" . }}-controller-manager-metrics-service
+kubectl get -n {{ .Release.Namespace }} services/{{ template "vp-k8s-operator.name" . }}-controller-manager-metrics-service

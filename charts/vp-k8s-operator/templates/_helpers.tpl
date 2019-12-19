@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "vp-k8s-controller.name" -}}
+{{- define "vp-k8s-operator.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "vp-k8s-controller.fullname" -}}
+{{- define "vp-k8s-operator.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -34,8 +34,8 @@ Create chart name and version as used by the chart label.
 {{/*
 Common labels
 */}}
-{{- define "vp-k8s-controller.labels" -}}
-app.kubernetes.io/name: {{ include "vp-k8s-controller.name" . }}
+{{- define "vp-k8s-operator.labels" -}}
+app.kubernetes.io/name: {{ include "vp-k8s-operator.name" . }}
 helm.sh/chart: {{ include "chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

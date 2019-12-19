@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ template "vp-k8s-controller.name" . }}-leader-election-role
+  name: {{ template "vp-k8s-operator.name" . }}-leader-election-role
   namespace: {{ .Release.Namespace }}
 rules:
   - apiGroups:
@@ -30,7 +30,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: {{ template "vp-k8s-controller.name" . }}-manager-role
+  name: {{ template "vp-k8s-operator.name" . }}-manager-role
 rules:
 - apiGroups:
   - ververicaplatform.fintechstudios.com
@@ -108,7 +108,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "vp-k8s-controller.name" . }}-proxy-role
+  name: {{ template "vp-k8s-operator.name" . }}-proxy-role
 rules:
   - apiGroups:
       - authentication.k8s.io
@@ -126,12 +126,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ template "vp-k8s-controller.name" . }}-leader-election-rolebinding
+  name: {{ template "vp-k8s-operator.name" . }}-leader-election-rolebinding
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "vp-k8s-controller.name" . }}-leader-election-role
+  name: {{ template "vp-k8s-operator.name" . }}-leader-election-role
 subjects:
   - kind: ServiceAccount
     name: default
@@ -140,11 +140,11 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "vp-k8s-controller.name" . }}-manager-rolebinding
+  name: {{ template "vp-k8s-operator.name" . }}-manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "vp-k8s-controller.name" . }}-manager-role
+  name: {{ template "vp-k8s-operator.name" . }}-manager-role
 subjects:
   - kind: ServiceAccount
     name: default
@@ -153,11 +153,11 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ template "vp-k8s-controller.name" . }}-proxy-rolebinding
+  name: {{ template "vp-k8s-operator.name" . }}-proxy-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ template "vp-k8s-controller.name" . }}-proxy-role
+  name: {{ template "vp-k8s-operator.name" . }}-proxy-role
 subjects:
   - kind: ServiceAccount
     name: default
