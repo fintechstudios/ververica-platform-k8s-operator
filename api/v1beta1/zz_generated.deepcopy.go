@@ -111,7 +111,7 @@ func (in *VpDeployment) DeepCopyObject() runtime.Object {
 func (in *VpDeploymentList) DeepCopyInto(out *VpDeploymentList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]VpDeployment, len(*in))
@@ -284,7 +284,7 @@ func (in *VpDeploymentTarget) DeepCopyObject() runtime.Object {
 func (in *VpDeploymentTargetList) DeepCopyInto(out *VpDeploymentTargetList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]VpDeploymentTarget, len(*in))
@@ -585,7 +585,7 @@ func (in *VpNamespace) DeepCopyObject() runtime.Object {
 func (in *VpNamespaceList) DeepCopyInto(out *VpNamespaceList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]VpNamespace, len(*in))
@@ -782,7 +782,7 @@ func (in *VpSavepointFailure) DeepCopy() *VpSavepointFailure {
 func (in *VpSavepointList) DeepCopyInto(out *VpSavepointList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]VpSavepoint, len(*in))

@@ -1,5 +1,5 @@
 # A development environment in an image to run tests on, build, etc.
-FROM golang:1.12-stretch
+FROM golang:1.13-stretch
 
 ENV CGO_ENABLED 0
 ENV GOOS linux
@@ -7,8 +7,8 @@ ENV GOARCH amd64
 ENV GO111MODULE on
 ENV GOPATH /go
 ENV GOLANGCI_LINT_VERSION 1.21.0
-ENV KUSTOMIZE_VERSION 3.1.0
-ENV KUBEBUILDER_VERSION 2.0.1
+ENV KUSTOMIZE_VERSION 3.3.0
+ENV KUBEBUILDER_VERSION 2.2.0
 ENV KUBEBUILDER_DIR /usr/local/kubebuilder
 ENV PATH ${KUBEBUILDER_DIR}/bin:${PATH}
 
@@ -25,7 +25,7 @@ RUN echo "installing kubebuilder@$KUBEBUILDER_VERSION, kustomize@$KUSTOMIZE_VERS
     mv $KUBEBUILDER_DIR/${DL_NAME}/bin $KUBEBUILDER_DIR/bin && \
     rm -rf ${KUBEBUILDER_DIR}/${DL_NAME} && \
     KUSTOMIZE_DL=kustomize_${KUSTOMIZE_VERSION}_${GOOS}_${GOARCH} && \
-    curl -O -L https://github.com/kubernetes-sigs/kustomize/releases/download/v${KUSTOMIZE_VERSION}/${KUSTOMIZE_DL} && \
+    curl -O -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/${KUSTOMIZE_DL} && \
     chmod +x ${KUSTOMIZE_DL} && \
     mv ${KUSTOMIZE_DL} ${KUBEBUILDER_DIR}/bin/kustomize # just pop it in the kubebuilder bin for now
 
