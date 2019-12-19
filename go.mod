@@ -1,4 +1,4 @@
-module github.com/fintechstudios/ververica-platform-k8s-controller
+module github.com/fintechstudios/ververica-platform-k8s-operator
 
 go 1.13
 

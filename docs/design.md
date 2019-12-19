@@ -24,7 +24,7 @@ conditions between resource-interdependency.
 Take a look at OpenShift's [Operator Best Practices](https://blog.openshift.com/kubernetes-operators-best-practices/)
 section on _Resource Reconciliation Cycle_ for more of what we should be doing here.
 
-You can see it in action by running the controller and then applying the entire samples directory:
+You can see it in action by running the operator and then applying the entire samples directory:
 
 ```bash
 kubectl apply -f ./config/samples

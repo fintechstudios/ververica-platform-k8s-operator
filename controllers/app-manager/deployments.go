@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 // GetDeploymentByName fetches a deployment from the VP by namespace and name

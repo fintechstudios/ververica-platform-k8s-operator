@@ -1,6 +1,6 @@
-# VP K8s Controller
+# VP K8s Operator
 
-A little Helm chart for deploying the Ververica Platform Kubernetes Controller.
+A little Helm chart for deploying the Ververica Platform Kubernetes Operator.
 
 ## Installing the Chart
 
@@ -13,10 +13,10 @@ A little Helm chart for deploying the Ververica Platform Kubernetes Controller.
 | `rbacProxy.imageTag`         |                                                      | `v0.4.0`                                           |
 | `rbacProxy.imagePullPolicy`  |                                                      | `IfNotPresent`                                     |
 | `rbacProxy.port`             |                                                      | `8443`                                             |
-| `controller.imageRepository` | Image repository for the Manager                     | `fintechstudios/ververica-platform-k8s-controller` |
-| `controller.imageTag`        |                                                      | `v0.3.1`                                           |
-| `controller.imagePullPolicy` |                                                      | `IfNotPresent`                                     |
-| `controller.metricsHost`     | Host for the metrics reporter.                       | `127.0.0.1`                                        |
-| `controller.metricsPort`     | Port for the metrics reporter.                       | `8080`                                             |
-| `controller.platformApiUrl`  | URL for the Ververica Platform API.                  | `http://ververica-platform-appmanager`             |
-| `controller.appManagerApiUrl`| URL for the Appmanager API.                          | `http://ververica-platform-appmanager/api`         |
+| `imageRepository`            | Image repository for the Manager                     | `fintechstudios/ververica-platform-k8s-operator`   |
+| `imageTag`                   |                                                      | `latest`                                           |
+| `imagePullPolicy`            |                                                      | `IfNotPresent`                                     |
+| `metricsHost`                | Host for the metrics reporter.                       | `127.0.0.1`                                        |
+| `metricsPort`                | Port for the metrics reporter.                       | `8080`                                             |
+| `platformApiUrl`             | URL for the Ververica Platform API.                  | `http://ververica-platform-appmanager`             |
+| `appManagerApiUrl`           | URL for the Appmanager API.                          | `http://ververica-platform-appmanager/api`         |

@@ -3,8 +3,8 @@ package converters
 import (
 	"errors"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-controller/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 )
 
 var InvalidNamespaceLifecyclePhaseError = errors.New("origin must be one of: LIFECYCLE_PHASE_ACTIVE, LIFECYCLE_PHASE_TERMINATING, UNRECOGNIZED, LIFECYCLE_PHASE_INVALID")

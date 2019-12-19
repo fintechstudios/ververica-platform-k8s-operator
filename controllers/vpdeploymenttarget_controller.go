@@ -21,17 +21,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1/converters"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/annotations"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-controller/controllers/app-manager"
-	"github.com/fintechstudios/ververica-platform-k8s-controller/controllers/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-controller/api/v1beta1"
+	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 )
 
 // VpDeploymentTargetReconciler reconciles a VpDeploymentTarget object

@@ -1,5 +1,5 @@
 variables:
-  DOCKER_HUB_IMAGE_REPO: index.docker.io/fintechstudios/ververica-platform-k8s-controller
+  DOCKER_HUB_IMAGE_REPO: index.docker.io/fintechstudios/ververica-platform-k8s-operator
   GL_IMAGE_REPO: registry.gitlab.com/$CI_PROJECT_PATH
   BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
   BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA

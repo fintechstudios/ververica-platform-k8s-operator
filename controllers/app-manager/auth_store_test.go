@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-controller/appmanager-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 func removeTokenData(slice []testTokenData, s int) []testTokenData {
