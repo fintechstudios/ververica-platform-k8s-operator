@@ -74,6 +74,8 @@ release-docker-build:
   image: docker:stable
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  needs:
+    - install
   script:
     # use the commit's builder image
     - docker pull $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG

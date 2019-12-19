@@ -69,7 +69,7 @@ Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ver
 
 ## Helm
 
-A base Helm chart is provided in [`./charts/vp-k8s-controller`](./charts/vp-k8s-controller).
+A base Helm chart is provided in [`./charts/vp-k8s-controller`](charts/vp-k8s-operator).
 
 This sets up a deployment with a metrics server, RBAC policies, CRDs, and, optionally, an RBAC proxy for the metrics over HTTPS.
 
