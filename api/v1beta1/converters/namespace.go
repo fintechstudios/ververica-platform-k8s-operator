@@ -7,7 +7,7 @@ import (
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 )
 
-var InvalidNamespaceLifecyclePhaseError = errors.New("origin must be one of: LIFECYCLE_PHASE_ACTIVE, LIFECYCLE_PHASE_TERMINATING, UNRECOGNIZED, LIFECYCLE_PHASE_INVALID")
+var ErrorInvalidNamespaceLifecyclePhase = errors.New("origin must be one of: LIFECYCLE_PHASE_ACTIVE, LIFECYCLE_PHASE_TERMINATING, UNRECOGNIZED, LIFECYCLE_PHASE_INVALID")
 
 func NamespaceLifecyclePhaseToNative(savepointOrigin string) (v1beta1.NamespaceLifecyclePhase, error) {
 	switch savepointOrigin {
@@ -20,7 +20,7 @@ func NamespaceLifecyclePhaseToNative(savepointOrigin string) (v1beta1.NamespaceL
 	case string(v1beta1.UnrecognizedNamespaceLifecyclePhase):
 		return v1beta1.UnrecognizedNamespaceLifecyclePhase, nil
 	default:
-		return "", InvalidNamespaceLifecyclePhaseError
+		return "", ErrorInvalidNamespaceLifecyclePhase
 	}
 }
 
@@ -35,7 +35,7 @@ func NamespaceLifecyclePhaseFromNative(vpSavepointOrigin v1beta1.NamespaceLifecy
 	case v1beta1.UnrecognizedNamespaceLifecyclePhase:
 		return string(v1beta1.UnrecognizedNamespaceLifecyclePhase), nil
 	default:
-		return "", InvalidNamespaceLifecyclePhaseError
+		return "", ErrorInvalidNamespaceLifecyclePhase
 	}
 }
 

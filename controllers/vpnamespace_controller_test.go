@@ -31,7 +31,7 @@ var _ = Describe("VpNamespace Controller", func() {
 		reconciler = VpNamespaceReconciler{
 			Client:            k8sClient,
 			Log:               logger,
-			PlatformApiClient: platformClient,
+			PlatformAPIClient: platformClient,
 		}
 	})
 

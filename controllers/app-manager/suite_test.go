@@ -1,4 +1,4 @@
-package appManager
+package appmanager
 
 import (
 	"testing"

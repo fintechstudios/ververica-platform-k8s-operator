@@ -25,7 +25,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
-	annotations "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
@@ -33,13 +33,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var InvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
+var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerApiClient *appManagerApi.APIClient
+	AppManagerAPIClient *appManagerApi.APIClient
 	AppManagerAuthStore *appManager.AuthStore
 }
 
@@ -49,7 +49,7 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // getDeploymentTargetID gets the id of a deployment
-func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment v1beta1.VpDeployment, ctx context.Context) (string, error) {
+func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDeployment v1beta1.VpDeployment) (string, error) {
 	if annotations.Has(vpDeployment.Annotations, annotations.DeploymentTargetID) {
 		return annotations.Get(vpDeployment.Annotations, annotations.DeploymentTargetID), nil
 	}
@@ -60,11 +60,11 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(vpDeployment v1beta1.VpDe
 	}
 	name := vpDeployment.Spec.DeploymentTargetName
 	if len(name) == 0 {
-		return "", InvalidDeploymentTargetNoTargetName
+		return "", ErrorInvalidDeploymentTargetNoTargetName
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	depTarget, _, err := r.AppManagerApiClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, nsName, vpDeployment.Spec.DeploymentTargetName)
+	depTarget, _, err := r.AppManagerAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, nsName, vpDeployment.Spec.DeploymentTargetName)
 
 	if err != nil {
 		return "", err
@@ -122,7 +122,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{Requeue: false}, nil
 	}
 
-	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetID(vpDeployment, ctx)
+	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetID(ctx, vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -130,7 +130,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 	deployment.Metadata.Name = req.Name
 
 	// create it
-	createdDep, res, err := r.AppManagerApiClient.
+	createdDep, res, err := r.AppManagerAPIClient.
 		DeploymentsApi.
 		CreateDeployment(ctx, namespace, deployment)
 
@@ -176,7 +176,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	// Patches with no changes to the spec should not trigger
 	// sequential patches with the same spec will not trigger a new transition
 	// but will bump the resource version, making a direct equality check impossible
-	updatedDep, res, err := r.AppManagerApiClient.DeploymentsApi.UpdateDeployment(ctx, nsName, currentDeployment.Metadata.Id, desiredDeployment)
+	updatedDep, res, err := r.AppManagerAPIClient.DeploymentsApi.UpdateDeployment(ctx, nsName, currentDeployment.Metadata.Id, desiredDeployment)
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
@@ -218,9 +218,9 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 	var deployment appManagerApi.Deployment
 	if annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
-		deployment, _, err = r.AppManagerApiClient.DeploymentsApi.GetDeployment(ctx, nsName, id)
+		deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, id)
 	} else {
-		deployment, err = appManager.GetDeploymentByName(r.AppManagerApiClient, ctx, nsName, vpDeployment.Name)
+		deployment, err = appManager.GetDeploymentByName(ctx, r.AppManagerAPIClient, nsName, vpDeployment.Name)
 	}
 
 	if err != nil {
@@ -235,7 +235,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 			// must cancel it
 			log.Info("Cancelling Deployment")
 			deployment.Spec.State = string(v1beta1.CancelledState)
-			deployment, _, err = r.AppManagerApiClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, deployment)
+			deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, deployment)
 
 			if err != nil {
 				return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -251,7 +251,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{RequeueAfter: time.Second * 30}, nil
 	}
 
-	deployment, _, err = r.AppManagerApiClient.DeploymentsApi.DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
+	deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
 	if err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
@@ -312,7 +312,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 	if !annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		// no id has been set
-		deployment, err := appManager.GetDeploymentByName(r.AppManagerApiClient, appManagerCtx, nsName, req.Name)
+		deployment, err := appManager.GetDeploymentByName(appManagerCtx, r.AppManagerAPIClient, nsName, req.Name)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("Create event")
@@ -331,7 +331,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 	id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
 
-	deployment, _, err := r.AppManagerApiClient.DeploymentsApi.GetDeployment(appManagerCtx, nsName, id)
+	deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(appManagerCtx, nsName, id)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			log.Info("Deployment by id not found - creating", "id", id)

@@ -55,7 +55,7 @@ type VpDeploymentTemplateMetadata struct {
 type VpArtifact struct {
 	Kind string `json:"kind"`
 
-	JarUri string `json:"jarUri"`
+	JarURI string `json:"jarUri"`
 	// +optional
 	MainArgs string `json:"mainArgs,omitempty"`
 	// +optional
@@ -73,7 +73,7 @@ type VpArtifact struct {
 // VpResourceSpec represents the resource requirements for components like the job and task managers
 type VpResourceSpec struct {
 	// +optional
-	Cpu resource.Quantity `json:"cpu,omitempty"`
+	CPU resource.Quantity `json:"cpu,omitempty"`
 	// +optional
 	// +kubebuilder:validation:minLength=2
 	Memory *string `json:"memory,omitempty"`

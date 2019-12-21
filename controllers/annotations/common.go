@@ -13,8 +13,8 @@ const (
 	ID                 = AnnotationName(baseAnnotation + "id")
 	ResourceVersion    = AnnotationName(baseAnnotation + "resource-version")
 	DeploymentTargetID = AnnotationName(baseAnnotation + "deployment-target-id")
-	DeploymentId       = AnnotationName(baseAnnotation + "deployment-id")
-	JobId              = AnnotationName(baseAnnotation + "job-id")
+	DeploymentID       = AnnotationName(baseAnnotation + "deployment-id")
+	JobID              = AnnotationName(baseAnnotation + "job-id")
 )
 
 func Pair(attr AnnotationName, val string) AnnotationPair {

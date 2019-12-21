@@ -24,7 +24,7 @@ var _ = Describe("DeploymentSpec", func() {
 	var deploymentParallelism = int32(1)
 	var deploymentNumTaskManagers = int32(2)
 	var artifactKind = "JAR"
-	var artifactJarUri = "s3://flink/a-jar"
+	var artifactJarURI = "s3://flink/a-jar"
 	var artifactArgs = "--ed ed --and eddy"
 	var artifactEntryClass = "com.fintechstudios.streaming"
 	var artifactFlinkVersion = "1.8.0"
@@ -47,7 +47,7 @@ var _ = Describe("DeploymentSpec", func() {
 				"high-availability": "true",
 			}
 			resources = map[string]vpAPI.ResourceSpec{
-				"jobmanager": vpAPI.ResourceSpec{
+				"jobmanager": {
 					Cpu:    1.5,
 					Memory: "2g",
 				},
@@ -80,7 +80,7 @@ var _ = Describe("DeploymentSpec", func() {
 					Spec: &vpAPI.DeploymentTemplateSpec{
 						Artifact: &vpAPI.Artifact{
 							Kind:                 artifactKind,
-							JarUri:               artifactJarUri,
+							JarUri:               artifactJarURI,
 							MainArgs:             artifactArgs,
 							EntryClass:           artifactEntryClass,
 							FlinkVersion:         artifactFlinkVersion,
@@ -135,7 +135,7 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(artifact.EntryClass).To(Equal(artifactEntryClass))
 			Expect(artifact.MainArgs).To(Equal(artifactArgs))
 			Expect(artifact.Kind).To(Equal(artifactKind))
-			Expect(artifact.JarUri).To(Equal(artifactJarUri))
+			Expect(artifact.JarURI).To(Equal(artifactJarURI))
 
 			templateMetadata := vpSpec.Template.Metadata
 			Expect(reflect.DeepEqual(templateMetadata.Annotations, annotations)).To(BeTrue())
@@ -170,8 +170,8 @@ var _ = Describe("DeploymentSpec", func() {
 			}
 			mem := "2g"
 			vpResources = map[string]ververicaplatformv1beta1.VpResourceSpec{
-				"jobmanager": ververicaplatformv1beta1.VpResourceSpec{
-					Cpu:    *resource.NewQuantity(2, resource.DecimalSI),
+				"jobmanager": {
+					CPU:    *resource.NewQuantity(2, resource.DecimalSI),
 					Memory: &mem,
 				},
 			}
@@ -203,7 +203,7 @@ var _ = Describe("DeploymentSpec", func() {
 					Spec: &ververicaplatformv1beta1.VpDeploymentTemplateSpec{
 						Artifact: &ververicaplatformv1beta1.VpArtifact{
 							Kind:                 artifactKind,
-							JarUri:               artifactJarUri,
+							JarURI:               artifactJarURI,
 							MainArgs:             artifactArgs,
 							EntryClass:           artifactEntryClass,
 							FlinkVersion:         artifactFlinkVersion,
@@ -258,7 +258,7 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(artifact.EntryClass).To(Equal(artifactEntryClass))
 			Expect(artifact.MainArgs).To(Equal(artifactArgs))
 			Expect(artifact.Kind).To(Equal(artifactKind))
-			Expect(artifact.JarUri).To(Equal(artifactJarUri))
+			Expect(artifact.JarUri).To(Equal(artifactJarURI))
 
 			templateMetadata := spec.Template.Metadata
 			Expect(reflect.DeepEqual(templateMetadata.Annotations, annotations)).To(BeTrue())

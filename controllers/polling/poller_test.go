@@ -14,12 +14,12 @@ var _ = Describe("Poller", func() {
 		}, time.Millisecond*1)
 		poller.Start()
 		poller.StopAndBlock()
-		Expect(func() { 
+		Expect(func() {
 			poller.Start()
 		}).To(Panic())
 	})
 
-	It("should close the output channel when stopped", func () {
+	It("should close the output channel when stopped", func() {
 		poller := NewPoller(func() interface{} {
 			return 1
 		}, time.Millisecond*1)

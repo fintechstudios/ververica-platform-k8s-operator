@@ -89,9 +89,9 @@ func main() {
 		enableDebugMode = flag.Bool("debug", false, "Enable debug mode for logging.")
 		watchNamespace  = flag.String("watch-namespace", apiv1.NamespaceAll,
 			`Namespace to watch for resources. Default is to watch all namespaces`)
-		platformApiUrl = flag.String("platform-api-url", "http://localhost:8081",
+		platformAPIURL = flag.String("platform-api-url", "http://localhost:8081",
 			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol, host, and base path.")
-		appManagerApiUrl = flag.String("app-manager-api-url", "http://localhost:8081/api",
+		appManagerAPIURL = flag.String("app-manager-api-url", "http://localhost:8081/api",
 			"The URL to the Ververica Platform AppManager API, without a trailing slash. Should include the protocol, host, and base path.")
 		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
@@ -130,17 +130,17 @@ func main() {
 	// Create clients
 	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
 	platformClient := platformApiClient.NewAPIClient(&platformApiClient.Configuration{
-		BasePath:      *platformApiUrl,
+		BasePath:      *platformAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
 
 	appManagerClient := appManagerApi.NewAPIClient(&appManagerApi.Configuration{
-		BasePath:      *appManagerApiUrl,
+		BasePath:      *appManagerAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
-	appManagerAuthStore := appManager.NewAuthStore(&appManager.PlatformTokenManager{PlatformApiClient: platformClient})
+	appManagerAuthStore := appManager.NewAuthStore(&appManager.PlatformTokenManager{PlatformAPIClient: platformClient})
 
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
@@ -153,9 +153,9 @@ func main() {
 	err = (&controllers.VpNamespaceReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		// AppManagerApiClient: appManagerClient,
+		// AppManagerAPIClient: appManagerClient,
 		AppManagerAuthStore: appManagerAuthStore,
-		PlatformApiClient:   platformClient,
+		PlatformAPIClient:   platformClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
@@ -164,7 +164,7 @@ func main() {
 	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		AppManagerApiClient: appManagerClient,
+		AppManagerAPIClient: appManagerClient,
 		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr)
 	if err != nil {
@@ -174,7 +174,7 @@ func main() {
 	if err = (&controllers.VpDeploymentReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		AppManagerApiClient: appManagerClient,
+		AppManagerAPIClient: appManagerClient,
 		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
@@ -183,7 +183,7 @@ func main() {
 	if err = (&controllers.VpSavepointReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
-		AppManagerApiClient: appManagerClient,
+		AppManagerAPIClient: appManagerClient,
 		AppManagerAuthStore: appManagerAuthStore,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")

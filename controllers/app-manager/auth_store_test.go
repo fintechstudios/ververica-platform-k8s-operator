@@ -1,4 +1,4 @@
-package appManager
+package appmanager
 
 import (
 	"context"
@@ -79,7 +79,7 @@ var _ = Describe("AuthStore", func() {
 		DefaultToken = "no-ns-TokenData"
 	)
 	setEnv := func() {
-		_ = os.Setenv(defaultTokenEnvVar + "_TEST", TestNsToken)
+		_ = os.Setenv(defaultTokenEnvVar+"_TEST", TestNsToken)
 		_ = os.Setenv(defaultTokenEnvVar, DefaultToken)
 	}
 	unsetEnv := func() {

@@ -61,7 +61,7 @@ var _ = Describe("VpDeployment", func() {
 							Spec: &VpDeploymentTemplateSpec{
 								Artifact: &VpArtifact{
 									Kind:   "JAR",
-									JarUri: "https://jars.com/peanut-butter",
+									JarURI: "https://jars.com/peanut-butter",
 								},
 							},
 						},
@@ -96,7 +96,7 @@ var _ = Describe("VpDeployment", func() {
 							Spec: &VpDeploymentTemplateSpec{
 								Artifact: &VpArtifact{
 									Kind:   "JAR",
-									JarUri: "https://jars.com/peanut-butter",
+									JarURI: "https://jars.com/peanut-butter",
 								},
 							},
 						},
@@ -125,7 +125,7 @@ var _ = Describe("VpDeployment", func() {
 							Spec: &VpDeploymentTemplateSpec{
 								Artifact: &VpArtifact{
 									Kind:   "JAR",
-									JarUri: "https://jars.com/peanut-butter",
+									JarURI: "https://jars.com/peanut-butter",
 								},
 							},
 						},

@@ -13,11 +13,11 @@ var _ = Describe("Resources", func() {
 		memory := "2g"
 		cpu := 2.0
 		resources := map[string]vpAPI.ResourceSpec{
-			"jobmanager": vpAPI.ResourceSpec{
+			"jobmanager": {
 				Cpu:    cpu,
 				Memory: memory,
 			},
-			"taskmanager": vpAPI.ResourceSpec{
+			"taskmanager": {
 				Cpu:    cpu,
 				Memory: memory,
 			},
@@ -30,8 +30,8 @@ var _ = Describe("Resources", func() {
 			Expect(vpResources).To(HaveKey("jobmanager"))
 			Expect(vpResources).To(HaveKey("taskmanager"))
 			for _, resource := range vpResources {
-				fmtCpu := resource.Cpu.MilliValue() / 1000
-				Expect(float64(fmtCpu)).To(Equal(cpu))
+				fmtCPU := resource.CPU.MilliValue() / 1000
+				Expect(float64(fmtCPU)).To(Equal(cpu))
 				Expect(*resource.Memory).To(Equal(memory))
 			}
 		})
@@ -41,12 +41,12 @@ var _ = Describe("Resources", func() {
 		memory := "2g"
 		cpu := resource.MustParse("2.0")
 		vpResources := map[string]ververicaplatformv1beta1.VpResourceSpec{
-			"jobmanager": ververicaplatformv1beta1.VpResourceSpec{
-				Cpu:    cpu,
+			"jobmanager": {
+				CPU:    cpu,
 				Memory: &memory,
 			},
-			"taskmanager": ververicaplatformv1beta1.VpResourceSpec{
-				Cpu:    cpu,
+			"taskmanager": {
+				CPU:    cpu,
 				Memory: &memory,
 			},
 		}
@@ -55,8 +55,8 @@ var _ = Describe("Resources", func() {
 			resources, err := ResourcesFromNative(vpResources)
 			Expect(err).ToNot(HaveOccurred())
 			for _, resource := range resources {
-				fmtCpu := cpu.MilliValue() / 1000
-				Expect(resource.Cpu).To(Equal(float64(fmtCpu)))
+				fmtCPU := cpu.MilliValue() / 1000
+				Expect(resource.Cpu).To(Equal(float64(fmtCPU)))
 				Expect(resource.Memory).To(Equal(memory))
 			}
 		})

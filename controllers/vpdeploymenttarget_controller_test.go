@@ -23,7 +23,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 		reconciler = VpDeploymentTargetReconciler{
 			Client:              k8sClient,
 			Log:                 logger,
-			AppManagerApiClient: &vpAPIClient,
+			AppManagerAPIClient: &vpAPIClient,
 		}
 	})
 
@@ -40,8 +40,8 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 			}
 			created = &ververicaplatformv1beta1.VpDeploymentTarget{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
+					Name:        "foo",
+					Namespace:   "default",
 					Annotations: make(map[string]string),
 				},
 			}

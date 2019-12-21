@@ -23,7 +23,7 @@ var _ = Describe("VpDeployment Controller", func() {
 		reconciler = VpDeploymentReconciler{
 			Client:              k8sClient,
 			Log:                 logger,
-			AppManagerApiClient: &vpAPIClient,
+			AppManagerAPIClient: &vpAPIClient,
 		}
 	})
 
@@ -54,7 +54,7 @@ var _ = Describe("VpDeployment Controller", func() {
 							Spec: &v1beta1.VpDeploymentTemplateSpec{
 								Artifact: &v1beta1.VpArtifact{
 									Kind:   "JAR",
-									JarUri: "https://jars.com/peanut-butter",
+									JarURI: "https://jars.com/peanut-butter",
 								},
 							},
 						},
