@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 
@@ -36,9 +36,10 @@ import (
 type VpNamespaceReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerAuthStore *appManager.AuthStore
 	PlatformAPIClient   *platformApiClient.APIClient
+	pollerMap           map[string]*polling.Poller
 }
+
 
 // updateResource takes a k8s resource and a VP resource and merges them
 func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *platformApiClient.Namespace) error {

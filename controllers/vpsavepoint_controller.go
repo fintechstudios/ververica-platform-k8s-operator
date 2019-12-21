@@ -43,6 +43,11 @@ type VpSavepointReconciler struct {
 
 func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
 	log := r.getLogger(req)
+
+	if r.pollerMap == nil {
+		r.pollerMap = make(map[string]*polling.Poller)
+	}
+
 	if r.pollerMap[req.String()] != nil {
 		log.Info("A status poller already exists, removing...")
 		r.removeStatusPollerForResource(req)
@@ -53,7 +58,7 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(func() interface{} {
-		ctx := context.Background()
+		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 		savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(ctx, nsName, vpID)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
@@ -82,14 +87,20 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 	poller.Start()
 }
 
-func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) {
+func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) bool {
+	if r.pollerMap == nil {
+		return false
+	}
 	log := r.getLogger(req)
 	poller := r.pollerMap[req.String()]
-	if poller != nil {
-		log.Info("Stopping poller")
-		poller.Stop()
-		delete(r.pollerMap, req.String())
+	if poller == nil {
+		return false
 	}
+
+	log.Info("Stopping poller")
+	poller.Stop()
+	delete(r.pollerMap, req.String())
+	return true
 }
 
 // getLogger creates a logger for the controller with the request name

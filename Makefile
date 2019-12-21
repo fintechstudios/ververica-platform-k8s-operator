@@ -89,13 +89,18 @@ kustomize-build: patch-image
 # Update the Swagger Client API
 .PHONY: swagger-gen
 swagger-gen:
-	./hack/update-app-manager-swagger-codegen.sh && \
-	./hack/update-platform-swagger-codegen.sh
+	./hack/update-app-manager-swagger-codegen.sh \
+	 && ./hack/update-platform-swagger-codegen.sh
 
 # Create the test cluster using kind
+# install local path storage as defult storage class (see: https://github.com/kubernetes-sigs/kind/issues/118#issuecomment-475134086)
 .PHONY: test-cluster-create
 test-cluster-create:
-	kind create cluster --name $(TEST_CLUSTER_NAME) && $(MAKE) install
+	kind create cluster --name $(TEST_CLUSTER_NAME) \
+		&& sleep 10 \
+		&& kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml \
+		&& kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false", "storageclass.beta.kubernetes.io/is-default-class":"false"}}}' \
+		&& kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true", "storageclass.beta.kubernetes.io/is-default-class":"true"}}}'
 
 # Delete the test cluster using kind
 .PHONY: test-cluster-delete

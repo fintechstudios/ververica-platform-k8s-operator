@@ -11,6 +11,7 @@ const baseAnnotation = "ververicaplatform.fintechstudios.com/"
 
 const (
 	ID                 = AnnotationName(baseAnnotation + "id")
+	Namespace          = AnnotationName(baseAnnotation + "namespace")
 	ResourceVersion    = AnnotationName(baseAnnotation + "resource-version")
 	DeploymentTargetID = AnnotationName(baseAnnotation + "deployment-target-id")
 	DeploymentID       = AnnotationName(baseAnnotation + "deployment-id")
@@ -33,8 +34,9 @@ func Get(annotations map[string]string, attr AnnotationName) string {
 	return annotations[string(attr)]
 }
 
-func Set(annotations map[string]string, attrs ...AnnotationPair) {
+func Set(annotations map[string]string, attrs ...AnnotationPair) map[string]string {
 	for _, attr := range attrs {
 		annotations[string(attr.name)] = attr.val
 	}
+	return annotations
 }

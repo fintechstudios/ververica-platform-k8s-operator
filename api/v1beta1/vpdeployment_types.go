@@ -219,17 +219,6 @@ type VpDeploymentStatus struct {
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
 
-	// +optional
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
-
-	// +optional
-	ID string `json:"id,omitempty"`
-
-	// +optional
-	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	// +optional
-	ModifiedAt *metav1.Time `json:"modifiedAt,omitempty"`
-
 	// TODO: think about adding other information here, ie:
 	// 		- list of Jobs
 	//		- list of Events
@@ -238,8 +227,8 @@ type VpDeploymentStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="Flink-Version",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkVersion"
 // +kubebuilder:printcolumn:name="Flink-Image-Tag",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageTag"
 // +kubebuilder:printcolumn:name="Flink-Image-Registry",type="string",JSONPath=".spec.spec.template.spec.artifact.flinkImageRegistry"

@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
+
+	. "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 // GetDeploymentByName fetches a deployment from the VP by namespace and name
-func GetDeploymentByName(ctx context.Context, apiClient *vpAPI.APIClient, namespace string, name string) (vpAPI.Deployment, error) {
-	var deployment vpAPI.Deployment
+func GetDeploymentByName(ctx context.Context, apiClient *APIClient, namespace string, name string) (Deployment, error) {
+	var deployment Deployment
 	if len(namespace) == 0 || len(name) == 0 {
 		return deployment, errors.New("namespace and name must not be empty")
 	}
