@@ -25,7 +25,7 @@ func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
 		isStopped:    false,
 		isFinished:   false,
 		group:        &sync.WaitGroup{},
-		stopMutex:	  &sync.Mutex{},
+		stopMutex:    &sync.Mutex{},
 	}
 }
 

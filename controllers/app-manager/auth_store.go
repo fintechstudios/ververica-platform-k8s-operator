@@ -1,4 +1,4 @@
-package appManager
+package appmanager
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
-const defaultTokenEnvVar = "APPMANAGER_API_TOKEN"
+const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
 
 // One token per namespace
-const tokenName = "vp-k8s-operator-admin-token"
+const tokenName = "vp-k8s-operator-admin-token" // nolint:gosec
 
 type TokenData struct {
 	Name       string

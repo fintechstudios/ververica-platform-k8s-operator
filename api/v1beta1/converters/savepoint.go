@@ -6,7 +6,6 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 )
 
-
 func SavepointOriginToNative(savepointOrigin string) (v1beta1.SavepointOrigin, error) {
 	switch savepointOrigin {
 	case string(v1beta1.UserRequestOrigin):

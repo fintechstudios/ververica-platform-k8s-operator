@@ -14,6 +14,13 @@ output:
   # print linter name in the end of issue text, default is true
   print-linter-name: true
 
+
+linters:
+  enable:
+    - golint
+    - gofmt
+    - gosec
+
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 service:

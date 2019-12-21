@@ -38,7 +38,7 @@ import (
 type VpDeploymentTargetReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerApiClient *appManagerApi.APIClient
+	AppManagerAPIClient *appManagerApi.APIClient
 	AppManagerAuthStore *appManager.AuthStore
 }
 
@@ -73,7 +73,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	patchSet, err := converters.DeploymentTargetPatchSetFromNative(vpDepTarget.Spec.Spec.DeploymentPatchSet)
@@ -95,7 +95,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 		},
 	}
 	// create it
-	createdDepTarget, res, err := r.AppManagerApiClient.
+	createdDepTarget, res, err := r.AppManagerAPIClient.
 		DeploymentTargetsApi.
 		CreateDeploymentTarget(ctx, nsName, depTarget)
 
@@ -134,11 +134,11 @@ func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarge
 	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	// Let's make sure it's deleted from the ververica platform
-	depTarget, res, err := r.AppManagerApiClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, nsName, req.Name)
+	depTarget, res, err := r.AppManagerAPIClient.DeploymentTargetsApi.DeleteDeploymentTarget(ctx, nsName, req.Name)
 
 	if res != nil && res.StatusCode == 409 {
 		// Conflict - still have deployments referenced
@@ -197,9 +197,9 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 	if err != nil {
 		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
-	depTarget, _, err := r.AppManagerApiClient.DeploymentTargetsApi.GetDeploymentTarget(appManagerCtx, nsName, req.Name)
+	depTarget, _, err := r.AppManagerAPIClient.DeploymentTargetsApi.GetDeploymentTarget(appManagerCtx, nsName, req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it

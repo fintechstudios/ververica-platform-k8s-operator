@@ -37,7 +37,7 @@ type VpNamespaceReconciler struct {
 	client.Client
 	Log                 logr.Logger
 	AppManagerAuthStore *appManager.AuthStore
-	PlatformApiClient   *platformApiClient.APIClient
+	PlatformAPIClient   *platformApiClient.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
@@ -66,7 +66,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 	log := r.getLogger(req)
 	ctx := context.Background()
 	// create it
-	createRes, _, err := r.PlatformApiClient.NamespacesApi.CreateNamespace(ctx, platformApiClient.Namespace{
+	createRes, _, err := r.PlatformAPIClient.NamespacesApi.CreateNamespace(ctx, platformApiClient.Namespace{
 		Name:         "namespaces/" + req.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
@@ -94,7 +94,7 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 		Name:         "namespaces/" + req.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
-	updateRes, _, err := r.PlatformApiClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
+	updateRes, _, err := r.PlatformAPIClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -109,7 +109,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 	ctx := context.Background()
 	// Let's make sure it's deleted from the ververica platform
 	// Should be idempotent, so retrying shouldn't matter
-	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
+	namespaceRes, _, err := r.PlatformAPIClient.NamespacesApi.DeleteNamespace(ctx, req.Name)
 
 	if err != nil {
 		// If it's already gone, great!
@@ -176,7 +176,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return res, nil
 	}
 
-	namespaceRes, _, err := r.PlatformApiClient.NamespacesApi.GetNamespace(context.Background(), req.Name)
+	namespaceRes, _, err := r.PlatformAPIClient.NamespacesApi.GetNamespace(context.Background(), req.Name)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			// Not found, let's create it

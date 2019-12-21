@@ -16,7 +16,7 @@ func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]verv
 		if len(v.Memory) > 0 {
 			res.Memory = &v.Memory
 		}
-		res.Cpu = resource.MustParse(fmt.Sprintf("%f", v.Cpu))
+		res.CPU = resource.MustParse(fmt.Sprintf("%f", v.Cpu))
 		vpResources[k] = res
 	}
 	return vpResources, nil
@@ -30,7 +30,7 @@ func ResourcesFromNative(vpResources map[string]ververicaplatformv1beta1.VpResou
 		if v.Memory != nil {
 			res.Memory = *v.Memory
 		}
-		res.Cpu = float64(v.Cpu.MilliValue()) / 1000 // convert back to a plain float
+		res.Cpu = float64(v.CPU.MilliValue()) / 1000 // convert back to a plain float
 		resources[k] = res
 	}
 	return resources, nil

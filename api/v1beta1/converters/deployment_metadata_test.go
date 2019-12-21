@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Describe("DeploymentMetadata", func() {
-	const deploymentId = "9cfce163-e969-4d75-8847-0c4309fcfe99"
+	const deploymentID = "9cfce163-e969-4d75-8847-0c4309fcfe99"
 	const deploymentName = "test-deployment"
 	const deploymentNamespace = "testing"
 
@@ -34,7 +34,7 @@ var _ = Describe("DeploymentMetadata", func() {
 				"excellent": "adventure",
 			}
 			metadata = vpAPI.DeploymentMetadata{
-				Id:          deploymentId,
+				Id:          deploymentID,
 				Annotations: annotations,
 				Labels:      labels,
 				Name:        deploymentName,

@@ -1,4 +1,4 @@
-package appManager
+package appmanager
 
 import (
 	"context"
@@ -13,11 +13,11 @@ func formatTokenNameForNamespace(name, namespace string) string {
 
 // PlatformTokenManager manages creation / deletion / querying of Platform API Tokens
 type PlatformTokenManager struct {
-	PlatformApiClient *platformApiClient.APIClient
+	PlatformAPIClient *platformApiClient.APIClient
 }
 
 func (p *PlatformTokenManager) TokenExists(ctx context.Context, name, namespace string) (bool, error) {
-	_, res, err := p.PlatformApiClient.ApiTokensApi.GetApiToken(ctx, name, namespace)
+	_, res, err := p.PlatformAPIClient.ApiTokensApi.GetApiToken(ctx, name, namespace)
 	if res != nil && (res.StatusCode == 404 || res.StatusCode == 403) {
 		return false, nil
 	}
@@ -29,7 +29,7 @@ func (p *PlatformTokenManager) TokenExists(ctx context.Context, name, namespace 
 }
 
 func (p *PlatformTokenManager) CreateToken(ctx context.Context, name, role, namespace string) (string, error) {
-	createRes, _, err := p.PlatformApiClient.ApiTokensApi.CreateApiToken(ctx, platformApiClient.ApiToken{
+	createRes, _, err := p.PlatformAPIClient.ApiTokensApi.CreateApiToken(ctx, platformApiClient.ApiToken{
 		Name: formatTokenNameForNamespace(name, namespace),
 		Role: role,
 	}, namespace)
@@ -42,7 +42,7 @@ func (p *PlatformTokenManager) CreateToken(ctx context.Context, name, role, name
 }
 
 func (p *PlatformTokenManager) RemoveToken(ctx context.Context, name, namespace string) (bool, error) {
-	_, res, err := p.PlatformApiClient.ApiTokensApi.DeleteApiToken(ctx, name, namespace)
+	_, res, err := p.PlatformAPIClient.ApiTokensApi.DeleteApiToken(ctx, name, namespace)
 	if res != nil && res.StatusCode == 404 {
 		return false, nil
 	}
