@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
@@ -133,7 +133,7 @@ func (s *AuthStore) ContextForNamespace(baseCtx context.Context, namespace strin
 		return nil, err
 	}
 
-	return context.WithValue(baseCtx, appManagerApi.ContextAccessToken, token), nil
+	return context.WithValue(baseCtx, appmanager.ContextAccessToken, token), nil
 }
 
 // RemoveAllCreatedTokens deletes all tokens that have been created by the store

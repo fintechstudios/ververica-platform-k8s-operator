@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	. "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 )
 
 func removeTokenData(slice []testTokenData, s int) []testTokenData {
@@ -162,7 +162,7 @@ var _ = Describe("AuthStore", func() {
 			It("should get a context for a namespace", func() {
 				ctx, err := authStore.ContextForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
-				Expect(ctx.Value(appManagerApi.ContextAccessToken)).To(Equal(TestNsToken))
+				Expect(ctx.Value(ContextAccessToken)).To(Equal(TestNsToken))
 			})
 		})
 	})

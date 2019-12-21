@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 
@@ -35,9 +34,8 @@ import (
 // VpNamespaceReconciler reconciles a VpNamespace object
 type VpNamespaceReconciler struct {
 	client.Client
-	Log                 logr.Logger
-	AppManagerAuthStore *appManager.AuthStore
-	PlatformAPIClient   *platformApiClient.APIClient
+	Log               logr.Logger
+	PlatformAPIClient *platformApiClient.APIClient
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them

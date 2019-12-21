@@ -22,11 +22,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
 	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -35,12 +37,17 @@ import (
 
 var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
+const EventPollingInterval = 10 * time.Second
+const StatusPollingInterval = 10 * time.Second
+
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
 	client.Client
 	Log                 logr.Logger
 	AppManagerAPIClient *appManagerApi.APIClient
 	AppManagerAuthStore *appManager.AuthStore
+	pollerMap           map[string]*polling.Poller
+	manager             *ctrl.Manager
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -71,6 +78,149 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDe
 	}
 
 	return depTarget.Metadata.Id, nil
+}
+
+func eventAnnotations(event appManagerApi.Event) map[string]string {
+	return annotations.Set(map[string]string{},
+		annotations.Pair(annotations.ID, event.Metadata.Id),
+		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(event.Metadata.ResourceVersion))),
+		annotations.Pair(annotations.Namespace, event.Metadata.Namespace),
+		annotations.Pair(annotations.DeploymentID, event.Metadata.DeploymentId),
+		annotations.Pair(annotations.JobID, event.Metadata.JobId))
+}
+
+func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+	if !r.pollerIsRunning(req, "event") {
+		r.addEventPollerForResource(req, vpDeployment)
+	}
+	if !r.pollerIsRunning(req, "status") {
+		r.addStatusPollerForResource(req, vpDeployment)
+	}
+}
+
+func (r *VpDeploymentReconciler) setPoller(req ctrl.Request, pollerType string, poller *polling.Poller) {
+	if r.pollerMap == nil {
+		r.pollerMap = make(map[string]*polling.Poller)
+	}
+	r.pollerMap[req.String()+"-"+pollerType] = poller
+}
+
+func (r *VpDeploymentReconciler) removePoller(req ctrl.Request, pollerType string) bool {
+	if r.pollerMap == nil {
+		return false
+	}
+
+	log := r.getLogger(req).WithValues("poller", pollerType)
+	poller := r.pollerMap[req.String()+"-"+pollerType]
+	if poller == nil {
+		return false
+	}
+	log.Info("Stopping poller")
+	poller.StopAndBlock()
+	delete(r.pollerMap, req.String()+"-"+pollerType)
+	return true
+}
+
+func (r *VpDeploymentReconciler) pollerIsRunning(req ctrl.Request, pollerType string) bool {
+	if r.pollerMap[req.String()+"-"+pollerType] == nil {
+		return false
+	}
+
+	return !r.pollerMap[req.String()+"-"+pollerType].IsStopped()
+}
+
+func (r *VpDeploymentReconciler) removePollers(req ctrl.Request) {
+	r.removePoller(req, "status")
+	r.removePoller(req, "event")
+}
+
+func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+	log := r.getLogger(req).WithValues("poller", "event")
+	if r.pollerIsRunning(req, "event") {
+		log.Info("A status poller already exists, removing...")
+		r.removePoller(req, "event")
+	}
+
+	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
+
+	// On each polling callback, push the update through the k8s client
+	poller := polling.NewPoller(func() interface{} {
+		log.Info("Polling")
+		ctx, _ := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+
+		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, nsName, &appManagerApi.GetEventsOpts{
+			DeploymentId: optional.NewInterface(vpID),
+			JobId:        optional.EmptyInterface(),
+		})
+
+		if err != nil {
+			log.Error(err, "Error while polling events")
+			return nil
+		}
+
+		// for each events, find out if a k8s Event exists. If not, create one attached to our k8s resource!
+		for _, event := range events.Items {
+			recorder := (*r.manager).GetEventRecorderFor("ververica-platform-k8s-operator")
+			recorder.AnnotatedEventf(vpDeployment,
+				eventAnnotations(event),
+				"Normal",
+				event.Metadata.Name,
+				event.Spec.Message)
+		}
+
+		return nil
+	}, EventPollingInterval)
+
+	r.setPoller(req, "event", poller)
+	poller.Start()
+}
+
+func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+	log := r.getLogger(req)
+	if r.pollerIsRunning(req, "status") {
+		log.Info("A status poller already exists, removing...")
+		r.removePoller(req, "status")
+	}
+
+	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
+
+	// On each polling callback, push the update through the k8s client
+	poller := polling.NewPoller(func() interface{} {
+		log.Info("Polling")
+		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+
+		if err != nil {
+			log.Error(err, "Error getting authorized context")
+			return nil
+		}
+
+		deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, vpID)
+		if err != nil {
+			log.Error(err, "Error while polling deployment")
+			return nil
+		}
+
+		var vpDeploymentUpdated v1beta1.VpDeployment
+		if err = r.Get(ctx, req.NamespacedName, &vpDeploymentUpdated); err != nil {
+			if utils.IsNotFoundError(err) {
+				log.Error(err, "VpDeployment not found while polling")
+			} else {
+				log.Error(err, "Error getting VpDeployment while polling")
+			}
+			return deployment
+		}
+
+		if err = r.updateResource(&vpDeploymentUpdated, &deployment); err != nil {
+			log.Error(err, "Error while updating VpSavepoint from poller")
+		}
+
+		return nil
+	}, StatusPollingInterval)
+
+	r.setPoller(req, "status", poller)
+	poller.Start()
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
@@ -151,6 +301,9 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
+	// Create a poller to keep the savepoint up to date
+	r.ensurePollersAreRunning(req, &vpDeployment)
+
 	return ctrl.Result{}, nil
 }
 
@@ -199,6 +352,8 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	if err = r.Status().Update(context.Background(), &vpDeployment); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	r.ensurePollersAreRunning(req, &vpDeployment)
 
 	return ctrl.Result{}, nil
 }
@@ -258,11 +413,14 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	log.Info("Deleting Deployment", "name", deployment.Metadata.Name)
 	// Should happen instantaneously
+	r.removePollers(req)
 	return ctrl.Result{}, nil
 }
 
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=events,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=events/status,verbs=get
 
 // Reconcile is the main reconciliation loop handler
 func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -289,6 +447,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		}
 	} else {
 		log.Info("Delete event", "name", req.Name)
+		r.removePoller(req, "status")
 		res, err := r.handleDelete(req, vpDeployment)
 		if utils.IsRequeueResponse(res, err) {
 			return res, err
@@ -348,6 +507,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 // SetupWithManager hooks the reconciler into the main manager
 func (r *VpDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	r.manager = &mgr
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.VpDeployment{}).
 		Complete(r)
