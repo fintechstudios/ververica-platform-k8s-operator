@@ -66,7 +66,7 @@ manifests: controller-gen
 # Run go fmt against code
 .PHONY: fmt
 fmt:
-	gofmt -s -w ./api ./controllers
+	gofmt -s -w ./api ./controllers *.go
 
 .PHONY: lint
 lint:

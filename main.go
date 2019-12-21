@@ -151,9 +151,9 @@ func main() {
 	}
 
 	err = (&controllers.VpNamespaceReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		PlatformAPIClient:   platformClient,
+		Client:            mgr.GetClient(),
+		Log:               ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+		PlatformAPIClient: platformClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")

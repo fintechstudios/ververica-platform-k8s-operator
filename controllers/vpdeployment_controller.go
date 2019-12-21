@@ -38,6 +38,7 @@ import (
 var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
 const EventPollingInterval = 10 * time.Second
+const StatusPollingInterval = 10 * time.Second
 
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
@@ -88,16 +89,12 @@ func eventAnnotations(event appManagerApi.Event) map[string]string {
 		annotations.Pair(annotations.JobID, event.Metadata.JobId))
 }
 
-func (r *VpDeploymentReconciler) getEventRecorder() {
-
-}
-
 func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
 	if !r.pollerIsRunning(req, "event") {
 		r.addEventPollerForResource(req, vpDeployment)
 	}
 	if !r.pollerIsRunning(req, "status") {
-		r.addEventPollerForResource(req, vpDeployment)
+		r.addStatusPollerForResource(req, vpDeployment)
 	}
 }
 
@@ -150,7 +147,7 @@ func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpD
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(func() interface{} {
 		log.Info("Polling")
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+		ctx, _ := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
 
 		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, nsName, &appManagerApi.GetEventsOpts{
 			DeploymentId: optional.NewInterface(vpID),
@@ -193,6 +190,12 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 	poller := polling.NewPoller(func() interface{} {
 		log.Info("Polling")
 		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+
+		if err != nil {
+			log.Error(err, "Error getting authorized context")
+			return nil
+		}
+
 		deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, vpID)
 		if err != nil {
 			log.Error(err, "Error while polling deployment")
@@ -214,7 +217,7 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 		}
 
 		return nil
-	}, time.Second*5)
+	}, StatusPollingInterval)
 
 	r.setPoller(req, "status", poller)
 	poller.Start()

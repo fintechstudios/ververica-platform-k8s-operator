@@ -59,6 +59,12 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(func() interface{} {
 		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+
+		if err != nil {
+			log.Error(err, "Error getting authorized context")
+			return nil
+		}
+
 		savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(ctx, nsName, vpID)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
