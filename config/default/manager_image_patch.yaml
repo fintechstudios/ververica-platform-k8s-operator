@@ -7,6 +7,5 @@ spec:
   template:
     spec:
       containers:
-      # Change the value of image field below to your controller image URL
-      - image: fintechstudios/ververica-platform-k8s-operator:v0.4.0
+      - image: fintechstudios/ververica-platform-k8s-operator:v0.5.0
         name: manager
