@@ -12,9 +12,13 @@ rbacProxy:
 
 cleanupCustomResourceBeforeInstall: false
 imageRepository: fintechstudios/ververica-platform-k8s-operator
-imageTag: latest
+imageTag: v0.5.0
 imagePullPolicy: IfNotPresent
+
 metricsHost: 127.0.0.1
 metricsPort: 8080
+
+metricsMonitorEnabled: true
+
 appManagerApiUrl: http://ververica-platform-ververica-platform/api
 platformApiUrl: http://ververica-platform-ververica-platform
