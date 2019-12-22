@@ -70,7 +70,8 @@ license-check:
   image: fossa/fossa-cli
   script:
     - fossa test
-
+  needs:
+    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 
 release-docker-build:
   stage: pre-release
