@@ -10,7 +10,7 @@ type PollerFunc func() interface{}
 
 // Poller represents everything needed for polling a function
 type Poller struct {
-	Channel      chan<- interface{}
+	Channel      chan interface{}
 	Poll         PollerFunc
 	WaitInterval time.Duration
 	isStopped    bool
