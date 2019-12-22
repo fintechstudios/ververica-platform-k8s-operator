@@ -73,6 +73,16 @@ license-check:
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 
+lint-charts:
+  stage: test
+  image: gcr.io/kubernetes-charts-ci/test-image:v3.3.2
+  script:
+    - git fetch origin master # needed for diffing
+    - ct lint --config ct.yaml --chart-yaml-schema chart-schema.yaml --validate-maintainers=false
+  needs:
+    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
+
+
 release-docker-build:
   stage: pre-release
   variables:
