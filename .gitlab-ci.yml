@@ -16,7 +16,6 @@ variables:
 
 stages:
   - install # install and cache the deps
-  - build # build the docker image
   - test # build and test the code, lint, etc.
   - pre-release # build the release image
   - release # tag and release the docker image to repositories
@@ -48,7 +47,7 @@ install:
 
 build:
   extends: .dev-image-job
-  stage: build
+  stage: test
   variables:
     GIT_STRATEGY: none
   script:
@@ -125,6 +124,7 @@ release-docker-build:
     DOCKER_DRIVER: overlay2
   needs:
     - release-docker-build
+    - test
   services:
     - docker:dind
   before_script:
