@@ -6,12 +6,13 @@ variables:
   RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
   DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
-before_script:
-  - cd /workspace # from Dockerfile_build
+.dev-image-job: &dev-image-job
+  before_script:
+    - cd /workspace # from Dockerfile_build
 
-image:
-  name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
-  entrypoint: [""] # override entrypoint to take arbitrary commands
+  image:
+    name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
+    entrypoint: [""] # override entrypoint to take arbitrary commands
 
 stages:
   - install # install and cache the deps
@@ -21,6 +22,7 @@ stages:
   - release # tag and release the docker image to repositories
 
 install:
+  extends: .dev-image-job
   stage: install
   variables:
     DOCKER_DRIVER: overlay2
@@ -45,6 +47,7 @@ install:
     - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
 
 build:
+  extends: .dev-image-job
   stage: build
   variables:
     GIT_STRATEGY: none
@@ -52,6 +55,7 @@ build:
     - make
 
 lint:
+  extends: .dev-image-job
   stage: test
   variables:
     GIT_STRATEGY: none
@@ -59,6 +63,7 @@ lint:
     - make lint
 
 test:
+  extends: .dev-image-job
   stage: test
   variables:
     GIT_STRATEGY: none
@@ -67,8 +72,9 @@ test:
 
 license-check:
   stage: test
-  image: fossa/fossa-cli
+  image: debian:stretch-slim
   script:
+    - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
     - fossa test
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
