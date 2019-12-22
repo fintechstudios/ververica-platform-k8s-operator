@@ -77,7 +77,9 @@ license-check:
     - apt install -y curl
     - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
   script:
-    - fossa test
+    # if the test fails, likely because fossa is backed up, so sleep and then retry
+    - fossa test || (sleep 10 && exit 1)
+  retry: 2
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 
