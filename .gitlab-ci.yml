@@ -81,6 +81,8 @@ license-check:
     # With 2 retries, this will take max 6 minutes.
     - fossa test --verbose || (sleep 120 && exit 1)
   retry: 2
+  # don't fail the entire pipeline if this can't complete in time
+  allow_failure: true
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 
