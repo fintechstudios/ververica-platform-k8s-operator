@@ -65,6 +65,13 @@ test:
   script:
     - make test
 
+license-check:
+  stage: test
+  image: fossa/fossa-cli
+  script:
+    - fossa test
+
+
 release-docker-build:
   stage: pre-release
   variables:
