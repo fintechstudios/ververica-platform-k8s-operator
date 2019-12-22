@@ -73,8 +73,11 @@ test:
 license-check:
   stage: test
   image: debian:stretch-slim
-  script:
+  before_script:
+    - apt update
+    - apt install -y curl
     - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
+  script:
     - fossa test
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
