@@ -24,3 +24,5 @@ vendor
 # Other dev files
 *.env
 resources.yaml
+.charts
+*.tgz
