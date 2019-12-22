@@ -8,7 +8,7 @@ resources:
 - bases/ververicaplatform.fintechstudios.com_vpsavepoints.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
-patches:
+patchesStrategicMerge:
 # [WEBHOOK] patches here are for enabling the conversion webhook for each CRD
 #- patches/webhook_in_deploymenttargets.yaml
 #- patches/webhook_in_vpnamespaces.yaml

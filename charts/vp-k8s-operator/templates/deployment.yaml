@@ -23,7 +23,7 @@ spec:
           image: {{ .Values.rbacProxy.imageRepository }}:{{ .Values.rbacProxy.imageTag }}
           args:
             - --secure-listen-address=0.0.0.0:{{ .Values.rbacProxy.port }}
-            - --upstream=http://{{.Values.controller.metricsHost}}:{{.Values.controller.metricsPort}}/
+            - --upstream=http://{{.Values.metricsHost}}:{{.Values.metricsPort}}/
             - --logtostderr=true
             - --v={{ .Values.rbacProxy.logLevel }}
           ports:
@@ -31,14 +31,14 @@ spec:
               name: https
           {{- end }}
         - name: manager
-          image: {{ .Values.controller.imageRepository }}:{{ .Values.controller.imageTag }}
-          imagePullPolicy: {{ .Values.controller.imagePullPolicy }}
+          image: {{ .Values.imageRepository }}:{{ .Values.imageTag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           command:
             - /manager
           args:
-            - --metrics-addr={{.Values.controller.metricsHost}}:{{.Values.controller.metricsPort}}
-            - --platform-api-url={{.Values.controller.platformApiUrl}}
-            - --app-manager-api-url={{.Values.controller.appManagerApiUrl}}
+            - --metrics-addr={{.Values.metricsHost}}:{{.Values.metricsPort}}
+            - --platform-api-url={{.Values.platformApiUrl}}
+            - --app-manager-api-url={{.Values.appManagerApiUrl}}
           resources:
             limits:
               cpu: 100m
