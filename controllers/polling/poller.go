@@ -5,9 +5,13 @@ import (
 	"time"
 )
 
+// PollerFunc is a function to be polled
+type PollerFunc func() interface{}
+
+// Poller represents everything needed for polling a function
 type Poller struct {
 	Channel      chan<- interface{}
-	Poll         func() interface{}
+	Poll         PollerFunc
 	WaitInterval time.Duration
 	isStopped    bool
 	isFinished   bool
@@ -17,7 +21,7 @@ type Poller struct {
 
 // NewPoller creates a new poller for a function with a polling interval
 // NOTE: the polling function cannot return `nil`
-func NewPoller(poll func() interface{}, interval time.Duration) *Poller {
+func NewPoller(poll PollerFunc, interval time.Duration) *Poller {
 	return &Poller{
 		Channel:      make(chan interface{}),
 		Poll:         poll,

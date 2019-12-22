@@ -25,9 +25,9 @@ import (
 	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
@@ -37,15 +37,29 @@ import (
 
 var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
-const EventPollingInterval = 10 * time.Second
-const StatusPollingInterval = 10 * time.Second
+const eventPollingInterval = 10 * time.Second
+const statusPollingInterval = 30 * time.Second
+
+var eventsLastPolledAnnotation = annotations.NewAnnotationName("events-last-polled")
+const eventsLastPolledFormat = time.RFC3339
+
+
+func eventAnnotations(event appmanagerapi.Event) map[string]string {
+	return annotations.Create(
+		annotations.Pair(annotations.ID, event.Metadata.Id),
+		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(event.Metadata.ResourceVersion))),
+		annotations.Pair(annotations.Namespace, event.Metadata.Namespace),
+		annotations.Pair(annotations.DeploymentID, event.Metadata.DeploymentId),
+		annotations.Pair(annotations.JobID, event.Metadata.JobId))
+}
+
 
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerAPIClient *appManagerApi.APIClient
-	AppManagerAuthStore *appManager.AuthStore
+	AppManagerAPIClient *appmanagerapi.APIClient
+	AppManagerAuthStore *appmanager.AuthStore
 	pollerMap           map[string]*polling.Poller
 	manager             *ctrl.Manager
 }
@@ -78,15 +92,6 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDe
 	}
 
 	return depTarget.Metadata.Id, nil
-}
-
-func eventAnnotations(event appManagerApi.Event) map[string]string {
-	return annotations.Set(map[string]string{},
-		annotations.Pair(annotations.ID, event.Metadata.Id),
-		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(event.Metadata.ResourceVersion))),
-		annotations.Pair(annotations.Namespace, event.Metadata.Namespace),
-		annotations.Pair(annotations.DeploymentID, event.Metadata.DeploymentId),
-		annotations.Pair(annotations.JobID, event.Metadata.JobId))
 }
 
 func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
@@ -134,6 +139,84 @@ func (r *VpDeploymentReconciler) removePollers(req ctrl.Request) {
 	r.removePoller(req, "event")
 }
 
+func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
+	log := r.getLogger(req).WithValues("poller", "event")
+
+	return func() interface{} {
+		log.Info("Polling")
+		ctx, _ := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
+
+		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, namespace, &appmanagerapi.GetEventsOpts{
+			DeploymentId: optional.NewInterface(id),
+			JobId:        optional.EmptyInterface(),
+		})
+
+		if err != nil {
+			log.Error(err, "Error while polling events")
+			return nil
+		}
+
+		var vpDeployment v1beta1.VpDeployment
+		if err := r.Get(context.Background(), req.NamespacedName, &vpDeployment); err != nil {
+			log.Error(err, "Error while getting latest k8s object")
+			return nil
+		}
+
+		// Since the VVP API doesn't support polling from a specific point-in-time,
+		// record the last event time on the k8s obj
+
+		var lastPolled *time.Time
+		if annotations.Has(vpDeployment.Annotations, eventsLastPolledAnnotation) {
+			timeStr := annotations.Get(vpDeployment.Annotations, eventsLastPolledAnnotation)
+			var t time.Time
+			if t, err = time.Parse(eventsLastPolledFormat, timeStr); err != nil {
+				log.Error(err, "Error parsing annotation time: " + timeStr)
+				annotations.Remove(vpDeployment.Annotations, eventsLastPolledAnnotation)
+				// update the k8s object
+				if err = r.Update(context.Background(), &vpDeployment); err != nil {
+					log.Error(err, "Unable to update deployment")
+				}
+				return nil
+			}
+			lastPolled = &t
+		}
+
+		var maxTime *time.Time
+		for _, event := range events.Items {
+			// filter out all created events before the last time polled
+			if lastPolled != nil && event.Metadata.CreatedAt.Before(*lastPolled) {
+				continue
+			}
+
+			// record the latest event to have occurred
+			if maxTime == nil || maxTime.Before(event.Metadata.CreatedAt) {
+				maxTime = &event.Metadata.CreatedAt
+			}
+
+			recorder := (*r.manager).GetEventRecorderFor("ververica-platform-k8s-operator")
+			recorder.AnnotatedEventf(&vpDeployment,
+				eventAnnotations(event),
+				"Normal",
+				event.Metadata.Name,
+				event.Spec.Message)
+		}
+
+		if maxTime != nil {
+			annotations.Set(vpDeployment.Annotations,
+				annotations.Pair(eventsLastPolledAnnotation, maxTime.Format(eventsLastPolledFormat)))
+
+			// update the k8s object
+			if err = r.Update(context.Background(), &vpDeployment); err != nil {
+				log.Error(err, "Unable to update deployment")
+				return nil
+			}
+		}
+
+
+		return nil
+	}
+}
+
 func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
 	log := r.getLogger(req).WithValues("poller", "event")
 	if r.pollerIsRunning(req, "event") {
@@ -145,58 +228,24 @@ func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpD
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
 
 	// On each polling callback, push the update through the k8s client
-	poller := polling.NewPoller(func() interface{} {
-		log.Info("Polling")
-		ctx, _ := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-
-		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, nsName, &appManagerApi.GetEventsOpts{
-			DeploymentId: optional.NewInterface(vpID),
-			JobId:        optional.EmptyInterface(),
-		})
-
-		if err != nil {
-			log.Error(err, "Error while polling events")
-			return nil
-		}
-
-		// for each events, find out if a k8s Event exists. If not, create one attached to our k8s resource!
-		for _, event := range events.Items {
-			recorder := (*r.manager).GetEventRecorderFor("ververica-platform-k8s-operator")
-			recorder.AnnotatedEventf(vpDeployment,
-				eventAnnotations(event),
-				"Normal",
-				event.Metadata.Name,
-				event.Spec.Message)
-		}
-
-		return nil
-	}, EventPollingInterval)
+	poller := polling.NewPoller(r.getEventPollerFunc(req, nsName, vpID), eventPollingInterval)
 
 	r.setPoller(req, "event", poller)
 	poller.Start()
 }
 
-func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
-	log := r.getLogger(req)
-	if r.pollerIsRunning(req, "status") {
-		log.Info("A status poller already exists, removing...")
-		r.removePoller(req, "status")
-	}
-
-	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
-
-	// On each polling callback, push the update through the k8s client
-	poller := polling.NewPoller(func() interface{} {
+func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
+	log := r.getLogger(req).WithValues("poller", "status")
+	return func() interface{} {
 		log.Info("Polling")
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
 
 		if err != nil {
 			log.Error(err, "Error getting authorized context")
 			return nil
 		}
 
-		deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, vpID)
+		deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling deployment")
 			return nil
@@ -217,14 +266,26 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 		}
 
 		return nil
-	}, StatusPollingInterval)
+	}
+}
+
+func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+	log := r.getLogger(req)
+	if r.pollerIsRunning(req, "status") {
+		log.Info("A status poller already exists, removing...")
+		r.removePoller(req, "status")
+	}
+
+	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
+	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
 
 	r.setPoller(req, "status", poller)
 	poller.Start()
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appManagerApi.Deployment) error {
+func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appmanagerapi.Deployment) error {
 	ctx := context.Background()
 
 	if resource.Annotations == nil {
@@ -310,7 +371,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 // handleUpdate updates the k8s resource when it already exists in the VP
 // it also patches the deployment in the Ververica Platform, which could trigger a state transition
 // which we should wait for, if possible
-func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1beta1.VpDeployment, currentDeployment appManagerApi.Deployment) (ctrl.Result, error) {
+func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1beta1.VpDeployment, currentDeployment appmanagerapi.Deployment) (ctrl.Result, error) {
 	log := r.getLogger(req)
 	log.Info("Patching VP Deployment")
 
@@ -370,12 +431,12 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{Requeue: false}, nil
 	}
 
-	var deployment appManagerApi.Deployment
+	var deployment appmanagerapi.Deployment
 	if annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
 		deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, id)
 	} else {
-		deployment, err = appManager.GetDeploymentByName(ctx, r.AppManagerAPIClient, nsName, vpDeployment.Name)
+		deployment, err = appmanager.GetDeploymentByName(ctx, r.AppManagerAPIClient, nsName, vpDeployment.Name)
 	}
 
 	if err != nil {
@@ -471,7 +532,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 	if !annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		// no id has been set
-		deployment, err := appManager.GetDeploymentByName(appManagerCtx, r.AppManagerAPIClient, nsName, req.Name)
+		deployment, err := appmanager.GetDeploymentByName(appManagerCtx, r.AppManagerAPIClient, nsName, req.Name)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("Create event")
