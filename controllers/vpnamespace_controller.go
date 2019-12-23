@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 
@@ -36,6 +37,89 @@ type VpNamespaceReconciler struct {
 	client.Client
 	Log               logr.Logger
 	PlatformAPIClient *platformApiClient.APIClient
+	pollerMap         map[string]*polling.Poller
+}
+
+func (r *VpNamespaceReconciler) setPoller(req ctrl.Request, pollerType string, poller *polling.Poller) {
+	if r.pollerMap == nil {
+		r.pollerMap = make(map[string]*polling.Poller)
+	}
+	r.pollerMap[req.String()+"-"+pollerType] = poller
+}
+
+func (r *VpNamespaceReconciler) getPoller(req ctrl.Request, pollerType string) *polling.Poller {
+	if r.pollerMap == nil {
+		return nil
+	}
+	return r.pollerMap[req.String()+"-"+pollerType]
+}
+
+func (r *VpNamespaceReconciler) removePoller(req ctrl.Request, pollerType string) bool {
+	poller := r.getPoller(req, pollerType)
+	if poller == nil {
+		return false
+	}
+	log := r.getLogger(req).WithValues("poller", pollerType)
+	log.Info("Stopping poller")
+	poller.Stop()
+	delete(r.pollerMap, req.String()+"-"+pollerType)
+	return true
+}
+
+func (r *VpNamespaceReconciler) ensurePollersAreRunning(req ctrl.Request, vpNamespace *v1beta1.VpNamespace) {
+	if !r.pollerIsRunning(req, "status") {
+		r.addStatusPollerForResource(req, vpNamespace)
+	}
+}
+
+func (r *VpNamespaceReconciler) getStatusPollerFunc(req ctrl.Request, namespaceName string) polling.PollerFunc {
+	log := r.getLogger(req).WithValues("poller", "status")
+	return func() interface{} {
+		log.Info("Polling")
+		ctx := context.TODO()
+		namespaceRes, _, err := r.PlatformAPIClient.NamespacesApi.GetNamespace(ctx, namespaceName)
+		if err != nil {
+			log.Error(err, "Error while polling namespace")
+		}
+
+		var vpNamespace v1beta1.VpNamespace
+		if err = r.Get(context.Background(), req.NamespacedName, &vpNamespace); err != nil {
+			log.Error(err, "Error while getting latest k8s object")
+			return nil
+		}
+
+		if err = r.updateResource(&vpNamespace, namespaceRes.Namespace); err != nil {
+			log.Error(err, "Unable to update namespace")
+			return nil
+		}
+
+		return nil
+	}
+}
+
+func (r *VpNamespaceReconciler) addStatusPollerForResource(req ctrl.Request, vpNamespace *v1beta1.VpNamespace) {
+	log := r.getLogger(req)
+	if r.pollerIsRunning(req, "status") {
+		log.Info("A status poller already exists, removing...")
+		r.removePoller(req, "status")
+	}
+
+	poller := polling.NewPoller(r.getStatusPollerFunc(req, vpNamespace.Name), statusPollingInterval)
+
+	r.setPoller(req, "status", poller)
+	poller.Start()
+}
+
+func (r *VpNamespaceReconciler) pollerIsRunning(req ctrl.Request, pollerType string) bool {
+	if r.getPoller(req, pollerType) == nil {
+		return false
+	}
+
+	return !r.getPoller(req, pollerType).IsStopped()
+}
+
+func (r *VpNamespaceReconciler) removePollers(req ctrl.Request) {
+	r.removePoller(req, "status")
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
@@ -62,10 +146,10 @@ func (r *VpNamespaceReconciler) getLogger(req ctrl.Request) logr.Logger {
 // handleCreate creates VP resources
 func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1beta1.VpNamespace) (ctrl.Result, error) {
 	log := r.getLogger(req)
-	ctx := context.Background()
+	ctx := context.TODO()
 	// create it
 	createRes, _, err := r.PlatformAPIClient.NamespacesApi.CreateNamespace(ctx, platformApiClient.Namespace{
-		Name:         "namespaces/" + req.Name,
+		Name:         "namespaces/" + vpNamespace.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
 
@@ -80,19 +164,21 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 		return ctrl.Result{}, err
 	}
 
+	r.ensurePollersAreRunning(req, &vpNamespace)
+
 	return ctrl.Result{}, nil
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
 func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, currentNamespace platformApiClient.Namespace) (ctrl.Result, error) {
-	ctx := context.Background()
+	ctx := context.TODO()
 
 	// lifecyclePhase and createTime must be left nil
 	updatedNamespace := platformApiClient.Namespace{
-		Name:         "namespaces/" + req.Name,
+		Name:         "namespaces/" + vpNamespace.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
-	updateRes, _, err := r.PlatformAPIClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, req.Name)
+	updateRes, _, err := r.PlatformAPIClient.NamespacesApi.UpdateNamespace(ctx, updatedNamespace, vpNamespace.Name)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -126,6 +212,8 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 		log.Info("Requeueing deletion request for 5 seconds")
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
+
+	r.removePollers(req)
 
 	return ctrl.Result{}, nil
 }

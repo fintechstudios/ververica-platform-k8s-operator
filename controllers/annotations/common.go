@@ -60,6 +60,10 @@ func Remove(annotations Annotations, attr AnnotationName) bool {
 
 // Set adds all the pairs to the annotations map
 func Set(annotations Annotations, attrs ...AnnotationPair) Annotations {
+	if annotations == nil {
+		return Create(attrs...)
+	}
+
 	for _, attr := range attrs {
 		annotations[string(attr.name)] = attr.val
 	}
