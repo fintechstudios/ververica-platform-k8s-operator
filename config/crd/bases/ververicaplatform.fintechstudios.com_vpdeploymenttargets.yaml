@@ -9,9 +9,6 @@ metadata:
   name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.metadata.id
-    name: Id
-    type: string
   - JSONPath: .spec.metadata.namespace
     name: Namespace
     type: string

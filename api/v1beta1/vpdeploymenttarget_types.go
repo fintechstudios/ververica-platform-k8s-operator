@@ -61,7 +61,6 @@ type VpDeploymentTargetObjectSpec struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".spec.metadata.id"
 // +kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.metadata.namespace"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
