@@ -33,8 +33,7 @@ RUN go mod download
 
 # Download the necessessary controller-gen and kustomize
 COPY Makefile Makefile
-RUN make controller-gen
-RUN make kustomize
+RUN make controller-gen kustomize
 
 # Copy the dev / test files
 COPY hack/ hack/
