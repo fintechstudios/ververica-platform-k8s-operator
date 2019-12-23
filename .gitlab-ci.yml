@@ -77,7 +77,13 @@ license-check:
     - apt install -y curl
     - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
   script:
-    - fossa test
+    # if the test fails, likely because fossa is backed up, so wait 1 minutes and then retry.
+    # With 2 retries, this will take max 3 minutes.
+    - fossa analyze
+    - fossa test --verbose || (sleep 60 && exit 1)
+  retry: 2
+  # don't fail the entire pipeline if this can't complete in time
+  allow_failure: true
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 
