@@ -108,28 +108,31 @@ func (r *VpDeploymentReconciler) setPoller(req ctrl.Request, pollerType string, 
 	r.pollerMap[req.String()+"-"+pollerType] = poller
 }
 
-func (r *VpDeploymentReconciler) removePoller(req ctrl.Request, pollerType string) bool {
+func (r *VpDeploymentReconciler) getPoller(req ctrl.Request, pollerType string) *polling.Poller {
 	if r.pollerMap == nil {
-		return false
+		return nil
 	}
+	return r.pollerMap[req.String()+"-"+pollerType]
+}
 
-	log := r.getLogger(req).WithValues("poller", pollerType)
-	poller := r.pollerMap[req.String()+"-"+pollerType]
+func (r *VpDeploymentReconciler) removePoller(req ctrl.Request, pollerType string) bool {
+	poller := r.getPoller(req, pollerType)
 	if poller == nil {
 		return false
 	}
+	log := r.getLogger(req).WithValues("poller", pollerType)
 	log.Info("Stopping poller")
-	poller.StopAndBlock()
+	poller.Stop()
 	delete(r.pollerMap, req.String()+"-"+pollerType)
 	return true
 }
 
 func (r *VpDeploymentReconciler) pollerIsRunning(req ctrl.Request, pollerType string) bool {
-	if r.pollerMap[req.String()+"-"+pollerType] == nil {
+	if r.getPoller(req, pollerType) == nil {
 		return false
 	}
 
-	return !r.pollerMap[req.String()+"-"+pollerType].IsStopped()
+	return !r.getPoller(req, pollerType).IsStopped()
 }
 
 func (r *VpDeploymentReconciler) removePollers(req ctrl.Request) {
@@ -142,7 +145,11 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 
 	return func() interface{} {
 		log.Info("Polling")
-		ctx, _ := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
+		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
+		if err != nil {
+			log.Error(err, "Error getting authorized context")
+			return nil
+		}
 
 		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, namespace, &appmanagerapi.GetEventsOpts{
 			DeploymentId: optional.NewInterface(id),
@@ -258,7 +265,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 		}
 
 		var vpDeploymentUpdated v1beta1.VpDeployment
-		if err = r.Get(ctx, req.NamespacedName, &vpDeploymentUpdated); err != nil {
+		if err = r.Get(context.Background(), req.NamespacedName, &vpDeploymentUpdated); err != nil {
 			if utils.IsNotFoundError(err) {
 				log.Error(err, "VpDeployment not found while polling")
 			} else {
@@ -514,7 +521,6 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		}
 	} else {
 		log.Info("Delete event", "name", req.Name)
-		r.removePoller(req, "status")
 		res, err := r.handleDelete(req, vpDeployment)
 		if utils.IsRequeueResponse(res, err) {
 			return res, err
