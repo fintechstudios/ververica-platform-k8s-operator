@@ -27,7 +27,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
-	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
@@ -37,12 +37,13 @@ import (
 
 var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
+const eventsLastPolledFormat = time.RFC3339Nano
 const eventPollingInterval = 10 * time.Second
+const eventTimestampGranularity = time.Millisecond * 250 // to the closest quarter millisecond
+
 const statusPollingInterval = 30 * time.Second
 
 var eventsLastPolledAnnotation = annotations.NewAnnotationName("events-last-polled")
-const eventsLastPolledFormat = time.RFC3339
-
 
 func eventAnnotations(event appmanagerapi.Event) map[string]string {
 	return annotations.Create(
@@ -52,7 +53,6 @@ func eventAnnotations(event appmanagerapi.Event) map[string]string {
 		annotations.Pair(annotations.DeploymentID, event.Metadata.DeploymentId),
 		annotations.Pair(annotations.JobID, event.Metadata.JobId))
 }
-
 
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
@@ -165,12 +165,12 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 		// Since the VVP API doesn't support polling from a specific point-in-time,
 		// record the last event time on the k8s obj
 
-		var lastPolled *time.Time
+		var lastPolledTime *time.Time
 		if annotations.Has(vpDeployment.Annotations, eventsLastPolledAnnotation) {
 			timeStr := annotations.Get(vpDeployment.Annotations, eventsLastPolledAnnotation)
 			var t time.Time
 			if t, err = time.Parse(eventsLastPolledFormat, timeStr); err != nil {
-				log.Error(err, "Error parsing annotation time: " + timeStr)
+				log.Error(err, "Error parsing annotation time: "+timeStr)
 				annotations.Remove(vpDeployment.Annotations, eventsLastPolledAnnotation)
 				// update the k8s object
 				if err = r.Update(context.Background(), &vpDeployment); err != nil {
@@ -178,19 +178,23 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 				}
 				return nil
 			}
-			lastPolled = &t
+			rounded := t.Round(eventTimestampGranularity)
+			lastPolledTime = &rounded
 		}
 
 		var maxTime *time.Time
 		for _, event := range events.Items {
-			// filter out all created events before the last time polled
-			if lastPolled != nil && event.Metadata.CreatedAt.Before(*lastPolled) {
+			eventTime := event.Metadata.CreatedAt.Round(eventTimestampGranularity)
+			// filter out all created events before the last time polled, or where the event time is unset
+			if eventTime.IsZero() ||
+				(lastPolledTime != nil &&
+					(lastPolledTime.Equal(eventTime) || lastPolledTime.After(eventTime))) {
 				continue
 			}
 
 			// record the latest event to have occurred
-			if maxTime == nil || maxTime.Before(event.Metadata.CreatedAt) {
-				maxTime = &event.Metadata.CreatedAt
+			if maxTime == nil || maxTime.Before(eventTime) {
+				maxTime = &eventTime
 			}
 
 			recorder := (*r.manager).GetEventRecorderFor("ververica-platform-k8s-operator")
@@ -201,9 +205,13 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 				event.Spec.Message)
 		}
 
-		if maxTime != nil {
+		if maxTime != nil && (lastPolledTime == nil || !maxTime.Equal(*lastPolledTime)) {
+			timeStr := maxTime.Format(eventsLastPolledFormat)
+			log.WithValues( "last", annotations.Get(vpDeployment.Annotations, eventsLastPolledAnnotation),
+				"latest", timeStr).
+				Info("Updating last event time polled")
 			annotations.Set(vpDeployment.Annotations,
-				annotations.Pair(eventsLastPolledAnnotation, maxTime.Format(eventsLastPolledFormat)))
+				annotations.Pair(eventsLastPolledAnnotation, timeStr))
 
 			// update the k8s object
 			if err = r.Update(context.Background(), &vpDeployment); err != nil {
@@ -211,7 +219,6 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 				return nil
 			}
 		}
-
 
 		return nil
 	}
