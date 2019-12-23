@@ -37,13 +37,10 @@ import (
 
 var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploymentTargetName if spec.spec.deploymentTargetId is not specified")
 
+const statusPollingInterval = 30 * time.Second
 const eventsLastPolledFormat = time.RFC3339Nano
 const eventPollingInterval = 10 * time.Second
-const eventTimestampGranularity = time.Millisecond * 250 // to the closest quarter millisecond
-
-const statusPollingInterval = 30 * time.Second
-
-var eventsLastPolledAnnotation = annotations.NewAnnotationName("events-last-polled")
+var lastEventTimestampAnnotation = annotations.NewAnnotationName("last-event-timestamp")
 
 func eventAnnotations(event appmanagerapi.Event) map[string]string {
 	return annotations.Create(
@@ -166,25 +163,24 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 		// record the last event time on the k8s obj
 
 		var lastPolledTime *time.Time
-		if annotations.Has(vpDeployment.Annotations, eventsLastPolledAnnotation) {
-			timeStr := annotations.Get(vpDeployment.Annotations, eventsLastPolledAnnotation)
+		if annotations.Has(vpDeployment.Annotations, lastEventTimestampAnnotation) {
+			timeStr := annotations.Get(vpDeployment.Annotations, lastEventTimestampAnnotation)
 			var t time.Time
 			if t, err = time.Parse(eventsLastPolledFormat, timeStr); err != nil {
-				log.Error(err, "Error parsing annotation time: "+timeStr)
-				annotations.Remove(vpDeployment.Annotations, eventsLastPolledAnnotation)
+				log.WithValues("timestamp", timeStr).Error(err, "Error parsing annotation time")
+				annotations.Remove(vpDeployment.Annotations, lastEventTimestampAnnotation)
 				// update the k8s object
 				if err = r.Update(context.Background(), &vpDeployment); err != nil {
 					log.Error(err, "Unable to update deployment")
 				}
 				return nil
 			}
-			rounded := t.Round(eventTimestampGranularity)
-			lastPolledTime = &rounded
+			lastPolledTime = &t
 		}
 
 		var maxTime *time.Time
 		for _, event := range events.Items {
-			eventTime := event.Metadata.CreatedAt.Round(eventTimestampGranularity)
+			eventTime := event.Metadata.CreatedAt
 			// filter out all created events before the last time polled, or where the event time is unset
 			if eventTime.IsZero() ||
 				(lastPolledTime != nil &&
@@ -205,13 +201,15 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 				event.Spec.Message)
 		}
 
+		// update if there is a new max time and
 		if maxTime != nil && (lastPolledTime == nil || !maxTime.Equal(*lastPolledTime)) {
 			timeStr := maxTime.Format(eventsLastPolledFormat)
-			log.WithValues( "last", annotations.Get(vpDeployment.Annotations, eventsLastPolledAnnotation),
+			log.WithValues(
+				"last", annotations.Get(vpDeployment.Annotations, lastEventTimestampAnnotation),
 				"latest", timeStr).
 				Info("Updating last event time polled")
 			annotations.Set(vpDeployment.Annotations,
-				annotations.Pair(eventsLastPolledAnnotation, timeStr))
+				annotations.Pair(lastEventTimestampAnnotation, timeStr))
 
 			// update the k8s object
 			if err = r.Update(context.Background(), &vpDeployment); err != nil {
