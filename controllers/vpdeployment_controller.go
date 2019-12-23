@@ -40,6 +40,7 @@ var ErrorInvalidDeploymentTargetNoTargetName = errors.New("must set spec.deploym
 const statusPollingInterval = 30 * time.Second
 const eventsLastPolledFormat = time.RFC3339Nano
 const eventPollingInterval = 10 * time.Second
+
 var lastEventTimestampAnnotation = annotations.NewAnnotationName("last-event-timestamp")
 
 func eventAnnotations(event appmanagerapi.Event) map[string]string {
