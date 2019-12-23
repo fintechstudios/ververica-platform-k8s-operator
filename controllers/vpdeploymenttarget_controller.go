@@ -24,7 +24,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
+	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

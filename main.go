@@ -23,13 +23,13 @@ import (
 	"runtime"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/app-manager"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
-	k8sRuntime "k8s.io/apimachinery/pkg/runtime"
+	k8s "k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -72,7 +72,7 @@ func (v Version) String() string {
 }
 
 var (
-	scheme   = k8sRuntime.NewScheme()
+	scheme   = k8s.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 )
 
@@ -129,18 +129,18 @@ func main() {
 
 	// Create clients
 	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
-	platformClient := platformApiClient.NewAPIClient(&platformApiClient.Configuration{
+	platformClient := platformapi.NewAPIClient(&platformapi.Configuration{
 		BasePath:      *platformAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
 
-	appManagerClient := appManagerApi.NewAPIClient(&appManagerApi.Configuration{
+	appManagerClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
 		BasePath:      *appManagerAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
-	appManagerAuthStore := appManager.NewAuthStore(&appManager.PlatformTokenManager{PlatformAPIClient: platformClient})
+	appManagerAuthStore := appmanager.NewAuthStore(&appmanager.PlatformTokenManager{PlatformAPIClient: platformClient})
 
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
