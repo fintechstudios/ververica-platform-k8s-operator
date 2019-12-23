@@ -5,7 +5,7 @@ version: 2
 cli:
   server: https://app.fossa.com
   fetcher: custom
-  project: git@github.com:fintechstudios/ververica-platform-k8s-operator.git
+  project: ververica-platform-k8s-operator
 analyze:
   modules:
   - name: github.com/fintechstudios/ververica-platform-k8s-operator

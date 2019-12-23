@@ -7,12 +7,15 @@ variables:
   DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
 .dev-image-job: &dev-image-job
-  before_script:
-    - cd /workspace # from Dockerfile_build
+  variables:
+    GIT_STRATEGY: none
 
   image:
     name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
     entrypoint: [""] # override entrypoint to take arbitrary commands
+
+  before_script:
+    - cd /workspace # from Dockerfile_build
 
 stages:
   - install # install and cache the deps
@@ -21,7 +24,6 @@ stages:
   - release # tag and release the docker image to repositories
 
 install:
-  extends: .dev-image-job
   stage: install
   variables:
     DOCKER_DRIVER: overlay2
@@ -48,24 +50,28 @@ install:
 build:
   extends: .dev-image-job
   stage: test
-  variables:
-    GIT_STRATEGY: none
   script:
     - make
+
+build-config:
+  extends: .dev-image-job
+  stage: test
+  only:
+    changes:
+      - config/**/*
+  script:
+    # ensure the configs can be built
+    - make kustomize-build
 
 lint:
   extends: .dev-image-job
   stage: test
-  variables:
-    GIT_STRATEGY: none
   script:
     - make lint
 
 test:
   extends: .dev-image-job
   stage: test
-  variables:
-    GIT_STRATEGY: none
   script:
     - make test
 
@@ -79,11 +85,16 @@ license-check:
   script:
     # if the test fails, likely because fossa is backed up, so wait 1 minutes and then retry.
     # With 2 retries, this will take max 3 minutes.
-    - fossa analyze
+    - fossa analyze --verbose
     - fossa test --verbose || (sleep 60 && exit 1)
   retry: 2
   # don't fail the entire pipeline if this can't complete in time
   allow_failure: true
+  only:
+    # only run if actual dependencies have changed
+    changes:
+      - go.mod
+      - go.sum
   needs:
     - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
 

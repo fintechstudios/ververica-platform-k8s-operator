@@ -1,8 +1,7 @@
 # Ververica Platform K8s Operator
 
 [![go reportcard](https://goreportcard.com/badge/github.com/fintechstudios/ververica-platform-k8s-operator)](https://goreportcard.com/report/github.com/fintechstudios/ververica-platform-k8s-operator)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator?ref=badge_shield)
-[![pipeline status](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/badges/master/pipeline.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/commits/master)
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git.svg?type=shield)](https://app.fossa.io/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git?ref=badge_shield)[![pipeline status](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/badges/master/pipeline.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/commits/master)
 [![coverage report](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/badges/master/coverage.svg)](https://gitlab.com/fintechstudios/ververica-platform-k8s-operator/commits/master)
 
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
@@ -22,11 +21,11 @@ custom VP Resources will all be prefixed with `Vp`.
 * `Deployment` -> `VpDeployment`
 * `Namespace` -> `VpNamespace`
 * `Savepoint` -> `VpSavepoint`
+* `Event` -> native K8s `Event`
 
 ## Unsupported
 
 * `Job`
-* `Event`
 * `Secret Value`
 * `Status`
 
@@ -202,4 +201,4 @@ Other OSS that influenced this project:
 
 
 ## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffintechstudios%2Fververica-platform-k8s-operator?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git.svg?type=large)](https://app.fossa.io/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git?ref=badge_large)
