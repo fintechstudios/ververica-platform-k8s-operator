@@ -8,7 +8,7 @@ cli:
   project: github.com/fintechstudios/ververica-platform-k8s-operator
 analyze:
   modules:
-  - name: fossa-cli
+  - name: ververica-platform-k8s-operator
     type: go
     target: github.com/fintechstudios/ververica-platform-k8s-operator
     path: .
