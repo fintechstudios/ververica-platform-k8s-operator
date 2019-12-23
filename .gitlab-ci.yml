@@ -79,6 +79,7 @@ license-check:
   script:
     # if the test fails, likely because fossa is backed up, so wait 2 minutes and then retry.
     # With 2 retries, this will take max 6 minutes.
+    - fossa analyze
     - fossa test --verbose || (sleep 120 && exit 1)
   retry: 2
   # don't fail the entire pipeline if this can't complete in time
