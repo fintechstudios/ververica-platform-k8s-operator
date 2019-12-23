@@ -11,9 +11,6 @@ metadata:
 {{- end }}
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.metadata.id
-    name: Id
-    type: string
   - JSONPath: .spec.metadata.namespace
     name: Namespace
     type: string
