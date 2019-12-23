@@ -5,10 +5,10 @@ version: 2
 cli:
   server: https://app.fossa.com
   fetcher: custom
-  project: ververica-platform-k8s-operator
+  project: github.com/fintechstudios/ververica-platform-k8s-operator
 analyze:
   modules:
-  - name: github.com/fintechstudios/ververica-platform-k8s-operator
+  - name: fossa-cli
     type: go
     target: github.com/fintechstudios/ververica-platform-k8s-operator
     path: .
