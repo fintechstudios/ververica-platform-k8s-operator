@@ -1,0 +1,22 @@
+# until something like semantic-release is incorporated, likely after first major release
+categories:
+  - title: 'Features'
+    labels:
+      - 'kind/feature'
+  - title: 'Documentation'
+    labels:
+      - 'kind/docs'
+  - title: 'Bug Fixes'
+    labels:
+      - 'kind/bug'
+  - title: 'CI + Process'
+    labels:
+      - 'kind/ci'
+  - title: 'Dependency Updates'
+    labels:
+      - 'dependencies'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+template: |
+  ## Changes
+
+  $CHANGES
