@@ -1,0 +1,18 @@
+categories:
+  - title: '🚀Features'
+    labels:
+      - 'kind/feature'
+  - title: 'Documentation'
+    labels:
+      - 'kind/docs'
+  - title: '🐛Bug Fixes'
+    labels:
+      - 'kind/bug'
+  - title: 'CI + Process'
+    labels:
+      - 'kind/ci'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+template: |
+  ## Changes
+
+  $CHANGES
