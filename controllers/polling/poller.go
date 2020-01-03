@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+type commandResult struct{}
+
+// FinishedResult is a sentinel can be returned by a PollerFunc to signal polling should exit
+var FinishedResult = &commandResult{}
+
 // PollerFunc is a function to be polled
 type PollerFunc func() interface{}
 
@@ -13,11 +18,19 @@ type Poller struct {
 	Channel      chan interface{}
 	Poll         PollerFunc
 	WaitInterval time.Duration
-	isStopped    bool
-	isFinished   bool
+	status       status
 	group        *sync.WaitGroup
-	stopMutex    *sync.Mutex
+	statusMutex  *sync.Mutex
 }
+
+type status = string
+
+const (
+	runnable = status("runnable") // 1
+	running  = status("running")  // 2
+	stopped  = status("stopped")  // 3
+	finished = status("finished") // 4
+)
 
 // NewPoller creates a new poller for a function with a polling interval
 // NOTE: the polling function cannot return `nil`
@@ -26,18 +39,17 @@ func NewPoller(poll PollerFunc, interval time.Duration) *Poller {
 		Channel:      make(chan interface{}),
 		Poll:         poll,
 		WaitInterval: interval,
-		isStopped:    false,
-		isFinished:   false,
+		status:       runnable,
 		group:        &sync.WaitGroup{},
-		stopMutex:    &sync.Mutex{},
+		statusMutex:  &sync.Mutex{},
 	}
 }
 
 // sendResult forwards on a polling result if the channel is not closed
 // which could happen during the polling request
 func (p *Poller) sendResult(result interface{}) {
-	p.stopMutex.Lock()
-	defer p.stopMutex.Unlock()
+	p.statusMutex.Lock()
+	defer p.statusMutex.Unlock()
 	if !p.IsStopped() {
 		p.Channel <- result
 	}
@@ -47,19 +59,36 @@ func (p *Poller) sendResult(result interface{}) {
 func (p *Poller) runPolling() {
 	for !p.IsStopped() {
 		if res := p.Poll(); res != nil {
+			if res == FinishedResult {
+				p.Stop()
+				break
+			}
+
 			p.sendResult(res)
 		}
 		time.Sleep(p.WaitInterval)
 	}
 	p.group.Done()
-	p.isFinished = true
+	p.statusMutex.Lock()
+	defer p.statusMutex.Unlock()
+	p.status = finished
 }
 
 // Start starts the polling process -- cannot be restarted after stopping
 func (p *Poller) Start() {
+	// TODO: make this less panic-driven by accommodating this case
 	if p.IsStopped() {
 		panic("cannot restart poller after it has been stopped")
 	}
+
+	if p.IsRunning() {
+		// already running
+		return
+	}
+
+	p.statusMutex.Lock()
+	defer p.statusMutex.Unlock()
+	p.status = running
 
 	p.group.Add(1)
 	go p.runPolling()
@@ -68,10 +97,15 @@ func (p *Poller) Start() {
 // Stop exits the polling loop on the next attempt, waits for it to finish,
 // and closes the channel
 func (p *Poller) Stop() {
-	p.stopMutex.Lock()
-	defer p.stopMutex.Unlock()
+	p.statusMutex.Lock()
+	defer p.statusMutex.Unlock()
 
-	p.isStopped = true
+	if p.IsStopped() {
+		// already been closed
+		return
+	}
+
+	p.status = stopped
 	close(p.Channel)
 }
 
@@ -81,12 +115,18 @@ func (p *Poller) StopAndBlock() {
 	p.group.Wait()
 }
 
-// IsFinished returns whether or not the polling worker has completed
-func (p *Poller) IsFinished() bool {
-	return p.isFinished
+// IsRunning returns whether or not the poller is able to be started
+func (p *Poller) IsRunning() bool {
+	return p.status == running
 }
 
-// IsStopped returns whether or not the polling worker has been stopped
+// IsFinished returns whether or not the polling worker has completed
+func (p *Poller) IsFinished() bool {
+	return p.status == finished
+}
+
+// IsStopped returns whether or not the polling worker has been stopped or is finished
+// perhaps should be refactored to IsClosed, or IsRunnable
 func (p *Poller) IsStopped() bool {
-	return p.isStopped
+	return p.status == stopped || p.IsFinished()
 }

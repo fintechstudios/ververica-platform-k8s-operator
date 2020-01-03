@@ -23,7 +23,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
+	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,38 +36,12 @@ import (
 type VpNamespaceReconciler struct {
 	client.Client
 	Log               logr.Logger
-	PlatformAPIClient *platformApiClient.APIClient
-	pollerMap         map[string]*polling.Poller
-}
-
-func (r *VpNamespaceReconciler) setPoller(req ctrl.Request, pollerType string, poller *polling.Poller) {
-	if r.pollerMap == nil {
-		r.pollerMap = make(map[string]*polling.Poller)
-	}
-	r.pollerMap[req.String()+"-"+pollerType] = poller
-}
-
-func (r *VpNamespaceReconciler) getPoller(req ctrl.Request, pollerType string) *polling.Poller {
-	if r.pollerMap == nil {
-		return nil
-	}
-	return r.pollerMap[req.String()+"-"+pollerType]
-}
-
-func (r *VpNamespaceReconciler) removePoller(req ctrl.Request, pollerType string) bool {
-	poller := r.getPoller(req, pollerType)
-	if poller == nil {
-		return false
-	}
-	log := r.getLogger(req).WithValues("poller", pollerType)
-	log.Info("Stopping poller")
-	poller.Stop()
-	delete(r.pollerMap, req.String()+"-"+pollerType)
-	return true
+	PlatformAPIClient *platformapiclient.APIClient
+	pollerManager     polling.PollerManager
 }
 
 func (r *VpNamespaceReconciler) ensurePollersAreRunning(req ctrl.Request, vpNamespace *v1beta1.VpNamespace) {
-	if !r.pollerIsRunning(req, "status") {
+	if !r.pollerManager.PollerIsRunning("status", req.String()) {
 		r.addStatusPollerForResource(req, vpNamespace)
 	}
 }
@@ -98,32 +72,16 @@ func (r *VpNamespaceReconciler) getStatusPollerFunc(req ctrl.Request, namespaceN
 }
 
 func (r *VpNamespaceReconciler) addStatusPollerForResource(req ctrl.Request, vpNamespace *v1beta1.VpNamespace) {
-	log := r.getLogger(req)
-	if r.pollerIsRunning(req, "status") {
-		log.Info("A status poller already exists, removing...")
-		r.removePoller(req, "status")
-	}
-
 	poller := polling.NewPoller(r.getStatusPollerFunc(req, vpNamespace.Name), statusPollingInterval)
-
-	r.setPoller(req, "status", poller)
-	poller.Start()
-}
-
-func (r *VpNamespaceReconciler) pollerIsRunning(req ctrl.Request, pollerType string) bool {
-	if r.getPoller(req, pollerType) == nil {
-		return false
-	}
-
-	return !r.getPoller(req, pollerType).IsStopped()
+	r.pollerManager.AddPoller("status", req.String(), poller)
 }
 
 func (r *VpNamespaceReconciler) removePollers(req ctrl.Request) {
-	r.removePoller(req, "status")
+	r.pollerManager.RemovePoller("status", req.String())
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *platformApiClient.Namespace) error {
+func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, namespace *platformapiclient.Namespace) error {
 	ctx := context.Background()
 
 	var err error
@@ -148,7 +106,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 	log := r.getLogger(req)
 	ctx := context.TODO()
 	// create it
-	createRes, _, err := r.PlatformAPIClient.NamespacesApi.CreateNamespace(ctx, platformApiClient.Namespace{
+	createRes, _, err := r.PlatformAPIClient.NamespacesApi.CreateNamespace(ctx, platformapiclient.Namespace{
 		Name:         "namespaces/" + vpNamespace.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
@@ -170,11 +128,11 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 }
 
 // handleUpdate updates the k8s resource when it already exists in the VP
-func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, currentNamespace platformApiClient.Namespace) (ctrl.Result, error) {
+func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, currentNamespace platformapiclient.Namespace) (ctrl.Result, error) {
 	ctx := context.TODO()
 
 	// lifecyclePhase and createTime must be left nil
-	updatedNamespace := platformApiClient.Namespace{
+	updatedNamespace := platformapiclient.Namespace{
 		Name:         "namespaces/" + vpNamespace.Name,
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
@@ -278,6 +236,7 @@ func (r *VpNamespaceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 // SetupWithManager is a helper function to initial on manager boot
 func (r *VpNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	r.pollerManager = polling.NewManager()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.VpNamespace{}).
 		Complete(r)
