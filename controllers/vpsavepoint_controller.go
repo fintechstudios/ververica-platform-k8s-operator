@@ -29,6 +29,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/vvp-errors"
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -88,7 +89,6 @@ func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace,
 func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
-
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), time.Second*5)
 	r.pollerManager.AddPoller("status", req.String(), poller)
@@ -139,6 +139,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		return ctrl.Result{Requeue: false}, nil
 	}
 	depID := vpSavepoint.Spec.Metadata.DeploymentID
+	var depNamespacedName types.NamespacedName
 	if depID == "" {
 		// no deployment id has been explicitly set
 		// try to find one
@@ -155,6 +156,10 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		}
 
 		depID = deployment.Metadata.Id
+		depNamespacedName = types.NamespacedName{
+			Namespace: vpSavepoint.Namespace,
+			Name:      depName,
+		}
 	}
 
 	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
@@ -175,6 +180,20 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	if err != nil {
 		log.Info("Error creating VP Savepoint")
 		return ctrl.Result{}, err
+	}
+
+	// If there exists a VpDeployment, attach it as the owner of this savepoint
+	var vpDeployment v1beta1.VpDeployment
+
+	if err := r.Get(context.Background(), depNamespacedName, &vpDeployment); err != nil {
+		if !utils.IsNotFoundError(err) {
+			return ctrl.Result{}, err
+		}
+		log.WithValues("VpDeployment name", depNamespacedName.String()).
+				Info("No VpDeployment")
+	} else {
+		// we've got a deployment, set it!
+		vpSavepoint.OwnerReferences = append(vpSavepoint.OwnerReferences, &vpDeployment)
 	}
 
 	// Now update the k8s resource and status as well

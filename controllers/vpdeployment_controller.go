@@ -247,6 +247,26 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 	r.pollerManager.AddPoller("status", req.String(), poller)
 }
 
+
+func (r *VpDeploymentReconciler) addSavepointPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
+	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
+
+	r.pollerManager.AddPoller("status", req.String(), poller)
+}
+
+func (r *VpDeploymentReconciler) getSavepointPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
+	log := r.getLogger(req).WithValues("poller", "savepoint")
+	return func() interface{} {
+		log.Info("Polling")
+		// get a list of savepoints and create ones that do not yet exist in k8s
+
+
+		return nil
+	}
+}
+
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
 func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appmanagerapi.Deployment) error {
 	ctx := context.Background()
