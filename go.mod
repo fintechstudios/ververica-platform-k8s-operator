@@ -11,7 +11,7 @@ require (
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20190922100055-0a153f010e69 // indirect
-	k8s.io/api v0.17.0
+	k8s.io/api v0.17.2
 	k8s.io/apimachinery v0.17.0
 	k8s.io/client-go v0.0.0-20190918160344-1fbdaa4c8d90
 	sigs.k8s.io/controller-runtime v0.4.0
