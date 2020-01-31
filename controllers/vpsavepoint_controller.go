@@ -22,12 +22,13 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -36,7 +37,7 @@ import (
 type VpSavepointReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerAPIClient *appManagerApi.APIClient
+	AppManagerAPIClient *appmanagerapi.APIClient
 	AppManagerAuthStore *appmanager.AuthStore
 	pollerManager       polling.PollerManager
 }
@@ -103,14 +104,10 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, savepoint *appManagerApi.Savepoint) error {
+func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, savepoint *appmanagerapi.Savepoint) error {
 	ctx := context.Background()
 
-	if resource.Annotations == nil {
-		resource.Annotations = make(map[string]string)
-	}
-
-	annotations.Set(resource.Annotations,
+	resource.Annotations = annotations.Set(resource.Annotations,
 		annotations.Pair(annotations.ID, savepoint.Metadata.Id),
 		annotations.Pair(annotations.DeploymentID, savepoint.Metadata.DeploymentId),
 		annotations.Pair(annotations.JobID, savepoint.Metadata.JobId))
@@ -142,6 +139,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		return ctrl.Result{Requeue: false}, nil
 	}
 	depID := vpSavepoint.Spec.Metadata.DeploymentID
+	var depNamespacedName types.NamespacedName
 	if depID == "" {
 		// no deployment id has been explicitly set
 		// try to find one
@@ -158,12 +156,16 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		}
 
 		depID = deployment.Metadata.Id
+		depNamespacedName = types.NamespacedName{
+			Namespace: vpSavepoint.Namespace,
+			Name:      depName,
+		}
 	}
 
-	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appManagerApi.Savepoint{
+	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
-		Metadata: &appManagerApi.SavepointMetadata{
+		Metadata: &appmanagerapi.SavepointMetadata{
 			DeploymentId: depID,
 			Namespace:    nsName,
 		},
@@ -178,6 +180,20 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	if err != nil {
 		log.Info("Error creating VP Savepoint")
 		return ctrl.Result{}, err
+	}
+
+	// If there exists a VpDeployment, attach it as the owner of this savepoint
+	var vpDeployment v1beta1.VpDeployment
+
+	if err := r.Get(context.Background(), depNamespacedName, &vpDeployment); err != nil {
+		if !utils.IsNotFoundError(err) {
+			return ctrl.Result{}, err
+		}
+		log.WithValues("VpDeployment name", depNamespacedName.String()).
+				Info("No VpDeployment")
+	} else {
+		// we've got a deployment, set it!
+		vpSavepoint.OwnerReferences = append(vpSavepoint.OwnerReferences, &vpDeployment)
 	}
 
 	// Now update the k8s resource and status as well
