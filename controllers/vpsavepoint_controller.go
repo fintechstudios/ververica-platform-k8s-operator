@@ -27,7 +27,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
-	vvp_errors "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/vvp-errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/controllers/vvp-errors"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -184,7 +184,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
-		log.Error(err, "Bad request when creating savepoint: "+vvp_errors.GetVVPErrorMessage(err))
+		log.Error(err, "Bad request when creating savepoint: "+vvperrors.GetVVPErrorMessage(err))
 		return ctrl.Result{Requeue: false}, nil
 	}
 

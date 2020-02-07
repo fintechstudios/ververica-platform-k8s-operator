@@ -1,4 +1,4 @@
-package vvp_errors
+package vvperrors
 
 import (
 	"encoding/json"
