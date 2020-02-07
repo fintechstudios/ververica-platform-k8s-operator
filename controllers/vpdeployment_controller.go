@@ -58,7 +58,7 @@ type VpDeploymentReconciler struct {
 	Log                 logr.Logger
 	AppManagerAPIClient *appmanagerapi.APIClient
 	AppManagerAuthStore *appmanager.AuthStore
-	pollerMap           map[string]*polling.Poller
+	pollerManager       polling.PollerManager
 	manager             *ctrl.Manager
 }
 
@@ -93,51 +93,17 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDe
 }
 
 func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
-	if !r.pollerIsRunning(req, "event") {
+	if !r.pollerManager.PollerIsRunning("event", req.String()) {
 		r.addEventPollerForResource(req, vpDeployment)
 	}
-	if !r.pollerIsRunning(req, "status") {
+	if !r.pollerManager.PollerIsRunning("status", req.String()) {
 		r.addStatusPollerForResource(req, vpDeployment)
 	}
 }
 
-func (r *VpDeploymentReconciler) setPoller(req ctrl.Request, pollerType string, poller *polling.Poller) {
-	if r.pollerMap == nil {
-		r.pollerMap = make(map[string]*polling.Poller)
-	}
-	r.pollerMap[req.String()+"-"+pollerType] = poller
-}
-
-func (r *VpDeploymentReconciler) getPoller(req ctrl.Request, pollerType string) *polling.Poller {
-	if r.pollerMap == nil {
-		return nil
-	}
-	return r.pollerMap[req.String()+"-"+pollerType]
-}
-
-func (r *VpDeploymentReconciler) removePoller(req ctrl.Request, pollerType string) bool {
-	poller := r.getPoller(req, pollerType)
-	if poller == nil {
-		return false
-	}
-	log := r.getLogger(req).WithValues("poller", pollerType)
-	log.Info("Stopping poller")
-	poller.Stop()
-	delete(r.pollerMap, req.String()+"-"+pollerType)
-	return true
-}
-
-func (r *VpDeploymentReconciler) pollerIsRunning(req ctrl.Request, pollerType string) bool {
-	if r.getPoller(req, pollerType) == nil {
-		return false
-	}
-
-	return !r.getPoller(req, pollerType).IsStopped()
-}
-
 func (r *VpDeploymentReconciler) removePollers(req ctrl.Request) {
-	r.removePoller(req, "status")
-	r.removePoller(req, "event")
+	r.pollerManager.RemovePoller("status", req.String())
+	r.pollerManager.RemovePoller("event", req.String())
 }
 
 func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
@@ -231,20 +197,11 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 }
 
 func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
-	log := r.getLogger(req).WithValues("poller", "event")
-	if r.pollerIsRunning(req, "event") {
-		log.Info("A status poller already exists, removing...")
-		r.removePoller(req, "event")
-	}
-
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
-
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(r.getEventPollerFunc(req, nsName, vpID), eventPollingInterval)
-
-	r.setPoller(req, "event", poller)
-	poller.Start()
+	r.pollerManager.AddPoller("event", req.String(), poller)
 }
 
 func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
@@ -275,7 +232,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 		}
 
 		if err = r.updateResource(&vpDeploymentUpdated, &deployment); err != nil {
-			log.Error(err, "Error while updating VpSavepoint from poller")
+			log.Error(err, "Error while updating VpDeployment from poller")
 		}
 
 		return nil
@@ -283,29 +240,19 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 }
 
 func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
-	log := r.getLogger(req)
-	if r.pollerIsRunning(req, "status") {
-		log.Info("A status poller already exists, removing...")
-		r.removePoller(req, "status")
-	}
-
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
 	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
 
-	r.setPoller(req, "status", poller)
-	poller.Start()
+	r.pollerManager.AddPoller("status", req.String(), poller)
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
 func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appmanagerapi.Deployment) error {
 	ctx := context.Background()
 
-	if resource.Annotations == nil {
-		resource.Annotations = make(map[string]string)
-	}
 	// save dynamic information as annotations
-	annotations.Set(resource.Annotations,
+	resource.Annotations = annotations.Set(resource.Annotations,
 		annotations.Pair(annotations.ID, deployment.Metadata.Id),
 		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(deployment.Metadata.ResourceVersion))),
 		annotations.Pair(annotations.DeploymentTargetID, deployment.Spec.DeploymentTargetId))
@@ -375,7 +322,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	// Create a poller to keep the savepoint up to date
+	// Create a poller to keep the deployment up to date
 	r.ensurePollersAreRunning(req, &vpDeployment)
 
 	return ctrl.Result{}, nil
@@ -486,7 +433,6 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 	}
 
 	log.Info("Deleting Deployment", "name", deployment.Metadata.Name)
-	// Should happen instantaneously
 	r.removePollers(req)
 	return ctrl.Result{}, nil
 }
@@ -581,6 +527,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 // SetupWithManager hooks the reconciler into the main manager
 func (r *VpDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.manager = &mgr
+	r.pollerManager = polling.NewManager()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.VpDeployment{}).
 		Complete(r)

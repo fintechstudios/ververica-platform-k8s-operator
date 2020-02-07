@@ -22,7 +22,7 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
@@ -37,36 +37,23 @@ import (
 type VpSavepointReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerAPIClient *appManagerApi.APIClient
+	AppManagerAPIClient *appmanagerapi.APIClient
 	AppManagerAuthStore *appmanager.AuthStore
-	pollerMap           map[string]*polling.Poller
+	pollerManager       polling.PollerManager
 }
 
-func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
-	log := r.getLogger(req)
+func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
+	log := r.getLogger(req).WithValues("poller", "status")
 
-	if r.pollerMap == nil {
-		r.pollerMap = make(map[string]*polling.Poller)
-	}
-
-	if r.pollerMap[req.String()] != nil {
-		log.Info("A status poller already exists, removing...")
-		r.removeStatusPollerForResource(req)
-	}
-
-	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	vpID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
-
-	// On each polling callback, push the update through the k8s client
-	poller := polling.NewPoller(func() interface{} {
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
+	return func() interface{} {
+		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
 
 		if err != nil {
 			log.Error(err, "Error getting authorized context")
 			return nil
 		}
 
-		savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(ctx, nsName, vpID)
+		savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(ctx, namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
 			return nil
@@ -87,27 +74,28 @@ func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpS
 			log.Error(err, "Error while updating VpSavepoint from poller")
 		}
 
-		return nil
-	}, time.Second*5)
+		// final state, stop and remove the poller
+		if vpSavepointUpdated.Status.State == v1beta1.FailedSavepointState ||
+			vpSavepointUpdated.Status.State == v1beta1.CompletedSavepointState {
+			r.pollerManager.RemovePoller("status", req.String())
+			return polling.FinishedResult
+		}
 
-	r.pollerMap[req.String()] = poller
-	poller.Start()
+		return nil
+	}
+}
+
+func (r *VpSavepointReconciler) addStatusPollerForResource(req ctrl.Request, vpSavepoint *v1beta1.VpSavepoint) {
+	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
+	vpID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
+
+	// On each polling callback, push the update through the k8s client
+	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), time.Second*5)
+	r.pollerManager.AddPoller("status", req.String(), poller)
 }
 
 func (r *VpSavepointReconciler) removeStatusPollerForResource(req ctrl.Request) bool {
-	if r.pollerMap == nil {
-		return false
-	}
-	log := r.getLogger(req)
-	poller := r.pollerMap[req.String()]
-	if poller == nil {
-		return false
-	}
-
-	log.Info("Stopping poller")
-	poller.Stop()
-	delete(r.pollerMap, req.String())
-	return true
+	return r.pollerManager.RemovePoller("status", req.String())
 }
 
 // getLogger creates a logger for the controller with the request name
@@ -116,14 +104,10 @@ func (r *VpSavepointReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, savepoint *appManagerApi.Savepoint) error {
+func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, savepoint *appmanagerapi.Savepoint) error {
 	ctx := context.Background()
 
-	if resource.Annotations == nil {
-		resource.Annotations = make(map[string]string)
-	}
-
-	annotations.Set(resource.Annotations,
+	resource.Annotations = annotations.Set(resource.Annotations,
 		annotations.Pair(annotations.ID, savepoint.Metadata.Id),
 		annotations.Pair(annotations.DeploymentID, savepoint.Metadata.DeploymentId),
 		annotations.Pair(annotations.JobID, savepoint.Metadata.JobId))
@@ -173,10 +157,10 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		depID = deployment.Metadata.Id
 	}
 
-	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appManagerApi.Savepoint{
+	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
-		Metadata: &appManagerApi.SavepointMetadata{
+		Metadata: &appmanagerapi.SavepointMetadata{
 			DeploymentId: depID,
 			Namespace:    nsName,
 		},
@@ -198,7 +182,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		return ctrl.Result{}, err
 	}
 
-	// Create a poller to keep the savepoint up to date
+	// Create a poller to keep the savepoint up-to-date
 	r.addStatusPollerForResource(req, &vpSavepoint)
 
 	return ctrl.Result{}, nil
@@ -258,6 +242,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 // SetupWithManager registers the controller
 func (r *VpSavepointReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	r.pollerManager = polling.NewManager()
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.VpSavepoint{}).
 		Complete(r)

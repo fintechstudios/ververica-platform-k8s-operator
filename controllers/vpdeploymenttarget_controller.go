@@ -46,11 +46,7 @@ type VpDeploymentTargetReconciler struct {
 func (r *VpDeploymentTargetReconciler) updateResource(resource *ververicaplatformv1beta1.VpDeploymentTarget, depTarget *appManagerApi.DeploymentTarget) error {
 	ctx := context.Background()
 
-	if resource.Annotations == nil {
-		resource.Annotations = make(map[string]string)
-	}
-
-	annotations.Set(resource.Annotations,
+	resource.Annotations = annotations.Set(resource.Annotations,
 		annotations.Pair(annotations.ID, depTarget.Metadata.Id),
 		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(depTarget.Metadata.ResourceVersion))))
 
