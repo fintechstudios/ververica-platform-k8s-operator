@@ -232,7 +232,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 		}
 
 		if err = r.updateResource(&vpDeploymentUpdated, &deployment); err != nil {
-			log.Error(err, "Error while updating VpSavepoint from poller")
+			log.Error(err, "Error while updating VpDeployment from poller")
 		}
 
 		return nil
@@ -245,26 +245,6 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
 
 	r.pollerManager.AddPoller("status", req.String(), poller)
-}
-
-
-func (r *VpDeploymentReconciler) addSavepointPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
-	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
-	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
-
-	r.pollerManager.AddPoller("status", req.String(), poller)
-}
-
-func (r *VpDeploymentReconciler) getSavepointPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
-	log := r.getLogger(req).WithValues("poller", "savepoint")
-	return func() interface{} {
-		log.Info("Polling")
-		// get a list of savepoints and create ones that do not yet exist in k8s
-
-
-		return nil
-	}
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
@@ -342,7 +322,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	// Create a poller to keep the savepoint up to date
+	// Create a poller to keep the deployment up to date
 	r.ensurePollersAreRunning(req, &vpDeployment)
 
 	return ctrl.Result{}, nil
