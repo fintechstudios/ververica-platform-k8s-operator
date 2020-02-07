@@ -21,7 +21,7 @@ spec:
       spec:
         artifact:
           kind: JAR
-          jarUri: http://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.9.0/flink-examples-streaming_2.11-1.9.0-TopSpeedWindowing.jar
+          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.9.0/flink-examples-streaming_2.11-1.9.0-TopSpeedWindowing.jar
           mainArgs: --windowSize 10 --windowUnit minutes
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
           flinkVersion: "1.9"
