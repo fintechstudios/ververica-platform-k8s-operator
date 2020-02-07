@@ -184,7 +184,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 
 	if res != nil && res.StatusCode == 400 {
 		// Bad Request, should not requeue
-		log.Error(err, "Bad request when creating savepoint: " + vvp_errors.GetVVPErrorMessage(err))
+		log.Error(err, "Bad request when creating savepoint: "+vvp_errors.GetVVPErrorMessage(err))
 		return ctrl.Result{Requeue: false}, nil
 	}
 
