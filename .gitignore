@@ -26,3 +26,5 @@ vendor
 resources.yaml
 .charts
 *.tgz
+
+vvp-values.yaml
