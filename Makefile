@@ -54,6 +54,24 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
+# find or download kind
+.PHONY: kind
+kind:
+ifeq (, $(shell which kind))
+	@{ \
+	set -e ;\
+	KIND_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KIND_TMP_DIR ;\
+	go mod init tmp ;\
+	go get go get sigs.k8s.io/kind@v0.7.0 ;\
+	rm -rf $$KIND_TMP_DIR ;\
+	}
+KIND=$(GOBIN)/kind
+else
+KIND=$(shell which kind)
+endif
+
+
 # Run tests
 .PHONY: test
 test: generate manifests
@@ -122,14 +140,21 @@ swagger-gen:
 # install local path storage as defult storage class (see: https://github.com/kubernetes-sigs/kind/issues/118#issuecomment-475134086)
 .PHONY: test-cluster-create
 test-cluster-create:
-	kind create cluster --name $(TEST_CLUSTER_NAME) \
-		&& sleep 10 \
-		&& kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml \
-		&& kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false", "storageclass.beta.kubernetes.io/is-default-class":"false"}}}' \
-		&& kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true", "storageclass.beta.kubernetes.io/is-default-class":"true"}}}'
+	$(KIND) create cluster --name $(TEST_CLUSTER_NAME)
 
 # Delete the test cluster using kind
 .PHONY: test-cluster-delete
 test-cluster-delete:
-	kind delete cluster --name $(TEST_CLUSTER_NAME)
+	$(KIND) delete cluster --name $(TEST_CLUSTER_NAME)
+
+.PHONY: test-cluster-install-vvp
+test-cluster-install-vvp:
+	. ./hack/helm-init.sh \
+	&& helm upgrade --install \
+		--version 3.0.0 \
+		--namespace vvp \
+		--set vvp.persistence.type=local \
+		-f ./vvp-values.yaml \
+		vvp \
+		ververica/ververica-platform
 
