@@ -181,10 +181,7 @@ This is a MVP for Flink deployments at FinTech Studios. We would love to see thi
 improved! 
 
 Some known issues + places to improve:
-* `DeploymentTarget.deploymentPatchSet` values can only be `strings`.
-* Watching the VP API for updates to Deployments, Jobs, Events, etc and adding updates to the `status` fields.
-* Memory management / over-allocation / embed-by-value vs embed-by-pointer could probably be improved.
-* Make the APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
+* Make the Platform APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
 * Splitting tests into unit, integration, e2e tests against a live cluster, etc.
 
 ## Acknowledgements

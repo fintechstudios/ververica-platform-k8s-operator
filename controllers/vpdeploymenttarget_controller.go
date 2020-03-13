@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
@@ -67,11 +66,6 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
 
-	patchSet, err := converters.DeploymentTargetPatchSetFromNative(vpDepTarget.Spec.Spec.DeploymentPatchSet)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	depTarget := appmanagerapi.DeploymentTarget{
 		ApiVersion: "v1",
 		Metadata: &appmanagerapi.DeploymentTargetMetadata{
@@ -82,7 +76,6 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 		},
 		Spec: &appmanagerapi.DeploymentTargetSpec{
 			Kubernetes:         &appmanagerapi.KubernetesTarget{Namespace: vpDepTarget.Spec.Spec.Kubernetes.Namespace},
-			DeploymentPatchSet: patchSet,
 		},
 	}
 	// create it
