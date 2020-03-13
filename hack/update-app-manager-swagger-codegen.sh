@@ -23,7 +23,7 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")
 PROJECT_DIR="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
 SWAGGER_FILE=appmanager-api-swagger.json
 CONFIG_FILE=appmanager-swagger-gen-config.json
-OUT_DIR=appmanager-api-client
+OUT_DIR=internal/appmanager-api-client
 
 rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !"${PROJECT_DIR:?}"/${OUT_DIR}/model_any.go !"${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore
 mkdir -p "${PROJECT_DIR}"/${OUT_DIR}

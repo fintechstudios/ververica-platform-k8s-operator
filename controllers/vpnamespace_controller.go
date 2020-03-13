@@ -21,9 +21,9 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
-	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
+	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/polling"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
 )
 
 // DeploymentTargetPatchSetFromNative converts a deployment k8s patch set to a platform patch set

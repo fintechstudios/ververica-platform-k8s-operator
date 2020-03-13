@@ -23,10 +23,10 @@ import (
 	"runtime"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
-	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
 	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
 	k8s "k8s.io/apimachinery/pkg/runtime"
