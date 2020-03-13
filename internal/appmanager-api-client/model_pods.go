@@ -10,14 +10,16 @@
 
 package appmanagerapi
 
+import core "k8s.io/api/core/v1"
+
 type Pods struct {
-	Affinity *JsonNode                      `json:"affinity,omitempty"`
-	Annotations map[string]string           `json:"annotations,omitempty"`
-	EnvVars []EnvVar                        `json:"envVars,omitempty"`
+	Affinity         *core.Affinity         `json:"affinity,omitempty"`
+	Annotations      map[string]string      `json:"annotations,omitempty"`
+	EnvVars          []EnvVar               `json:"envVars,omitempty"`
 	ImagePullSecrets []LocalObjectReference `json:"imagePullSecrets,omitempty"`
-	Labels map[string]string                `json:"labels,omitempty"`
-	NodeSelector map[string]string          `json:"nodeSelector,omitempty"`
-	SecurityContext *JsonNode               `json:"securityContext,omitempty"`
-	Tolerations []JsonNode                  `json:"tolerations,omitempty"`
-	VolumeMounts []VolumeAndMount           `json:"volumeMounts,omitempty"`
+	Labels           map[string]string      `json:"labels,omitempty"`
+	NodeSelector     map[string]string      `json:"nodeSelector,omitempty"`
+	SecurityContext  *core.SecurityContext  `json:"securityContext,omitempty"`
+	Tolerations      []core.Toleration      `json:"tolerations,omitempty"`
+	VolumeMounts     []VolumeAndMount       `json:"volumeMounts,omitempty"`
 }

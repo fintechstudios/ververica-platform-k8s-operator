@@ -18,7 +18,6 @@ var _ = Describe("IsNotFoundError", func() {
 	})
 
 	notFoundErrors := []error{
-		DeploymentNotFoundError{Namespace: "grumpy", Name: "goose"},
 		appManagerApi.GenericSwaggerError{}.WithStatusCode(404),
 		platformApi.GenericSwaggerError{}.WithStatusCode(404),
 		apiErrors.NewNotFound(schema.GroupResource{
