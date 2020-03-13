@@ -6,7 +6,7 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/platform-api-client"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

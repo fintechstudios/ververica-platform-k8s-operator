@@ -25,11 +25,11 @@ import (
 	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/polling"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/polling"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,10 +55,10 @@ func eventAnnotations(event appmanagerapi.Event) map[string]string {
 // VpDeploymentReconciler reconciles a VpDeployment object
 type VpDeploymentReconciler struct {
 	client.Client
-	Log                 logr.Logger
-	AppManagerClient    appmanager.Client
-	pollerManager       polling.PollerManager
-	manager             *ctrl.Manager
+	Log              logr.Logger
+	AppManagerClient appmanager.Client
+	pollerManager    polling.PollerManager
+	manager          *ctrl.Manager
 }
 
 // getLogger creates a logger for the controller with the request name

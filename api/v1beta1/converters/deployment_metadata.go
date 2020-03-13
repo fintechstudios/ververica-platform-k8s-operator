@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
 )
 
 // DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation

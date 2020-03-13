@@ -23,10 +23,10 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/appmanager-api-client"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/appmanager"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
 	"github.com/go-logr/logr"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,8 +38,8 @@ import (
 // VpDeploymentTargetReconciler reconciles a VpDeploymentTarget object
 type VpDeploymentTargetReconciler struct {
 	client.Client
-	Log                 logr.Logger
-	AppManagerClient    appmanager.Client
+	Log              logr.Logger
+	AppManagerClient appmanager.Client
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
