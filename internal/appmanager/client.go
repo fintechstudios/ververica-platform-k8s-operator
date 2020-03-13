@@ -12,6 +12,7 @@ var (
 	// TODO: make custom types
 	ErrBadRequest   = errors.New("bad request")
 	ErrUnauthorized = errors.New("unathorized")
+	ErrForbidden = errors.New("forbidden")
 	ErrConflict     = errors.New("conflict")
 	ErrNotFound     = errors.New("not found")
 	ErrUnknown      = errors.New("unknown error")
@@ -29,6 +30,8 @@ func formatResponseError(res *http.Response) error {
 		return ErrBadRequest
 	case 401:
 		return ErrUnauthorized
+	case 403:
+		return ErrForbidden
 	case 404:
 		return ErrNotFound
 	case 409:

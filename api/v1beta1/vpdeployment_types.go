@@ -104,6 +104,9 @@ type VpPodSpec struct {
 	EnvVars []core.EnvVar `json:"envVars,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
 
 	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// +optional
 	VolumeMounts []VpVolumeAndMount `json:"volumeMounts,omitempty"`
 
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
@@ -175,6 +178,7 @@ const (
 	TransitioningState = DeploymentState("TRANSITIONING")
 	SuspendedState     = DeploymentState("SUSPENDED")
 	FailedState        = DeploymentState("FAILED")
+	Finishedstate      = DeploymentState("FINISHED")
 )
 
 // VpDeploymentSpec is the spec in the Ververica Platform
@@ -219,10 +223,7 @@ type VpDeploymentStatus struct {
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
 
-	// TODO: think about adding other information here, ie:
-	// 		- list of Jobs
-	//		- list of Events
-	//		- list of K8s Pods created
+	// TODO: add running status
 }
 
 // +kubebuilder:object:root=true
