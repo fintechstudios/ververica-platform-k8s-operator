@@ -56,8 +56,7 @@ func eventAnnotations(event appmanagerapi.Event) map[string]string {
 type VpDeploymentReconciler struct {
 	client.Client
 	Log                 logr.Logger
-	AppManagerAPIClient *appmanagerapi.APIClient
-	AppManagerAuthStore *appmanager.AuthStore
+	AppManagerClient    appmanager.Client
 	pollerManager       polling.PollerManager
 	manager             *ctrl.Manager
 }
@@ -83,7 +82,7 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDe
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	depTarget, _, err := r.AppManagerAPIClient.DeploymentTargetsApi.GetDeploymentTarget(ctx, nsName, vpDeployment.Spec.DeploymentTargetName)
+	depTarget, err := r.AppManagerClient.DeploymentTargets().GetDeploymentTarget(ctx, nsName, vpDeployment.Spec.DeploymentTargetName)
 
 	if err != nil {
 		return "", err
@@ -111,13 +110,7 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 
 	return func() interface{} {
 		log.Info("Polling")
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
-		if err != nil {
-			log.Error(err, "Error getting authorized context")
-			return nil
-		}
-
-		events, _, err := r.AppManagerAPIClient.EventsApi.GetEvents(ctx, namespace, &appmanagerapi.GetEventsOpts{
+		events, err := r.AppManagerClient.Events().GetEvents(context.Background(), namespace, &appmanager.GetEventsOpts{
 			DeploymentId: optional.NewInterface(id),
 			JobId:        optional.EmptyInterface(),
 		})
@@ -208,14 +201,10 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 	log := r.getLogger(req).WithValues("poller", "status")
 	return func() interface{} {
 		log.Info("Polling")
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
 
-		if err != nil {
-			log.Error(err, "Error getting authorized context")
-			return nil
-		}
-
-		deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, namespace, id)
+		deployment, err := r.AppManagerClient.
+			Deployments().
+			GetDeployment(context.Background(), namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling deployment")
 			return nil
@@ -231,7 +220,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 			return deployment
 		}
 
-		if err = r.updateResource(&vpDeploymentUpdated, &deployment); err != nil {
+		if err = r.updateResource(&vpDeploymentUpdated, deployment); err != nil {
 			log.Error(err, "Error while updating VpDeployment from poller")
 		}
 
@@ -286,14 +275,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
-
-	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetID(ctx, vpDeployment)
+	deployment.Spec.DeploymentTargetId, err = r.getDeploymentTargetID(context.Background(), vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -301,11 +283,11 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 	deployment.Metadata.Name = req.Name
 
 	// create it
-	createdDep, res, err := r.AppManagerAPIClient.
-		DeploymentsApi.
-		CreateDeployment(ctx, namespace, deployment)
+	createdDep, err := r.AppManagerClient.
+		Deployments().
+		CreateDeployment(context.Background(), namespace, deployment)
 
-	if res != nil && res.StatusCode == 400 {
+	if errors.Is(err, appmanager.ErrBadRequest) {
 		// Bad Request, should not requeue
 		return ctrl.Result{Requeue: false}, err
 	}
@@ -318,7 +300,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 	log.Info("Created deployment", "deployment", createdDep.Metadata.Id)
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(&vpDeployment, &createdDep); err != nil {
+	if err := r.updateResource(&vpDeployment, createdDep); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -341,18 +323,15 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
 
 	// Patches with no changes to the spec should not trigger
 	// sequential patches with the same spec will not trigger a new transition
 	// but will bump the resource version, making a direct equality check impossible
-	updatedDep, res, err := r.AppManagerAPIClient.DeploymentsApi.UpdateDeployment(ctx, nsName, currentDeployment.Metadata.Id, desiredDeployment)
+	updatedDep, err := r.AppManagerClient.
+		Deployments().
+		UpdateDeployment(context.Background(), nsName, currentDeployment.Metadata.Id, desiredDeployment)
 
-	if res != nil && res.StatusCode == 400 {
+	if errors.Is(err, appmanager.ErrBadRequest) {
 		// Bad Request, should not requeue
 		log.Error(err, "Error patching Deployment")
 		return ctrl.Result{Requeue: false}, nil
@@ -385,18 +364,15 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	// First must make sure the deployment is canceled, then must delete it.
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
+	var err error
+	ctx := context.Background()
 
-	var deployment appmanagerapi.Deployment
+	var deployment *appmanagerapi.Deployment
 	if annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
-		deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.GetDeployment(ctx, nsName, id)
+		deployment, err = r.AppManagerClient.Deployments().GetDeployment(ctx, nsName, id)
 	} else {
-		deployment, err = appmanager.GetDeploymentByName(ctx, r.AppManagerAPIClient, nsName, vpDeployment.Name)
+		deployment, err = r.AppManagerClient.Deployments().GetDeploymentByName(ctx, nsName, vpDeployment.Name)
 	}
 
 	if err != nil {
@@ -411,14 +387,14 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 			// must cancel it
 			log.Info("Cancelling Deployment")
 			deployment.Spec.State = string(v1beta1.CancelledState)
-			deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, deployment)
+			deployment, err = r.AppManagerClient.Deployments().UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, *deployment)
 
 			if err != nil {
 				return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 			}
 		}
 		// Just have to wait now
-		err = r.updateResource(&vpDeployment, &deployment)
+		err = r.updateResource(&vpDeployment, deployment)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -427,7 +403,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{RequeueAfter: time.Second * 30}, nil
 	}
 
-	deployment, _, err = r.AppManagerAPIClient.DeploymentsApi.DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
+	deployment, err = r.AppManagerClient.Deployments().DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
 	if err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
@@ -482,15 +458,10 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
 
 	if !annotations.Has(vpDeployment.ObjectMeta.Annotations, annotations.ID) {
 		// no id has been set
-		deployment, err := appmanager.GetDeploymentByName(appManagerCtx, r.AppManagerAPIClient, nsName, req.Name)
+		deployment, err := r.AppManagerClient.Deployments().GetDeploymentByName(context.Background(), nsName, req.Name)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("Create event")
@@ -503,13 +474,13 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 
 		log.Info("No id set for deployment", "deployment", deployment.Metadata.Name)
 		// Update in k8s but don't patch - should be handled by the update loop
-		err = r.updateResource(&vpDeployment, &deployment)
+		err = r.updateResource(&vpDeployment, deployment)
 		return ctrl.Result{}, err
 	}
 
 	id := annotations.Get(vpDeployment.ObjectMeta.Annotations, annotations.ID)
 
-	deployment, _, err := r.AppManagerAPIClient.DeploymentsApi.GetDeployment(appManagerCtx, nsName, id)
+	deployment, err := r.AppManagerClient.Deployments().GetDeployment(context.Background(), nsName, id)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			log.Info("Deployment by id not found - creating", "id", id)
@@ -521,7 +492,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	}
 
 	log.Info("Update event")
-	return r.handleUpdate(req, vpDeployment, deployment)
+	return r.handleUpdate(req, vpDeployment, *deployment)
 }
 
 // SetupWithManager hooks the reconciler into the main manager

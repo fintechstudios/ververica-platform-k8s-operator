@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
@@ -37,6 +38,7 @@ import (
 type VpSavepointReconciler struct {
 	client.Client
 	Log                 logr.Logger
+	AppManagerClient    appmanager.Client
 	AppManagerAPIClient *appmanagerapi.APIClient
 	AppManagerAuthStore *appmanager.AuthStore
 	pollerManager       polling.PollerManager
@@ -53,7 +55,7 @@ func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace,
 			return nil
 		}
 
-		savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(ctx, namespace, id)
+		savepoint, err := r.AppManagerClient.Savepoints().GetSavepoint(ctx, namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
 			return nil
@@ -70,7 +72,7 @@ func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace,
 			return savepoint
 		}
 
-		if err = r.updateResource(&vpSavepointUpdated, &savepoint); err != nil {
+		if err = r.updateResource(&vpSavepointUpdated, savepoint); err != nil {
 			log.Error(err, "Error while updating VpSavepoint from poller")
 		}
 
@@ -143,7 +145,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		// no deployment id has been explicitly set
 		// try to find one
 		depName := vpSavepoint.Spec.DeploymentName
-		deployment, err := appmanager.GetDeploymentByName(ctx, r.AppManagerAPIClient, nsName, depName)
+		deployment, err := r.AppManagerClient.Deployments().GetDeploymentByName(ctx, nsName, depName)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("No deployment by name %s", depName)
@@ -157,7 +159,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		depID = deployment.Metadata.Id
 	}
 
-	createdSavepoint, res, err := r.AppManagerAPIClient.SavepointsApi.CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
+	createdSavepoint, err := r.AppManagerClient.Savepoints().CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
 		Metadata: &appmanagerapi.SavepointMetadata{
@@ -166,7 +168,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		},
 	})
 
-	if res != nil && res.StatusCode == 400 {
+	if errors.Is(err, appmanager.ErrBadRequest) {
 		// Bad Request, should not requeue
 		log.Error(err, "Bad request when creating savepoint: "+vvperrors.GetVVPErrorMessage(err))
 		return ctrl.Result{Requeue: false}, nil
@@ -178,7 +180,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	}
 
 	// Now update the k8s resource and status as well
-	if err := r.updateResource(&vpSavepoint, &createdSavepoint); err != nil {
+	if err := r.updateResource(&vpSavepoint, createdSavepoint); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -224,7 +226,7 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{Requeue: false}, nil
 	}
 
-	savepoint, _, err := r.AppManagerAPIClient.SavepointsApi.GetSavepoint(appManagerCtx, nsName, savepointID)
+	savepoint, err := r.AppManagerClient.Savepoints().GetSavepoint(appManagerCtx, nsName, savepointID)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			log.Info("Savepoint by id not found - creating", "id", savepointID)

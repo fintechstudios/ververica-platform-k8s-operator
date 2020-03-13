@@ -1,25 +1,23 @@
-# \StatusApi
+# \StatusResourceApi
 
-All URIs are relative to *http://localhost/api*
+All URIs are relative to *https://localhost:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetStatus**](StatusApi.md#GetStatus) | **Get** /v1/status | Check that the server is running
-[**GetSystemInfo**](StatusApi.md#GetSystemInfo) | **Get** /v1/status/system-info | Get system&#39;s information
+[**GetStatusUsingGET**](StatusResourceApi.md#GetStatusUsingGET) | **Get** /api/v1/status | Check that the server is running
+[**GetSystemInfoUsingGET**](StatusResourceApi.md#GetSystemInfoUsingGET) | **Get** /api/v1/status/system-info | Get system&#39;s information
 
 
-# **GetStatus**
-> GetStatus(ctx, )
+# **GetStatusUsingGET**
+> interface{} GetStatusUsingGET(ctx, )
 Check that the server is running
-
-
 
 ### Required Parameters
 This endpoint does not need any parameter.
 
 ### Return type
 
- (empty response body)
+[**interface{}**](interface{}.md)
 
 ### Authorization
 
@@ -32,11 +30,9 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetSystemInfo**
-> SystemInformation GetSystemInfo(ctx, )
+# **GetSystemInfoUsingGET**
+> SystemInformation GetSystemInfoUsingGET(ctx, )
 Get system's information
-
-
 
 ### Required Parameters
 This endpoint does not need any parameter.

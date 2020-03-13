@@ -1,33 +1,31 @@
-# \SecretValuesApi
+# \DeploymentResourceApi
 
-All URIs are relative to *http://localhost/api*
+All URIs are relative to *https://localhost:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateSecretValue**](SecretValuesApi.md#CreateSecretValue) | **Post** /v1/namespaces/{namespace}/secret-values | Create a secret value
-[**DeleteSecretValue**](SecretValuesApi.md#DeleteSecretValue) | **Delete** /v1/namespaces/{namespace}/secret-values/{name} | Delete a secret value
-[**GetSecretValue**](SecretValuesApi.md#GetSecretValue) | **Get** /v1/namespaces/{namespace}/secret-values/{name} | Get a secret value by name
-[**GetSecretValues**](SecretValuesApi.md#GetSecretValues) | **Get** /v1/namespaces/{namespace}/secret-values | List all secrets values
-[**UpdateSecretValue**](SecretValuesApi.md#UpdateSecretValue) | **Patch** /v1/namespaces/{namespace}/secret-values/{name} | Update a secret value
+[**CreateDeploymentUsingPOST**](DeploymentResourceApi.md#CreateDeploymentUsingPOST) | **Post** /api/v1/namespaces/{namespace}/deployments | Create a deployment
+[**DeleteDeploymentUsingDELETE**](DeploymentResourceApi.md#DeleteDeploymentUsingDELETE) | **Delete** /api/v1/namespaces/{namespace}/deployments/{deploymentId} | Delete deployment
+[**GetDeploymentUsingGET**](DeploymentResourceApi.md#GetDeploymentUsingGET) | **Get** /api/v1/namespaces/{namespace}/deployments/{deploymentId} | Get a deployment by id
+[**GetDeploymentsUsingGET**](DeploymentResourceApi.md#GetDeploymentsUsingGET) | **Get** /api/v1/namespaces/{namespace}/deployments | List all deployments
+[**UpdateDeploymentUsingPATCH**](DeploymentResourceApi.md#UpdateDeploymentUsingPATCH) | **Patch** /api/v1/namespaces/{namespace}/deployments/{deploymentId} | Update a deployment
 
 
-# **CreateSecretValue**
-> SecretValue CreateSecretValue(ctx, namespace, body)
-Create a secret value
-
-
+# **CreateDeploymentUsingPOST**
+> Deployment CreateDeploymentUsingPOST(ctx, body, namespace)
+Create a deployment
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
-  **body** | [**SecretValue**](SecretValue.md)|  | 
+  **body** | [**Deployment**](Deployment.md)|  | 
+  **namespace** | **string**| namespace | 
 
 ### Return type
 
-[**SecretValue**](SecretValue.md)
+[**Deployment**](Deployment.md)
 
 ### Authorization
 
@@ -40,23 +38,23 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **DeleteSecretValue**
-> SecretValue DeleteSecretValue(ctx, namespace, name)
-Delete a secret value
+# **DeleteDeploymentUsingDELETE**
+> Deployment DeleteDeploymentUsingDELETE(ctx, deploymentId, namespace)
+Delete deployment
 
-
+This operation expects the deployment to be in desired state CANCELLED
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
-  **name** | **string**|  | 
+  **deploymentId** | [**string**](.md)| deploymentId | 
+  **namespace** | **string**| namespace | 
 
 ### Return type
 
-[**SecretValue**](SecretValue.md)
+[**Deployment**](Deployment.md)
 
 ### Authorization
 
@@ -69,23 +67,21 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetSecretValue**
-> SecretValue GetSecretValue(ctx, namespace, name)
-Get a secret value by name
-
-
+# **GetDeploymentUsingGET**
+> Deployment GetDeploymentUsingGET(ctx, deploymentId, namespace)
+Get a deployment by id
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
-  **name** | **string**|  | 
+  **deploymentId** | [**string**](.md)| deploymentId | 
+  **namespace** | **string**| namespace | 
 
 ### Return type
 
-[**SecretValue**](SecretValue.md)
+[**Deployment**](Deployment.md)
 
 ### Authorization
 
@@ -98,22 +94,29 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetSecretValues**
-> ResourceListSecretValue GetSecretValues(ctx, namespace)
-List all secrets values
-
-
+# **GetDeploymentsUsingGET**
+> ResourceListOfDeployment GetDeploymentsUsingGET(ctx, namespace, optional)
+List all deployments
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
+  **namespace** | **string**| namespace | 
+ **optional** | ***GetDeploymentsUsingGETOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetDeploymentsUsingGETOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **labelSelector** | **optional.String**| labelSelector | 
 
 ### Return type
 
-[**ResourceListSecretValue**](ResourceListSecretValue.md)
+[**ResourceListOfDeployment**](ResourceListOfDeployment.md)
 
 ### Authorization
 
@@ -126,24 +129,22 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **UpdateSecretValue**
-> SecretValue UpdateSecretValue(ctx, namespace, name, body)
-Update a secret value
-
-
+# **UpdateDeploymentUsingPATCH**
+> Deployment UpdateDeploymentUsingPATCH(ctx, body, deploymentId, namespace)
+Update a deployment
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
-  **name** | **string**|  | 
-  **body** | [**SecretValue**](SecretValue.md)|  | 
+  **body** | [**Deployment**](Deployment.md)|  | 
+  **deploymentId** | [**string**](.md)| deploymentId | 
+  **namespace** | **string**| namespace | 
 
 ### Return type
 
-[**SecretValue**](SecretValue.md)
+[**Deployment**](Deployment.md)
 
 ### Authorization
 

@@ -1,435 +1,544 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "HTTP REST API to connect to the AppManager",
-    "version": "1.0",
-    "title": "AppManager API"
+    "description": "Application Manager APIs to control Apache Flink jobs",
+    "version": "2.1.0",
+    "title": "Application Manager API",
+    "contact": {
+      "name": "Ververica GmbH",
+      "url": "https://www.ververica.com",
+      "email": "platform@ververica.com"
+    },
+    "license": {
+      "name": "Proprietary"
+    }
   },
-  "basePath": "/api",
+  "host": "localhost:8081",
+  "basePath": "/",
   "tags": [
     {
-      "name": "Deployments"
+      "name": "deployment-defaults-resource",
+      "description": "Deployment Defaults Resource"
     },
     {
-      "name": "Deployment Targets"
+      "name": "deployment-resource",
+      "description": "Deployment Resource"
     },
     {
-      "name": "Events"
+      "name": "deployment-target-resource",
+      "description": "Deployment Target Resource"
     },
     {
-      "name": "Jobs"
+      "name": "event-resource",
+      "description": "Event Resource"
     },
     {
-      "name": "Namespaces"
+      "name": "job-resource",
+      "description": "Job Resource"
     },
     {
-      "name": "Savepoints"
+      "name": "savepoint-resource",
+      "description": "Savepoint Resource"
     },
     {
-      "name": "Secret Values"
+      "name": "secret-value-resource",
+      "description": "Secret Value Resource"
     },
     {
-      "name": "Status"
+      "name": "status-resource",
+      "description": "Status Resource"
     }
   ],
-  "schemes": [
-    "http"
+  "consumes": [
+    "application/json",
+    "application/yaml"
+  ],
+  "produces": [
+    "application/json",
+    "application/yaml"
   ],
   "paths": {
-    "/v1/namespaces/{namespace}/deployments": {
+    "/api/v1/namespaces/{namespace}/deployment-defaults": {
       "get": {
         "tags": [
-          "Deployments"
+          "deployment-defaults-resource"
         ],
-        "summary": "List all deployments",
-        "description": "",
-        "operationId": "getDeployments",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "summary": "Get deployment defaults",
+        "operationId": "getDeploymentDefaultsUsingGET",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "labelSelector",
-            "in": "query",
-            "required": false,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ResourceListDeployment"
+              "$ref": "#/definitions/DeploymentDefaults"
             }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Deployments"
-        ],
-        "summary": "Create a deployment",
-        "description": "",
-        "operationId": "createDeployment",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
           },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Deployment"
-            },
-            "x-examples": {
-              "default": "{  \n   \"metadata\":{  \n      \"name\":\"Fraud Detection\",\n      \"labels\":{  \n         \"env\":\"production\"\n      }\n   },\n   \"spec\":{  \n      \"state\":\"RUNNING\",\n      \"deploymentTargetId\":\"57b4c290-73ad-11e7-8cf7-a6006ad3dba0\",\n      \"upgradeStrategy\":{  \n         \"kind\":\"STATEFUL\"\n      },\n      \"startFromSavepoint\":{  \n         \"kind\":\"LATEST\"\n      },\n      \"template\":{  \n         \"spec\":{  \n            \"parallelism\":4,\n            \"artifact\":{  \n               \"kind\":\"jar\",\n               \"jarUri\":\"https://repo.dataartisans.com/foo/fraud_detection.jar\"\n            },\n            \"flinkConfiguration\":{  \n               \"foo\":\"bar\"\n            }\n         }\n      }\n   }\n}  }"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "successful operation"
+          "401": {
+            "description": "Unauthorized"
           },
-          "201": {
-            "description": "successful creation",
-            "schema": {
-              "$ref": "#/definitions/Deployment"
-            }
-          }
-        }
-      }
-    },
-    "/v1/namespaces/{namespace}/deployments/{deploymentId}": {
-      "get": {
-        "tags": [
-          "Deployments"
-        ],
-        "summary": "Get a deployment by id",
-        "description": "",
-        "operationId": "getDeployment",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
+          "403": {
+            "description": "Forbidden"
           },
-          {
-            "name": "deploymentId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
+          "404": {
+            "description": "Not Found"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Deployment"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Deployments"
-        ],
-        "summary": "Delete deployment",
-        "description": "This operation expects the deployment to be in desired state CANCELLED",
-        "operationId": "deleteDeployment",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "deploymentId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Deployment"
-            }
-          }
-        }
+        },
+        "deprecated": false
       },
       "patch": {
         "tags": [
-          "Deployments"
+          "deployment-defaults-resource"
         ],
-        "summary": "Update a deployment",
-        "description": "",
-        "operationId": "updateDeployment",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "summary": "Update a deployment defaults",
+        "operationId": "updateDeploymentDefaultsUsingPATCH",
         "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "deploymentId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
-          },
           {
             "in": "body",
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Deployment"
+              "$ref": "#/definitions/DeploymentDefaults"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Deployment"
-            }
-          }
-        }
-      }
-    },
-    "/v1/namespaces/{namespace}/deployment-targets/{name}": {
-      "get": {
-        "tags": [
-          "Deployment Targets"
-        ],
-        "summary": "Get a deployment target by name",
-        "description": "",
-        "operationId": "getDeploymentTarget",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
+          },
           {
             "name": "namespace",
             "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/DeploymentTarget"
+              "$ref": "#/definitions/DeploymentDefaults"
             }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Deployment Targets"
-        ],
-        "summary": "Delete a deployment target",
-        "description": "",
-        "operationId": "deleteDeploymentTarget",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
           },
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/DeploymentTarget"
-            }
-          }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/deployment-targets": {
+    "/api/v1/namespaces/{namespace}/deployment-targets": {
       "get": {
         "tags": [
-          "Deployment Targets"
+          "deployment-target-resource"
         ],
         "summary": "List all deployment targets",
-        "description": "",
-        "operationId": "getDeploymentTargets",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getDeploymentTargetsUsingGET",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ResourceListDeploymentTarget"
+              "$ref": "#/definitions/ResourceListOfDeploymentTarget"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       },
       "post": {
         "tags": [
-          "Deployment Targets"
+          "deployment-target-resource"
         ],
         "summary": "Create a deployment target",
-        "description": "",
-        "operationId": "createDeploymentTarget",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "createDeploymentTargetUsingPOST",
         "parameters": [
+          {
+            "in": "body",
+            "name": "deploymentTarget",
+            "description": "deploymentTarget",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeploymentTarget"
+            }
+          },
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeploymentTarget"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/namespaces/{namespace}/deployment-targets/{name}": {
+      "get": {
+        "tags": [
+          "deployment-target-resource"
+        ],
+        "summary": "Get a deployment target by name",
+        "operationId": "getDeploymentTargetUsingGET",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
             "required": true,
             "type": "string"
           },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeploymentTarget"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "deployment-target-resource"
+        ],
+        "summary": "Delete a deployment target",
+        "operationId": "deleteDeploymentTargetUsingDELETE",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeploymentTarget"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/namespaces/{namespace}/deployments": {
+      "get": {
+        "tags": [
+          "deployment-resource"
+        ],
+        "summary": "List all deployments",
+        "operationId": "getDeploymentsUsingGET",
+        "parameters": [
+          {
+            "name": "labelSelector",
+            "in": "query",
+            "description": "labelSelector",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ResourceListOfDeployment"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "deployment-resource"
+        ],
+        "summary": "Create a deployment",
+        "operationId": "createDeploymentUsingPOST",
+        "parameters": [
           {
             "in": "body",
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DeploymentTarget"
+              "$ref": "#/definitions/Deployment"
             }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
           },
           "201": {
-            "description": "successful creation",
-            "schema": {
-              "$ref": "#/definitions/DeploymentTarget"
-            }
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/events": {
+    "/api/v1/namespaces/{namespace}/deployments/{deploymentId}": {
       "get": {
         "tags": [
-          "Events"
+          "deployment-resource"
+        ],
+        "summary": "Get a deployment by id",
+        "operationId": "getDeploymentUsingGET",
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "deployment-resource"
+        ],
+        "summary": "Delete deployment",
+        "description": "This operation expects the deployment to be in desired state CANCELLED",
+        "operationId": "deleteDeploymentUsingDELETE",
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "deployment-resource"
+        ],
+        "summary": "Update a deployment",
+        "operationId": "updateDeploymentUsingPATCH",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/namespaces/{namespace}/events": {
+      "get": {
+        "tags": [
+          "event-resource"
         ],
         "summary": "Filter all events for a deployment or job",
-        "description": "",
-        "operationId": "getEvents",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getEventsUsingGET",
         "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "deploymentId",
             "in": "query",
+            "description": "deploymentId",
             "required": false,
             "type": "string",
             "format": "uuid"
@@ -437,256 +546,139 @@
           {
             "name": "jobId",
             "in": "query",
+            "description": "jobId",
             "required": false,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ResourceListEvent"
+              "$ref": "#/definitions/ResourceListOfEvent"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/jobs": {
+    "/api/v1/namespaces/{namespace}/jobs": {
       "get": {
         "tags": [
-          "Jobs"
+          "job-resource"
         ],
         "summary": "List all jobs. Can be filtered by DeploymentId",
-        "description": "",
-        "operationId": "getJobs",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getJobsUsingGET",
         "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "deploymentId",
             "in": "query",
+            "description": "deploymentId",
             "required": false,
             "type": "string",
             "format": "uuid"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/ResourceListJob"
-            }
-          }
-        }
-      }
-    },
-    "/v1/namespaces/{namespace}/jobs/{jobId}": {
-      "get": {
-        "tags": [
-          "Jobs"
-        ],
-        "summary": "Get a job by id",
-        "description": "",
-        "operationId": "getJob",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
+          },
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "jobId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ResourceListOfJob"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/namespaces/{namespace}/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "job-resource"
+        ],
+        "summary": "Get a job by id",
+        "operationId": "getJobUsingGET",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "jobId",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/Job"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{name}": {
+    "/api/v1/namespaces/{namespace}/savepoints": {
       "get": {
         "tags": [
-          "Namespaces"
-        ],
-        "summary": "Get a namespace by name",
-        "description": "",
-        "operationId": "getNamespace",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Delete a namespace by name",
-        "description": "",
-        "operationId": "deleteNamespace",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          }
-        }
-      }
-    },
-    "/v1/namespaces": {
-      "get": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "List namespaces",
-        "description": "",
-        "operationId": "listNamespaces",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/ResourceListNamespace"
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Create a namespace",
-        "description": "",
-        "operationId": "postNamespace",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          }
-        }
-      }
-    },
-    "/v1/namespaces/{namespace}/savepoints": {
-      "get": {
-        "tags": [
-          "Savepoints"
+          "savepoint-resource"
         ],
         "summary": "List all savepoints. Can be filtered by DeploymentId",
-        "description": "",
-        "operationId": "getSavepoints",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getSavepointsUsingGET",
         "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "deploymentId",
             "in": "query",
+            "description": "deploymentId",
             "required": false,
             "type": "string",
             "format": "uuid"
@@ -694,96 +686,107 @@
           {
             "name": "jobId",
             "in": "query",
+            "description": "jobId",
             "required": false,
             "type": "string",
             "format": "uuid"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Savepoint"
-              }
+              "$ref": "#/definitions/ResourceListOfSavepoint"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       },
       "post": {
         "tags": [
-          "Savepoints"
+          "savepoint-resource"
         ],
         "summary": "Create a new savepoint",
-        "description": "",
-        "operationId": "createSavepoint",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "createSavepointUsingPOST",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           },
           {
             "in": "body",
-            "name": "body",
+            "name": "savepointChange",
+            "description": "savepointChange",
             "required": true,
             "schema": {
               "$ref": "#/definitions/Savepoint"
             },
             "x-examples": {
-              "default": "{\n  \"metadata\": {\n    \"deploymentId\": \"19570815-2528-4bda-a6ba-733cc29282c4\"\n  }\n}"
+              "": "{\n  \"metadata\": {\n    \"deploymentId\": \"19570815-2528-4bda-a6ba-733cc29282c4\"\n  }\n}"
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
-          },
-          "201": {
-            "description": "successful creation",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/Savepoint"
             }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/savepoints/{savepointId}": {
+    "/api/v1/namespaces/{namespace}/savepoints/{savepointId}": {
       "get": {
         "tags": [
-          "Savepoints"
+          "savepoint-resource"
         ],
         "summary": "Get a savepoint by id",
-        "description": "",
-        "operationId": "getSavepoint",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getSavepointUsingGET",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           },
           {
             "name": "savepointId",
             "in": "path",
+            "description": "savepointId",
             "required": true,
             "type": "string",
             "format": "uuid"
@@ -791,196 +794,199 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/Savepoint"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/secret-values": {
+    "/api/v1/namespaces/{namespace}/secret-values": {
       "get": {
         "tags": [
-          "Secret Values"
+          "secret-value-resource"
         ],
         "summary": "List all secrets values",
-        "description": "",
-        "operationId": "getSecretValues",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getSecretValuesUsingGET",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ResourceListSecretValue"
+              "$ref": "#/definitions/ResourceListOfSecretValue"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       },
       "post": {
         "tags": [
-          "Secret Values"
+          "secret-value-resource"
         ],
         "summary": "Create a secret value",
-        "description": "",
-        "operationId": "createSecretValue",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "createSecretValueUsingPOST",
         "parameters": [
           {
             "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           },
           {
             "in": "body",
-            "name": "body",
+            "name": "secretValue",
+            "description": "secretValue",
             "required": true,
             "schema": {
               "$ref": "#/definitions/SecretValue"
             },
             "x-examples": {
-              "default": "{\n  \"metadata\": {\n    \"name\": \"mypassword\"\n  },\n  \"spec\": {\n    \"kind\": \"Plain\",\n    \"value\": \"secret\"\n  }\n}"
+              "": "{\n  \"metadata\": {\n    \"name\": \"mypassword\"\n  },\n  \"spec\": {\n    \"kind\": \"Plain\",\n    \"value\": \"secret\"\n  }\n}"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/SecretValue"
             }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/namespaces/{namespace}/secret-values/{name}": {
+    "/api/v1/namespaces/{namespace}/secret-values/{name}": {
       "get": {
         "tags": [
-          "Secret Values"
+          "secret-value-resource"
         ],
         "summary": "Get a secret value by name",
-        "description": "",
-        "operationId": "getSecretValue",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "getSecretValueUsingGET",
         "parameters": [
           {
-            "name": "namespace",
+            "name": "name",
             "in": "path",
+            "description": "name",
             "required": true,
             "type": "string"
           },
           {
-            "name": "name",
+            "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/SecretValue"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
+        },
+        "deprecated": false
       },
       "delete": {
         "tags": [
-          "Secret Values"
+          "secret-value-resource"
         ],
         "summary": "Delete a secret value",
-        "description": "",
-        "operationId": "deleteSecretValue",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "deleteSecretValueUsingDELETE",
         "parameters": [
           {
-            "name": "namespace",
+            "name": "name",
             "in": "path",
+            "description": "name",
             "required": true,
             "type": "string"
           },
           {
-            "name": "name",
+            "name": "namespace",
             "in": "path",
+            "description": "namespace",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/SecretValue"
             }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "deprecated": false
       },
       "patch": {
         "tags": [
-          "Secret Values"
+          "secret-value-resource"
         ],
         "summary": "Update a secret value",
-        "description": "",
-        "operationId": "updateSecretValue",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
+        "operationId": "updateSecretValueUsingPATCH",
         "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "in": "body",
             "name": "body",
@@ -989,124 +995,116 @@
               "$ref": "#/definitions/SecretValue"
             },
             "x-examples": {
-              "default": "{\n  \"metadata\": {\n    \"name\": \"mypassword\"\n  },\n  \"spec\": {\n    \"kind\": \"Plain\",\n    \"value\": \"secret\"\n  }\n}"
+              "": "{\n  \"metadata\": {\n    \"name\": \"mypassword\"\n  },\n  \"spec\": {\n    \"kind\": \"Plain\",\n    \"value\": \"secret\"\n  }\n}"
             }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "namespace",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/SecretValue"
             }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/v1/status/system-info": {
+    "/api/v1/status": {
       "get": {
         "tags": [
-          "Status"
+          "status-resource"
         ],
-        "summary": "Get system's information",
-        "description": "",
-        "operationId": "getSystemInfo",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [],
+        "summary": "Check that the server is running",
+        "operationId": "getStatusUsingGET",
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/status/system-info": {
+      "get": {
+        "tags": [
+          "status-resource"
+        ],
+        "summary": "Get system's information",
+        "operationId": "getSystemInfoUsingGET",
+        "responses": {
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/SystemInformation"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
-        }
-      }
-    },
-    "/v1/status": {
-      "get": {
-        "tags": [
-          "Status"
-        ],
-        "summary": "Check that the server is running",
-        "description": "",
-        "operationId": "getStatus",
-        "consumes": [
-          "application/json",
-          "application/yaml"
-        ],
-        "produces": [
-          "application/json",
-          "application/yaml"
-        ],
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
+        },
+        "deprecated": false
       }
     }
   },
   "definitions": {
-    "Any": {},
-    "ResourceListMetadata": {
-      "type": "object"
-    },
     "Artifact": {
       "type": "object",
-      "required": [
-        "kind",
-        "jarUri"
-      ],
       "properties": {
         "kind": {
-          "type": "string",
-          "enum": [
-            "JAR"
-          ]
-        },
-        "jarUri": {
-          "type": "string"
-        },
-        "mainArgs": {
-          "type": "string"
-        },
-        "entryClass": {
-          "type": "string"
-        },
-        "flinkVersion": {
-          "type": "string"
-        },
-        "flinkImageRegistry": {
-          "type": "string"
-        },
-        "flinkImageRepository": {
-          "type": "string"
-        },
-        "flinkImageTag": {
           "type": "string"
         }
-      }
+      },
+      "title": "Artifact"
     },
     "Deployment": {
       "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
       "properties": {
-        "kind": {
+        "apiVersion": {
           "type": "string"
         },
-        "apiVersion": {
+        "kind": {
           "type": "string"
         },
         "metadata": {
@@ -1118,9 +1116,241 @@
         "status": {
           "$ref": "#/definitions/DeploymentStatus"
         }
-      }
+      },
+      "title": "Deployment"
+    },
+    "DeploymentCondition": {
+      "type": "object",
+      "properties": {
+        "lastTransitionTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastUpdateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "message": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "True",
+            "False",
+            "Unknown"
+          ]
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "DeploymentCondition"
+    },
+    "DeploymentDefaults": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/DeploymentDefaultsMetadata"
+        },
+        "spec": {
+          "$ref": "#/definitions/DeploymentSpec"
+        }
+      },
+      "title": "DeploymentDefaults"
+    },
+    "DeploymentDefaultsMetadata": {
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "modifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "resourceVersion": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "DeploymentDefaultsMetadata"
     },
     "DeploymentMetadata": {
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "modifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "resourceVersion": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "DeploymentMetadata"
+    },
+    "DeploymentRestoreStrategy": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        }
+      },
+      "title": "DeploymentRestoreStrategy"
+    },
+    "DeploymentSpec": {
+      "type": "object",
+      "properties": {
+        "deploymentTargetId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "maxJobCreationAttempts": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxSavepointCreationAttempts": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "restoreStrategy": {
+          "$ref": "#/definitions/DeploymentRestoreStrategy"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "RUNNING",
+            "SUSPENDED",
+            "CANCELLED"
+          ]
+        },
+        "template": {
+          "$ref": "#/definitions/DeploymentTemplate"
+        },
+        "upgradeStrategy": {
+          "$ref": "#/definitions/DeploymentUpgradeStrategy"
+        }
+      },
+      "title": "DeploymentSpec"
+    },
+    "DeploymentStatus": {
+      "type": "object",
+      "properties": {
+        "running": {
+          "$ref": "#/definitions/DeploymentStatusRunning"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "RUNNING",
+            "SUSPENDED",
+            "CANCELLED",
+            "TRANSITIONING",
+            "FAILED",
+            "FINISHED"
+          ]
+        }
+      },
+      "title": "DeploymentStatus"
+    },
+    "DeploymentStatusRunning": {
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DeploymentCondition"
+          }
+        },
+        "jobId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "transitionTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "DeploymentStatusRunning"
+    },
+    "DeploymentTarget": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/DeploymentTargetMetadata"
+        },
+        "spec": {
+          "$ref": "#/definitions/DeploymentTargetSpec"
+        }
+      },
+      "title": "DeploymentTarget"
+    },
+    "DeploymentTargetMetadata": {
       "type": "object",
       "properties": {
         "id": {
@@ -1141,13 +1371,13 @@
           "type": "string",
           "format": "date-time"
         },
-        "labels": {
+        "annotations": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
         },
-        "annotations": {
+        "labels": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -1157,102 +1387,20 @@
           "type": "integer",
           "format": "int32"
         }
-      }
+      },
+      "title": "DeploymentTargetMetadata"
     },
-    "DeploymentRestoreStrategy": {
+    "DeploymentTargetSpec": {
       "type": "object",
       "properties": {
-        "kind": {
-          "type": "string",
-          "enum": [
-            "LATEST_SAVEPOINT",
-            "LATEST_STATE",
-            "NONE"
-          ]
-        },
-        "allowNonRestoredState": {
-          "type": "boolean"
+        "kubernetes": {
+          "$ref": "#/definitions/KubernetesTarget"
         }
-      }
-    },
-    "DeploymentSpec": {
-      "type": "object",
-      "required": [
-        "deploymentTargetId",
-        "state",
-        "template",
-        "upgradeStrategy"
-      ],
-      "properties": {
-        "state": {
-          "type": "string",
-          "enum": [
-            "RUNNING",
-            "SUSPENDED",
-            "CANCELLED"
-          ]
-        },
-        "upgradeStrategy": {
-          "$ref": "#/definitions/DeploymentUpgradeStrategy"
-        },
-        "restoreStrategy": {
-          "$ref": "#/definitions/DeploymentRestoreStrategy"
-        },
-        "startFromSavepoint": {
-          "$ref": "#/definitions/DeploymentStartFromSavepoint"
-        },
-        "deploymentTargetId": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "maxSavepointCreationAttempts": {
-          "type": "integer",
-          "format": "int32",
-          "minimum": 1
-        },
-        "maxJobCreationAttempts": {
-          "type": "integer",
-          "format": "int32",
-          "minimum": 1
-        },
-        "template": {
-          "$ref": "#/definitions/DeploymentTemplate"
-        }
-      }
-    },
-    "DeploymentStartFromSavepoint": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string",
-          "enum": [
-            "NONE",
-            "LATEST"
-          ]
-        }
-      }
-    },
-    "DeploymentStatus": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "type": "string",
-          "enum": [
-            "RUNNING",
-            "SUSPENDED",
-            "CANCELLED",
-            "TRANSITIONING",
-            "FAILED",
-            "FINISHED"
-          ]
-        }
-      }
+      },
+      "title": "DeploymentTargetSpec"
     },
     "DeploymentTemplate": {
       "type": "object",
-      "required": [
-        "spec"
-      ],
       "properties": {
         "metadata": {
           "$ref": "#/definitions/DeploymentTemplateMetadata"
@@ -1260,7 +1408,8 @@
         "spec": {
           "$ref": "#/definitions/DeploymentTemplateSpec"
         }
-      }
+      },
+      "title": "DeploymentTemplate"
     },
     "DeploymentTemplateMetadata": {
       "type": "object",
@@ -1271,32 +1420,14 @@
             "type": "string"
           }
         }
-      }
+      },
+      "title": "DeploymentTemplateMetadata"
     },
     "DeploymentTemplateSpec": {
       "type": "object",
-      "required": [
-        "artifact"
-      ],
       "properties": {
         "artifact": {
           "$ref": "#/definitions/Artifact"
-        },
-        "parallelism": {
-          "type": "integer",
-          "format": "int32",
-          "minimum": 1
-        },
-        "numberOfTaskManagers": {
-          "type": "integer",
-          "format": "int32",
-          "minimum": 1
-        },
-        "resources": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/ResourceSpec"
-          }
         },
         "flinkConfiguration": {
           "type": "object",
@@ -1304,26 +1435,37 @@
             "type": "string"
           }
         },
+        "kubernetes": {
+          "$ref": "#/definitions/KubernetesOptions"
+        },
         "logging": {
           "$ref": "#/definitions/Logging"
         },
-        "kubernetes": {
-          "$ref": "#/definitions/KubernetesOptions"
+        "numberOfTaskManagers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "parallelism": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ResourceSpec"
+          }
         }
-      }
+      },
+      "title": "DeploymentTemplateSpec"
     },
     "DeploymentUpgradeStrategy": {
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string",
-          "enum": [
-            "STATELESS",
-            "STATEFUL",
-            "NONE"
-          ]
+          "type": "string"
         }
-      }
+      },
+      "title": "DeploymentUpgradeStrategy"
     },
     "EnvVar": {
       "type": "object",
@@ -1337,355 +1479,16 @@
         "valueFrom": {
           "$ref": "#/definitions/JsonNode"
         }
-      }
-    },
-    "JsonPatchGeneric": {
-      "description": "Since Swagger 2 doesn't have oneOf support, this definition should fit all JSON Patch objects.",
-      "type": "object",
-      "required": [
-        "op",
-        "path"
-      ],
-      "properties": {
-        "op": {
-          "type": "string",
-          "enum": [
-            "add",
-            "remove",
-            "replace",
-            "copy",
-            "move",
-            "test"
-          ]
-        },
-        "path": {
-          "type": "string"
-        },
-        "value": {
-          "$ref": "#/definitions/Any"
-        },
-        "from": {
-          "type": "string"
-        }
-      }
-    },
-    "JsonNode": {
-      "type": "object",
-      "properties": {
-        "valueNode": {
-          "type": "boolean"
-        },
-        "containerNode": {
-          "type": "boolean"
-        },
-        "missingNode": {
-          "type": "boolean"
-        },
-        "object": {
-          "type": "boolean"
-        },
-        "nodeType": {
-          "type": "string",
-          "enum": [
-            "ARRAY",
-            "BINARY",
-            "BOOLEAN",
-            "MISSING",
-            "NULL",
-            "NUMBER",
-            "OBJECT",
-            "POJO",
-            "STRING"
-          ]
-        },
-        "pojo": {
-          "type": "boolean"
-        },
-        "number": {
-          "type": "boolean"
-        },
-        "integralNumber": {
-          "type": "boolean"
-        },
-        "floatingPointNumber": {
-          "type": "boolean"
-        },
-        "short": {
-          "type": "boolean"
-        },
-        "int": {
-          "type": "boolean"
-        },
-        "long": {
-          "type": "boolean"
-        },
-        "float": {
-          "type": "boolean"
-        },
-        "double": {
-          "type": "boolean"
-        },
-        "bigDecimal": {
-          "type": "boolean"
-        },
-        "bigInteger": {
-          "type": "boolean"
-        },
-        "textual": {
-          "type": "boolean"
-        },
-        "boolean": {
-          "type": "boolean"
-        },
-        "binary": {
-          "type": "boolean"
-        },
-        "array": {
-          "type": "boolean"
-        },
-        "null": {
-          "type": "boolean"
-        }
-      }
-    },
-    "KubernetesOptions": {
-      "type": "object",
-      "properties": {
-        "pods": {
-          "$ref": "#/definitions/Pods"
-        }
-      }
-    },
-    "LocalObjectReference": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "Logging": {
-      "type": "object",
-      "properties": {
-        "log4jLoggers": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "Pods": {
-      "type": "object",
-      "properties": {
-        "annotations": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "nodeSelector": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "securityContext": {
-          "$ref": "#/definitions/JsonNode"
-        },
-        "affinity": {
-          "$ref": "#/definitions/JsonNode"
-        },
-        "tolerations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JsonNode"
-          }
-        },
-        "volumeMounts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/VolumeAndMount"
-          }
-        },
-        "envVars": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/EnvVar"
-          }
-        },
-        "imagePullSecrets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LocalObjectReference"
-          }
-        }
-      }
-    },
-    "ResourceListDeployment": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Deployment"
-          }
-        }
-      }
-    },
-    "ResourceSpec": {
-      "type": "object",
-      "properties": {
-        "cpu": {
-          "type": "number",
-          "format": "double"
-        },
-        "memory": {
-          "type": "string"
-        }
-      }
-    },
-    "VolumeAndMount": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "volume": {
-          "$ref": "#/definitions/JsonNode"
-        },
-        "volumeMount": {
-          "$ref": "#/definitions/JsonNode"
-        }
-      }
-    },
-    "DeploymentTarget": {
-      "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/DeploymentTargetMetadata"
-        },
-        "spec": {
-          "$ref": "#/definitions/DeploymentTargetSpec"
-        }
-      }
-    },
-    "DeploymentTargetMetadata": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "modifiedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "annotations": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "DeploymentTargetSpec": {
-      "type": "object",
-      "required": [
-        "kubernetes"
-      ],
-      "properties": {
-        "kubernetes": {
-          "$ref": "#/definitions/KubernetesTarget"
-        },
-        "deploymentPatchSet": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JsonPatchGeneric"
-          }
-        }
-      }
-    },
-    "KubernetesTarget": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string"
-        }
-      }
-    },
-    "ResourceListDeploymentTarget": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DeploymentTarget"
-          }
-        }
-      }
+      },
+      "title": "EnvVar"
     },
     "Event": {
       "type": "object",
       "properties": {
-        "kind": {
+        "apiVersion": {
           "type": "string"
         },
-        "apiVersion": {
+        "kind": {
           "type": "string"
         },
         "metadata": {
@@ -1694,15 +1497,12 @@
         "spec": {
           "$ref": "#/definitions/EventSpec"
         }
-      }
+      },
+      "title": "Event"
     },
     "EventMetadata": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -1711,13 +1511,13 @@
           "type": "string",
           "format": "uuid"
         },
-        "jobId": {
+        "id": {
           "type": "string",
           "format": "uuid"
         },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
+        "jobId": {
+          "type": "string",
+          "format": "uuid"
         },
         "name": {
           "type": "string",
@@ -1766,8 +1566,13 @@
         },
         "namespace": {
           "type": "string"
+        },
+        "resourceVersion": {
+          "type": "integer",
+          "format": "int32"
         }
-      }
+      },
+      "title": "EventMetadata"
     },
     "EventSpec": {
       "type": "object",
@@ -1775,27 +1580,8 @@
         "message": {
           "type": "string"
         }
-      }
-    },
-    "ResourceListEvent": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Event"
-          }
-        }
-      }
+      },
+      "title": "EventSpec"
     },
     "Failure": {
       "type": "object",
@@ -1810,15 +1596,16 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "title": "Failure"
     },
     "Job": {
       "type": "object",
       "properties": {
-        "kind": {
+        "apiVersion": {
           "type": "string"
         },
-        "apiVersion": {
+        "kind": {
           "type": "string"
         },
         "metadata": {
@@ -1830,7 +1617,8 @@
         "status": {
           "$ref": "#/definitions/JobStatus"
         }
-      }
+      },
+      "title": "Job"
     },
     "JobDeploymentTarget": {
       "type": "object",
@@ -1838,61 +1626,82 @@
         "kubernetes": {
           "$ref": "#/definitions/KubernetesTarget"
         }
-      }
+      },
+      "title": "JobDeploymentTarget"
     },
     "JobMetadata": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "modifiedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "terminatedAt": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "deploymentId": {
-          "type": "string",
-          "format": "uuid"
-        },
         "annotations": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
         },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deploymentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "deploymentName": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "modifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "namespace": {
+          "type": "string"
+        },
         "resourceVersion": {
           "type": "integer",
           "format": "int32"
         },
-        "namespace": {
-          "type": "string"
+        "terminatedAt": {
+          "type": "string",
+          "format": "date-time"
         }
-      }
+      },
+      "title": "JobMetadata"
     },
     "JobSpec": {
       "type": "object",
       "properties": {
+        "allowNonRestoredState": {
+          "type": "boolean"
+        },
         "artifact": {
           "$ref": "#/definitions/Artifact"
         },
-        "parallelism": {
-          "type": "integer",
-          "format": "int32"
+        "deploymentTarget": {
+          "$ref": "#/definitions/JobDeploymentTarget"
         },
         "flinkConfiguration": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "kubernetes": {
+          "$ref": "#/definitions/KubernetesOptions"
+        },
+        "logging": {
+          "$ref": "#/definitions/Logging"
+        },
+        "numberOfTaskManagers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "parallelism": {
+          "type": "integer",
+          "format": "int32"
         },
         "resources": {
           "type": "object",
@@ -1901,30 +1710,20 @@
           }
         },
         "savepointLocation": {
-          "type": "string",
-          "format": "uri"
-        },
-        "allowNonRestoredState": {
-          "type": "boolean"
-        },
-        "numberOfTaskManagers": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "logging": {
-          "$ref": "#/definitions/Logging"
-        },
-        "kubernetes": {
-          "$ref": "#/definitions/KubernetesOptions"
-        },
-        "deploymentTarget": {
-          "$ref": "#/definitions/JobDeploymentTarget"
+          "type": "string"
         }
-      }
+      },
+      "title": "JobSpec"
     },
     "JobStatus": {
       "type": "object",
       "properties": {
+        "failure": {
+          "$ref": "#/definitions/Failure"
+        },
+        "started": {
+          "$ref": "#/definitions/JobStatusStarted"
+        },
         "state": {
           "type": "string",
           "enum": [
@@ -1936,344 +1735,546 @@
             "TERMINATED",
             "FINISHED"
           ]
-        },
-        "failure": {
-          "$ref": "#/definitions/Failure"
         }
-      }
+      },
+      "title": "JobStatus"
     },
-    "ResourceListJob": {
+    "JobStatusStarted": {
       "type": "object",
       "properties": {
-        "kind": {
+        "flinkJobId": {
           "type": "string"
         },
+        "lastUpdateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observedFlinkJobRestarts": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "observedFlinkJobStatus": {
+          "type": "string"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "JobStatusStarted"
+    },
+    "JsonNode": {
+      "type": "object",
+      "properties": {
+        "array": {
+          "type": "boolean"
+        },
+        "bigDecimal": {
+          "type": "boolean"
+        },
+        "bigInteger": {
+          "type": "boolean"
+        },
+        "binary": {
+          "type": "boolean"
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "containerNode": {
+          "type": "boolean"
+        },
+        "double": {
+          "type": "boolean"
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "float": {
+          "type": "boolean"
+        },
+        "floatingPointNumber": {
+          "type": "boolean"
+        },
+        "int": {
+          "type": "boolean"
+        },
+        "integralNumber": {
+          "type": "boolean"
+        },
+        "long": {
+          "type": "boolean"
+        },
+        "missingNode": {
+          "type": "boolean"
+        },
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "ARRAY",
+            "BINARY",
+            "BOOLEAN",
+            "MISSING",
+            "NULL",
+            "NUMBER",
+            "OBJECT",
+            "POJO",
+            "STRING"
+          ]
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "boolean"
+        },
+        "object": {
+          "type": "boolean"
+        },
+        "pojo": {
+          "type": "boolean"
+        },
+        "short": {
+          "type": "boolean"
+        },
+        "textual": {
+          "type": "boolean"
+        },
+        "valueNode": {
+          "type": "boolean"
+        }
+      },
+      "title": "JsonNode"
+    },
+    "KubernetesOptions": {
+      "type": "object",
+      "properties": {
+        "pods": {
+          "$ref": "#/definitions/Pods"
+        }
+      },
+      "title": "KubernetesOptions"
+    },
+    "KubernetesTarget": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "title": "KubernetesTarget"
+    },
+    "LocalObjectReference": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "LocalObjectReference"
+    },
+    "Logging": {
+      "type": "object",
+      "properties": {
+        "log4j2ConfigurationTemplate": {
+          "type": "string"
+        },
+        "log4jLoggers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "loggingProfile": {
+          "type": "string"
+        }
+      },
+      "title": "Logging"
+    },
+    "ObjectNode": {
+      "type": "object",
+      "properties": {
+        "array": {
+          "type": "boolean"
+        },
+        "bigDecimal": {
+          "type": "boolean"
+        },
+        "bigInteger": {
+          "type": "boolean"
+        },
+        "binary": {
+          "type": "boolean"
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "containerNode": {
+          "type": "boolean"
+        },
+        "double": {
+          "type": "boolean"
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "float": {
+          "type": "boolean"
+        },
+        "floatingPointNumber": {
+          "type": "boolean"
+        },
+        "int": {
+          "type": "boolean"
+        },
+        "integralNumber": {
+          "type": "boolean"
+        },
+        "long": {
+          "type": "boolean"
+        },
+        "missingNode": {
+          "type": "boolean"
+        },
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "ARRAY",
+            "BINARY",
+            "BOOLEAN",
+            "MISSING",
+            "NULL",
+            "NUMBER",
+            "OBJECT",
+            "POJO",
+            "STRING"
+          ]
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "boolean"
+        },
+        "object": {
+          "type": "boolean"
+        },
+        "pojo": {
+          "type": "boolean"
+        },
+        "short": {
+          "type": "boolean"
+        },
+        "textual": {
+          "type": "boolean"
+        },
+        "valueNode": {
+          "type": "boolean"
+        }
+      },
+      "title": "ObjectNode"
+    },
+    "Pods": {
+      "type": "object",
+      "properties": {
+        "affinity": {
+          "$ref": "#/definitions/JsonNode"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "envVars": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnvVar"
+          }
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LocalObjectReference"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "nodeSelector": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "securityContext": {
+          "$ref": "#/definitions/JsonNode"
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JsonNode"
+          }
+        },
+        "volumeMounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VolumeAndMount"
+          }
+        }
+      },
+      "title": "Pods"
+    },
+    "ResourceListMetadata": {
+      "type": "object",
+      "title": "ResourceListMetadata"
+    },
+    "ResourceListOfDeployment": {
+      "type": "object",
+      "properties": {
         "apiVersion": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Deployment"
+          }
+        },
+        "kind": {
           "type": "string"
         },
         "metadata": {
           "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfDeployment"
+    },
+    "ResourceListOfDeploymentTarget": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DeploymentTarget"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfDeploymentTarget"
+    },
+    "ResourceListOfEvent": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Event"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfEvent"
+    },
+    "ResourceListOfJob": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
         },
         "items": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/Job"
           }
-        }
-      }
-    },
-    "Namespace": {
-      "type": "object",
-      "required": [
-        "metadata"
-      ],
-      "properties": {
+        },
         "kind": {
           "type": "string"
         },
+        "metadata": {
+          "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfJob"
+    },
+    "ResourceListOfSavepoint": {
+      "type": "object",
+      "properties": {
         "apiVersion": {
           "type": "string"
         },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Savepoint"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
         "metadata": {
-          "$ref": "#/definitions/NamespaceMetadata"
+          "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfSavepoint"
+    },
+    "ResourceListOfSecretValue": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SecretValue"
+          }
+        },
+        "kind": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/ResourceListMetadata"
+        }
+      },
+      "title": "ResourceListOfSecretValue"
+    },
+    "ResourceQuota": {
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/definitions/ResourceQuotaSpec"
         },
         "status": {
-          "$ref": "#/definitions/NamespaceStatus"
+          "$ref": "#/definitions/ResourceQuotaStatus"
         }
-      }
+      },
+      "title": "ResourceQuota"
     },
-    "NamespaceMetadata": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "modifiedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "NamespaceStatus": {
+    "ResourceQuotaQuantity": {
       "type": "object",
       "properties": {
-        "state": {
+        "cpu": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "title": "ResourceQuotaQuantity"
+    },
+    "ResourceQuotaSpec": {
+      "type": "object",
+      "properties": {
+        "limits": {
+          "$ref": "#/definitions/ResourceQuotaQuantity"
+        },
+        "toleratedOveruse": {
+          "$ref": "#/definitions/ResourceQuotaQuantity"
+        },
+        "type": {
           "type": "string",
           "enum": [
-            "ACTIVE",
-            "MARKED_FOR_DELETION"
+            "LIMITED",
+            "UNLIMITED"
           ]
         }
-      }
+      },
+      "title": "ResourceQuotaSpec"
     },
-    "ResourceListNamespace": {
+    "ResourceQuotaStatus": {
       "type": "object",
       "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Namespace"
-          }
+        "used": {
+          "$ref": "#/definitions/ResourceQuotaQuantity"
         }
-      }
+      },
+      "title": "ResourceQuotaStatus"
     },
-    "RoleBinding": {
-      "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/RoleBindingMetadata"
-        },
-        "spec": {
-          "$ref": "#/definitions/RoleBindingSpec"
-        }
-      }
-    },
-    "RoleBindingMetadata": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "modifiedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "RoleBindingRoleRef": {
-      "type": "object",
-      "required": [
-        "kind",
-        "name"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string",
-          "enum": [
-            "ROLE",
-            "CLUSTERROLE"
-          ]
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "RoleBindingSpec": {
-      "type": "object",
-      "required": [
-        "roleRef",
-        "subjects"
-      ],
-      "properties": {
-        "subjects": {
-          "$ref": "#/definitions/IterableRoleBindingSubject"
-        },
-        "roleRef": {
-          "$ref": "#/definitions/RoleBindingRoleRef"
-        }
-      }
-    },
-    "ResourceListRoleBinding": {
+    "ResourceSpec": {
       "type": "object",
       "properties": {
-        "kind": {
+        "cpu": {
+          "type": "number",
+          "format": "double"
+        },
+        "memory": {
           "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RoleBinding"
-          }
         }
-      }
+      },
+      "title": "ResourceSpec"
     },
-    "ResourceListRole": {
+    "RevisionInformation": {
       "type": "object",
       "properties": {
-        "kind": {
+        "buildTime": {
           "type": "string"
         },
-        "apiVersion": {
+        "buildVersion": {
           "type": "string"
         },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
+        "commitShaLong": {
+          "type": "string"
         },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Role"
-          }
+        "commitShaShort": {
+          "type": "string"
         }
-      }
-    },
-    "Role": {
-      "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/RoleMetadata"
-        },
-        "spec": {
-          "$ref": "#/definitions/RoleSpec"
-        }
-      }
-    },
-    "RoleMetadata": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "modifiedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "RoleSpec": {
-      "type": "object",
-      "required": [
-        "rules"
-      ],
-      "properties": {
-        "rules": {
-          "$ref": "#/definitions/IterableRoleRule"
-        }
-      }
+      },
+      "title": "RevisionInformation"
     },
     "Savepoint": {
       "type": "object",
-      "required": [
-        "metadata",
-        "spec",
-        "status"
-      ],
       "properties": {
-        "kind": {
+        "apiVersion": {
           "type": "string"
         },
-        "apiVersion": {
+        "kind": {
           "type": "string"
         },
         "metadata": {
           "$ref": "#/definitions/SavepointMetadata"
         },
-        "status": {
-          "$ref": "#/definitions/SavepointStatus"
-        },
         "spec": {
           "$ref": "#/definitions/SavepointSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/SavepointStatus"
         }
-      }
+      },
+      "title": "Savepoint"
     },
     "SavepointMetadata": {
       "type": "object",
-      "required": [
-        "deploymentId"
-      ],
       "properties": {
         "id": {
           "type": "string",
           "format": "uuid"
+        },
+        "namespace": {
+          "type": "string"
         },
         "createdAt": {
           "type": "string",
@@ -2297,7 +2298,8 @@
             "USER_REQUEST",
             "SUSPEND_AND_UPGRADE",
             "SUSPEND",
-            "COPIED"
+            "COPIED",
+            "RETAINED_CHECKPOINT"
           ]
         },
         "annotations": {
@@ -2309,18 +2311,12 @@
         "resourceVersion": {
           "type": "integer",
           "format": "int32"
-        },
-        "namespace": {
-          "type": "string"
         }
-      }
+      },
+      "title": "SavepointMetadata"
     },
     "SavepointSpec": {
       "type": "object",
-      "required": [
-        "flinkSavepointId",
-        "savepointLocation"
-      ],
       "properties": {
         "savepointLocation": {
           "type": "string"
@@ -2329,13 +2325,11 @@
           "type": "string",
           "format": "uuid"
         }
-      }
+      },
+      "title": "SavepointSpec"
     },
     "SavepointStatus": {
       "type": "object",
-      "required": [
-        "state"
-      ],
       "properties": {
         "state": {
           "type": "string",
@@ -2348,19 +2342,16 @@
         "failure": {
           "$ref": "#/definitions/Failure"
         }
-      }
+      },
+      "title": "SavepointStatus"
     },
     "SecretValue": {
       "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
       "properties": {
-        "kind": {
+        "apiVersion": {
           "type": "string"
         },
-        "apiVersion": {
+        "kind": {
           "type": "string"
         },
         "metadata": {
@@ -2369,35 +2360,25 @@
         "spec": {
           "$ref": "#/definitions/SecretValueSpec"
         }
-      }
+      },
+      "title": "SecretValue"
     },
     "SecretValueMetadata": {
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
         },
-        "modifiedAt": {
+        "id": {
           "type": "string",
-          "format": "date-time"
-        },
-        "resourceVersion": {
-          "type": "integer",
-          "format": "int32"
+          "format": "uuid"
         },
         "labels": {
           "type": "object",
@@ -2405,13 +2386,22 @@
             "type": "string"
           }
         },
-        "annotations": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+        "modifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "resourceVersion": {
+          "type": "integer",
+          "format": "int32"
         }
-      }
+      },
+      "title": "SecretValueMetadata"
     },
     "SecretValueSpec": {
       "type": "object",
@@ -2419,172 +2409,23 @@
         "kind": {
           "type": "string"
         }
-      }
-    },
-    "ResourceListSecretValue": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/ResourceListMetadata"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SecretValue"
-          }
-        }
-      }
-    },
-    "License": {
-      "type": "object",
-      "required": [
-        "metadata",
-        "spec"
-      ],
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/LicenseMetadata"
-        },
-        "spec": {
-          "$ref": "#/definitions/LicenseSpec"
-        }
-      }
-    },
-    "LicenseMetadata": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "annotations": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "LicenseSpec": {
-      "type": "object",
-      "properties": {
-        "licenseId": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "licensedTo": {
-          "type": "string"
-        },
-        "expires": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "params": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "ResourceQuota": {
-      "type": "object",
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "apiVersion": {
-          "type": "string"
-        },
-        "spec": {
-          "$ref": "#/definitions/ResourceQuotaSpec"
-        },
-        "status": {
-          "$ref": "#/definitions/ResourceQuotaStatus"
-        }
-      }
-    },
-    "ResourceQuotaQuantity": {
-      "type": "object",
-      "properties": {
-        "cpu": {
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
-    "ResourceQuotaSpec": {
-      "type": "object",
-      "properties": {
-        "limits": {
-          "$ref": "#/definitions/ResourceQuotaQuantity"
-        },
-        "toleratedOveruse": {
-          "$ref": "#/definitions/ResourceQuotaQuantity"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "LIMITED",
-            "UNLIMITED"
-          ]
-        }
-      }
-    },
-    "ResourceQuotaStatus": {
-      "type": "object",
-      "properties": {
-        "used": {
-          "$ref": "#/definitions/ResourceQuotaQuantity"
-        }
-      }
-    },
-    "RevisionInformation": {
-      "type": "object",
-      "properties": {
-        "commitShaLong": {
-          "type": "string"
-        },
-        "commitShaShort": {
-          "type": "string"
-        },
-        "buildVersion": {
-          "type": "string"
-        },
-        "buildTime": {
-          "type": "string"
-        }
-      }
+      },
+      "title": "SecretValueSpec"
     },
     "SystemInformation": {
       "type": "object",
       "properties": {
-        "status": {
-          "$ref": "#/definitions/SystemInformationStatus"
+        "apiVersion": {
+          "type": "string"
         },
         "kind": {
           "type": "string"
         },
-        "apiVersion": {
-          "type": "string"
+        "status": {
+          "$ref": "#/definitions/SystemInformationStatus"
         }
-      }
+      },
+      "title": "SystemInformation"
     },
     "SystemInformationStatus": {
       "type": "object",
@@ -2592,16 +2433,29 @@
         "jvmVersion": {
           "type": "string"
         },
-        "revisionInformation": {
-          "$ref": "#/definitions/RevisionInformation"
-        },
         "resourceQuota": {
           "$ref": "#/definitions/ResourceQuota"
         },
-        "license": {
-          "$ref": "#/definitions/License"
+        "revisionInformation": {
+          "$ref": "#/definitions/RevisionInformation"
         }
-      }
+      },
+      "title": "SystemInformationStatus"
+    },
+    "VolumeAndMount": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "volume": {
+          "$ref": "#/definitions/JsonNode"
+        },
+        "volumeMount": {
+          "$ref": "#/definitions/JsonNode"
+        }
+      },
+      "title": "VolumeAndMount"
     }
   }
 }

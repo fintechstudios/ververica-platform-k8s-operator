@@ -85,7 +85,7 @@ func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, na
 	ctx := context.Background()
 
 	var err error
-	if resource.Status.LifecyclePhase, err = converters.NamespaceLifecyclePhaseToNative(*namespace.LifecyclePhase); err != nil {
+	if resource.Status.LifecyclePhase, err = converters.NamespaceLifecyclePhaseToNative(namespace.LifecyclePhase); err != nil {
 		return err
 	}
 
@@ -160,7 +160,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 
 	log.Info("Deleting namespace")
 
-	lifecylePhase, err := converters.NamespaceLifecyclePhaseToNative(*namespaceRes.Namespace.LifecyclePhase)
+	lifecylePhase, err := converters.NamespaceLifecyclePhaseToNative(namespaceRes.Namespace.LifecyclePhase)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

@@ -32,7 +32,7 @@
           "api-tokens"
         ],
         "summary": "listApiTokens",
-        "operationId": "listApiTokens",
+        "operationId": "listApiTokensUsingGET",
         "produces": [
           "application/json"
         ],
@@ -69,7 +69,7 @@
           "api-tokens"
         ],
         "summary": "createApiToken",
-        "operationId": "createApiToken",
+        "operationId": "createApiTokenUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -123,7 +123,7 @@
           "api-tokens"
         ],
         "summary": "getApiToken",
-        "operationId": "getApiToken",
+        "operationId": "getApiTokenUsingGET",
         "produces": [
           "application/json"
         ],
@@ -167,7 +167,7 @@
           "api-tokens"
         ],
         "summary": "deleteApiToken",
-        "operationId": "deleteApiToken",
+        "operationId": "deleteApiTokenUsingDELETE",
         "produces": [
           "application/json"
         ],
@@ -213,7 +213,7 @@
           "namespaces"
         ],
         "summary": "listNamespaces",
-        "operationId": "listNamespaces",
+        "operationId": "listNamespacesUsingGET",
         "produces": [
           "application/json"
         ],
@@ -241,7 +241,7 @@
           "namespaces"
         ],
         "summary": "createNamespace",
-        "operationId": "createNamespace",
+        "operationId": "createNamespaceUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -288,7 +288,7 @@
           "namespaces"
         ],
         "summary": "getNamespace",
-        "operationId": "getNamespace",
+        "operationId": "getNamespaceUsingGET",
         "produces": [
           "application/json"
         ],
@@ -325,7 +325,7 @@
           "namespaces"
         ],
         "summary": "updateNamespace",
-        "operationId": "updateNamespace",
+        "operationId": "updateNamespaceUsingPUT",
         "consumes": [
           "application/json"
         ],
@@ -377,7 +377,7 @@
           "namespaces"
         ],
         "summary": "deleteNamespace",
-        "operationId": "deleteNamespace",
+        "operationId": "deleteNamespaceUsingDELETE",
         "produces": [
           "application/json"
         ],
