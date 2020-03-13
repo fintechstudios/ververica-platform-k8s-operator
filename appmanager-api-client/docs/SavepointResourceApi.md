@@ -1,31 +1,29 @@
-# \NamespacesApi
+# \SavepointResourceApi
 
-All URIs are relative to *http://localhost/api*
+All URIs are relative to *https://localhost:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeleteNamespace**](NamespacesApi.md#DeleteNamespace) | **Delete** /v1/namespaces/{name} | Delete a namespace by name
-[**GetNamespace**](NamespacesApi.md#GetNamespace) | **Get** /v1/namespaces/{name} | Get a namespace by name
-[**ListNamespaces**](NamespacesApi.md#ListNamespaces) | **Get** /v1/namespaces | List namespaces
-[**PostNamespace**](NamespacesApi.md#PostNamespace) | **Post** /v1/namespaces | Create a namespace
+[**CreateSavepointUsingPOST**](SavepointResourceApi.md#CreateSavepointUsingPOST) | **Post** /api/v1/namespaces/{namespace}/savepoints | Create a new savepoint
+[**GetSavepointUsingGET**](SavepointResourceApi.md#GetSavepointUsingGET) | **Get** /api/v1/namespaces/{namespace}/savepoints/{savepointId} | Get a savepoint by id
+[**GetSavepointsUsingGET**](SavepointResourceApi.md#GetSavepointsUsingGET) | **Get** /api/v1/namespaces/{namespace}/savepoints | List all savepoints. Can be filtered by DeploymentId
 
 
-# **DeleteNamespace**
-> Namespace DeleteNamespace(ctx, name)
-Delete a namespace by name
-
-
+# **CreateSavepointUsingPOST**
+> Savepoint CreateSavepointUsingPOST(ctx, namespace, savepointChange)
+Create a new savepoint
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **name** | **string**|  | 
+  **namespace** | **string**| namespace | 
+  **savepointChange** | [**Savepoint**](Savepoint.md)| savepointChange | 
 
 ### Return type
 
-[**Namespace**](Namespace.md)
+[**Savepoint**](Savepoint.md)
 
 ### Authorization
 
@@ -38,22 +36,21 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetNamespace**
-> Namespace GetNamespace(ctx, name)
-Get a namespace by name
-
-
+# **GetSavepointUsingGET**
+> Savepoint GetSavepointUsingGET(ctx, namespace, savepointId)
+Get a savepoint by id
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **name** | **string**|  | 
+  **namespace** | **string**| namespace | 
+  **savepointId** | [**string**](.md)| savepointId | 
 
 ### Return type
 
-[**Namespace**](Namespace.md)
+[**Savepoint**](Savepoint.md)
 
 ### Authorization
 
@@ -66,53 +63,30 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **ListNamespaces**
-> ResourceListNamespace ListNamespaces(ctx, )
-List namespaces
-
-
-
-### Required Parameters
-This endpoint does not need any parameter.
-
-### Return type
-
-[**ResourceListNamespace**](ResourceListNamespace.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json, application/yaml
- - **Accept**: application/json, application/yaml
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **PostNamespace**
-> Namespace PostNamespace(ctx, optional)
-Create a namespace
-
-
+# **GetSavepointsUsingGET**
+> ResourceListOfSavepoint GetSavepointsUsingGET(ctx, namespace, optional)
+List all savepoints. Can be filtered by DeploymentId
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
- **optional** | ***PostNamespaceOpts** | optional parameters | nil if no parameters
+  **namespace** | **string**| namespace | 
+ **optional** | ***GetSavepointsUsingGETOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
-Optional parameters are passed through a pointer to a PostNamespaceOpts struct
+Optional parameters are passed through a pointer to a GetSavepointsUsingGETOpts struct
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | [**optional.Interface of Namespace**](Namespace.md)|  | 
+
+ **deploymentId** | [**optional.Interface of string**](.md)| deploymentId | 
+ **jobId** | [**optional.Interface of string**](.md)| jobId | 
 
 ### Return type
 
-[**Namespace**](Namespace.md)
+[**ResourceListOfSavepoint**](ResourceListOfSavepoint.md)
 
 ### Authorization
 

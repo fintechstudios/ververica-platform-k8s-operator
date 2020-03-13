@@ -1,12 +1,12 @@
-# ResourceListDeploymentTarget
+# ResourceListOfSavepoint
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Kind** | **string** |  | [optional] [default to null]
 **ApiVersion** | **string** |  | [optional] [default to null]
+**Items** | [**[]Savepoint**](Savepoint.md) |  | [optional] [default to null]
+**Kind** | **string** |  | [optional] [default to null]
 **Metadata** | [***ResourceListMetadata**](ResourceListMetadata.md) |  | [optional] [default to null]
-**Items** | [**[]DeploymentTarget**](DeploymentTarget.md) |  | [optional] [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

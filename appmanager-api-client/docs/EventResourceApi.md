@@ -1,38 +1,36 @@
-# \EventsApi
+# \EventResourceApi
 
-All URIs are relative to *http://localhost/api*
+All URIs are relative to *https://localhost:8081*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetEvents**](EventsApi.md#GetEvents) | **Get** /v1/namespaces/{namespace}/events | Filter all events for a deployment or job
+[**GetEventsUsingGET**](EventResourceApi.md#GetEventsUsingGET) | **Get** /api/v1/namespaces/{namespace}/events | Filter all events for a deployment or job
 
 
-# **GetEvents**
-> ResourceListEvent GetEvents(ctx, namespace, optional)
+# **GetEventsUsingGET**
+> ResourceListOfEvent GetEventsUsingGET(ctx, namespace, optional)
 Filter all events for a deployment or job
-
-
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **namespace** | **string**|  | 
- **optional** | ***GetEventsOpts** | optional parameters | nil if no parameters
+  **namespace** | **string**| namespace | 
+ **optional** | ***GetEventsUsingGETOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
-Optional parameters are passed through a pointer to a GetEventsOpts struct
+Optional parameters are passed through a pointer to a GetEventsUsingGETOpts struct
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **deploymentId** | [**optional.Interface of string**](.md)|  | 
- **jobId** | [**optional.Interface of string**](.md)|  | 
+ **deploymentId** | [**optional.Interface of string**](.md)| deploymentId | 
+ **jobId** | [**optional.Interface of string**](.md)| jobId | 
 
 ### Return type
 
-[**ResourceListEvent**](ResourceListEvent.md)
+[**ResourceListOfEvent**](ResourceListOfEvent.md)
 
 ### Authorization
 
