@@ -109,6 +109,7 @@ spec:
                   - TRANSITIONING
                   - SUSPENDED
                   - FAILED
+                  - FINISHED
                   type: string
                 template:
                   description: VpDeploymentTemplate is the template for Deployment
@@ -1075,6 +1076,10 @@ spec:
                                         type: string
                                     type: object
                                   type: array
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
@@ -2945,6 +2950,7 @@ spec:
               - TRANSITIONING
               - SUSPENDED
               - FAILED
+              - FINISHED
               type: string
           type: object
       required:

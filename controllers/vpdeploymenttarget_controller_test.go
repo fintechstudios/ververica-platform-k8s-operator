@@ -73,18 +73,6 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 					Kubernetes: &vpAPI.KubernetesTarget{
 						Namespace: "default",
 					},
-					DeploymentPatchSet: []vpAPI.JsonPatchGeneric{
-						{
-							Op:    "add",
-							Path:  "/test/field",
-							Value: "data",
-						},
-						{
-							Op:   "move",
-							From: "/test/field",
-							Path: "/test/field2",
-						},
-					},
 				},
 			}
 

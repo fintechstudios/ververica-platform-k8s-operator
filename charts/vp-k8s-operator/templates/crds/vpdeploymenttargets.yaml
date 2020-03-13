@@ -9,14 +9,14 @@ metadata:
 {{- if .Values.cleanupCustomResourceBeforeInstall }}
     "helm.sh/hook-delete-policy": before-hook-creation
 {{- end }}
-spec:
+spec:spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.metadata.namespace
-    name: Namespace
-    type: string
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
+    - JSONPath: .spec.metadata.namespace
+      name: Namespace
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
+      type: date
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeploymentTarget
@@ -62,26 +62,6 @@ spec:
               description: VpDeploymentTargetSpec allows a users to set defaults for
                 deployments and configure K8s
               properties:
-                deploymentPatchSet:
-                  items:
-                    description: JSONPatchGeneric is a generic JSON-Patch object
-                    properties:
-                      from:
-                        type: string
-                      op:
-                        type: string
-                      path:
-                        type: string
-                      value:
-                        description: "TODO: support any type of JSON as an interface
-                          \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528
-                          \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
-                        type: string
-                    required:
-                    - op
-                    - path
-                    type: object
-                  type: array
                 kubernetes:
                   description: VpKubernetesTarget allows a user to configure k8s specific
                     options
@@ -90,15 +70,15 @@ spec:
                       type: string
                   type: object
               required:
-              - kubernetes
+                - kubernetes
               type: object
           type: object
       type: object
   version: v1beta1
   versions:
-  - name: v1beta1
-    served: true
-    storage: true
+    - name: v1beta1
+      served: true
+      storage: true
 status:
   acceptedNames:
     kind: ""

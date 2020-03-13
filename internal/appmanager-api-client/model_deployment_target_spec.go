@@ -12,5 +12,4 @@ package appmanagerapi
 
 type DeploymentTargetSpec struct {
 	Kubernetes         *KubernetesTarget  `json:"kubernetes"`
-	DeploymentPatchSet []JsonPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }

@@ -168,7 +168,7 @@ type VpDeploymentTemplate struct {
 
 // DeploymentState is the enum of all possible deployment states
 // Only one of the following states may be specified.
-// +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED
+// +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED;FINISHED
 type DeploymentState string
 
 // All the allowed DeploymentStates

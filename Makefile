@@ -127,6 +127,7 @@ patch-image:
 	sed -i'' -e 's@image: .*@image: '"$(IMG):$(VERSION)"'@' ./config/default/manager_image_patch.yaml
 
 # Build the k8s resources for deployment
+.PHONY: kustomize-build
 kustomize-build: patch-image
 	$(KUSTOMIZE) build config/default > resources.yaml
 

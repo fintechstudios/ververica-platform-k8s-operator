@@ -20,7 +20,6 @@ metadata:
 spec:
   kubernetes:
     namespace: String
-  deploymentPatchSet: JsonPatch[] # Optional, see: http://jsonpatch.com/
 ```
 
 ## K8s Definition
@@ -40,11 +39,6 @@ spec:
   spec:
     kubernetes: # Required
       namespace: String # Optional
-    # Optional, see: http://jsonpatch.com/
-    # Can only support string values
-    deploymentPatchSet: JsonPatch[]
 ```
-
-Currently, the only supported `value` type for the Json Patches is `string`.
 
 You can find an example in [config/samples/ververicaplatform_v1beta1_vpdeploymenttarget.yaml](../../config/samples/ververicaplatform_v1beta1_vpdeploymenttarget.yaml).
