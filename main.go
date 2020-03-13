@@ -110,7 +110,7 @@ func main() {
 
 	setupLog.Info("Watching namespace", "namespace", watchNamespace)
 
-	ctrl.SetLogger(zap.Logger(*enableDebugMode))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(*enableDebugMode)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
@@ -135,12 +135,13 @@ func main() {
 		UserAgent:     userAgent,
 	})
 
-	appManagerClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
+	appManagerApiClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
 		BasePath:      *appManagerAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
 	appManagerAuthStore := appmanager.NewAuthStore(&appmanager.PlatformTokenManager{PlatformAPIClient: platformClient})
+	appManagerClient := appmanager.NewClient(appManagerApiClient, appManagerAuthStore)
 
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
@@ -162,8 +163,7 @@ func main() {
 	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		AppManagerAPIClient: appManagerClient,
-		AppManagerAuthStore: appManagerAuthStore,
+		AppManagerClient:    appManagerClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
@@ -172,8 +172,7 @@ func main() {
 	if err = (&controllers.VpDeploymentReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		AppManagerAPIClient: appManagerClient,
-		AppManagerAuthStore: appManagerAuthStore,
+		AppManagerClient:    appManagerClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
 		os.Exit(1)
@@ -181,8 +180,7 @@ func main() {
 	if err = (&controllers.VpSavepointReconciler{
 		Client:              mgr.GetClient(),
 		Log:                 ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
-		AppManagerAPIClient: appManagerClient,
-		AppManagerAuthStore: appManagerAuthStore,
+		AppManagerClient:    appManagerClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)

@@ -5,15 +5,38 @@ import (
 	"errors"
 	"github.com/antihax/optional"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
+	"net/http"
 )
 
 var (
-	// TODO: make custom type
-	ErrBadRequest  = errors.New("bad request")
+	// TODO: make custom types
+	ErrBadRequest   = errors.New("bad request")
+	ErrUnauthorized = errors.New("unathorized")
+	ErrConflict     = errors.New("conflict")
+	ErrNotFound     = errors.New("not found")
+	ErrUnknown      = errors.New("unknown error")
+
 	ErrAuthContext = errors.New("couldn't get authorized context")
-	ErrConflict    = errors.New("conflict")
 )
+
+func isResponseError(res *http.Response) bool {
+	return res != nil && res.StatusCode >= 400
+}
+
+func formatResponseError(res *http.Response) error {
+	switch res.StatusCode {
+	case 400:
+		return ErrBadRequest
+	case 401:
+		return ErrUnauthorized
+	case 404:
+		return ErrNotFound
+	case 409:
+		return ErrConflict
+	default:
+		return ErrUnknown
+	}
+}
 
 type Client interface {
 	DeploymentTargets() DeploymentTargetsService
@@ -31,10 +54,10 @@ type client struct {
 	savepointsService        SavepointsService
 }
 
-func NewClient(cfg *appmanagerapi.Configuration) Client {
-	apiClient := appmanagerapi.NewAPIClient(cfg)
+func NewClient(apiClient *appmanagerapi.APIClient, authStore *AuthStore) Client {
 	return &client{
 		apiClient: apiClient,
+		authStore: authStore,
 	}
 }
 
@@ -92,8 +115,8 @@ func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, n
 	target, res, err := s.client.apiClient.DeploymentTargetResourceApi.
 		CreateDeploymentTargetUsingPOST(ctx, depTarget, namespaceName)
 
-	if res != nil && res.StatusCode == 400 {
-		return nil, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &target, err
@@ -102,10 +125,8 @@ func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, n
 func (s *deploymentTargetsService) DeleteDeploymentTarget(ctx context.Context, namespaceName, name string) (*appmanagerapi.DeploymentTarget, error) {
 	depTarget, res, err := s.client.apiClient.DeploymentTargetResourceApi.DeleteDeploymentTargetUsingDELETE(ctx, name, namespaceName)
 
-	if res != nil && res.StatusCode == 409 {
-		// Conflict - still have deployments referenced
-		// Can take a while to tear down
-		return nil, ErrConflict
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &depTarget, err
@@ -133,8 +154,8 @@ func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opt
 	}
 	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, (*appmanagerapi.GetEventsUsingGETOpts)(opts))
 
-	if res != nil && res.StatusCode == 400 {
-		return &eventsList, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &eventsList, err
@@ -162,15 +183,20 @@ func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, i
 	}
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentUsingGET(ctx, id, namespaceName)
 
-	if res != nil && res.StatusCode == 400 {
-		return &deployment, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &deployment, err
 }
 
 func (s *deploymentsService) ListDeployments(ctx context.Context, namespaceName string) (*appmanagerapi.ResourceListOfDeployment, error) {
-	depList, _, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentsUsingGET(ctx, namespaceName, nil)
+	depList, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentsUsingGET(ctx, namespaceName, nil)
+
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
+	}
+
 	return &depList, err
 }
 
@@ -191,14 +217,14 @@ func (s *deploymentsService) GetDeploymentByName(ctx context.Context, namespaceN
 		}
 	}
 
-	return nil, utils.DeploymentNotFoundError{Namespace: namespaceName, Name: name}
+	return nil, ErrNotFound
 }
 
 func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.CreateDeploymentUsingPOST(ctx, dep, namespaceName)
 
-	if res != nil && res.StatusCode == 400 {
-		return &deployment, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &deployment, err
@@ -207,8 +233,8 @@ func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName
 func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName, id string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.UpdateDeploymentUsingPATCH(ctx, dep, id, namespaceName)
 
-	if res != nil && res.StatusCode == 400 {
-		return &deployment, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &deployment, err
@@ -217,8 +243,8 @@ func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName
 func (s *deploymentsService) DeleteDeployment(ctx context.Context, namespaceName, id string) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.DeleteDeploymentUsingDELETE(ctx, id, namespaceName)
 
-	if res != nil && res.StatusCode == 400 {
-		return &deployment, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &deployment, err
@@ -238,8 +264,8 @@ type savepointsService struct {
 func (s savepointsService) GetSavepoint(ctx context.Context, namespaceName, id string) (*appmanagerapi.Savepoint, error) {
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.GetSavepointUsingGET(ctx, namespaceName, id)
 
-	if res != nil && res.StatusCode == 400 {
-		return nil, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &savepoint, err
@@ -248,8 +274,8 @@ func (s savepointsService) GetSavepoint(ctx context.Context, namespaceName, id s
 func (s savepointsService) CreateSavepoint(ctx context.Context, namespaceName string, savepoint appmanagerapi.Savepoint) (*appmanagerapi.Savepoint, error) {
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.CreateSavepointUsingPOST(ctx, namespaceName, savepoint)
 
-	if res != nil && res.StatusCode == 400 {
-		return nil, ErrBadRequest
+	if isResponseError(res) {
+		return nil, formatResponseError(res)
 	}
 
 	return &savepoint, err

@@ -39,8 +39,6 @@ type VpSavepointReconciler struct {
 	client.Client
 	Log                 logr.Logger
 	AppManagerClient    appmanager.Client
-	AppManagerAPIClient *appmanagerapi.APIClient
-	AppManagerAuthStore *appmanager.AuthStore
 	pollerManager       polling.PollerManager
 }
 
@@ -48,21 +46,14 @@ func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace,
 	log := r.getLogger(req).WithValues("poller", "status")
 
 	return func() interface{} {
-		ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), namespace)
-
-		if err != nil {
-			log.Error(err, "Error getting authorized context")
-			return nil
-		}
-
-		savepoint, err := r.AppManagerClient.Savepoints().GetSavepoint(ctx, namespace, id)
+		savepoint, err := r.AppManagerClient.Savepoints().GetSavepoint(context.Background(), namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling savepoint")
 			return nil
 		}
 
 		var vpSavepointUpdated v1beta1.VpSavepoint
-		if err = r.Get(ctx, req.NamespacedName, &vpSavepointUpdated); err != nil {
+		if err = r.Get(context.Background(), req.NamespacedName, &vpSavepointUpdated); err != nil {
 			if utils.IsNotFoundError(err) {
 				// TODO: should we force stop polling?
 				log.Error(err, "VpSavepoint not found while polling")
@@ -135,17 +126,13 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	log := r.getLogger(req)
 
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	ctx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
+
 	depID := vpSavepoint.Spec.Metadata.DeploymentID
 	if depID == "" {
 		// no deployment id has been explicitly set
 		// try to find one
 		depName := vpSavepoint.Spec.DeploymentName
-		deployment, err := r.AppManagerClient.Deployments().GetDeploymentByName(ctx, nsName, depName)
+		deployment, err := r.AppManagerClient.Deployments().GetDeploymentByName(context.Background(), nsName, depName)
 
 		if utils.IsNotFoundError(err) {
 			log.Info("No deployment by name %s", depName)
@@ -159,7 +146,9 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		depID = deployment.Metadata.Id
 	}
 
-	createdSavepoint, err := r.AppManagerClient.Savepoints().CreateSavepoint(ctx, nsName, appmanagerapi.Savepoint{
+	createdSavepoint, err := r.AppManagerClient.
+		Savepoints().
+		CreateSavepoint(context.Background(), nsName, appmanagerapi.Savepoint{
 		Kind:       "Savepoint",
 		ApiVersion: "v1",
 		Metadata: &appmanagerapi.SavepointMetadata{
@@ -220,13 +209,10 @@ func (r *VpSavepointReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	savepointID := annotations.Get(vpSavepoint.Annotations, annotations.ID)
 	nsName := utils.GetNamespaceOrDefault(vpSavepoint.Spec.Metadata.Namespace)
-	appManagerCtx, err := r.AppManagerAuthStore.ContextForNamespace(context.Background(), nsName)
-	if err != nil {
-		log.Error(err, "cannot create context")
-		return ctrl.Result{Requeue: false}, nil
-	}
 
-	savepoint, err := r.AppManagerClient.Savepoints().GetSavepoint(appManagerCtx, nsName, savepointID)
+	savepoint, err := r.AppManagerClient.
+		Savepoints().
+		GetSavepoint(context.Background(), nsName, savepointID)
 	if err != nil {
 		if utils.IsNotFoundError(err) {
 			log.Info("Savepoint by id not found - creating", "id", savepointID)

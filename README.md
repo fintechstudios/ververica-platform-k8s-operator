@@ -128,15 +128,9 @@ The original Swagger file was taken from their live API documentation (available
 but the docs don't exactly match their API, which makes the generated client incorrect.
 
 Main changes necessary:
-* Timestamps are returned as ISO8601 strings, not numbers
-* `DeploymentTarget.deploymentPatchSet` is a JSON Patch Array, not a JsonNode
 * `Artifact` needs many other fields
-* `DeploymentUpgradeStrategy` needs choices
-* `DeploymentRestoreStrategy` needs choices and `allowNonRestoredState` option
-* `DeploymentStartFromSavepoint` needs choices
-* `POST /namespaces/{namespace}/deployments` needs a `201` response with a `Deployment` in the body
-* `POST /namespaces/{namespace}/deployment-targets` needs a `201` response with a `DeploymenTarget` in the body
 * `model_pods.go` needs to be updated with the proper Kubernetes types
+* `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
 
 ##### Post-Generation Changes
 
@@ -153,10 +147,9 @@ import (
 ```
 
 Affected files:
-- `api_events.go`
-- `api_jobs.go`
-- `api_namespaces.go`
-- `api_savepoints.go`
+- `api_event_resource.go`
+- `api_job_resource.go`
+- `api_savepoint_resource.go`
 
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
