@@ -5,6 +5,8 @@ import (
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 )
 
+var ErrInvalidDeploymentState = errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FINISHED, FAILED")
+
 // DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation
 func DeploymentStateToNative(state string) (ververicaplatformv1beta1.DeploymentState, error) {
 	switch state {
@@ -18,8 +20,10 @@ func DeploymentStateToNative(state string) (ververicaplatformv1beta1.DeploymentS
 		return ververicaplatformv1beta1.SuspendedState, nil
 	case string(ververicaplatformv1beta1.FailedState):
 		return ververicaplatformv1beta1.FailedState, nil
+	case string(ververicaplatformv1beta1.Finishedstate):
+		return ververicaplatformv1beta1.Finishedstate, nil
 	default:
-		return "", errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FAILED")
+		return "", ErrInvalidDeploymentState
 	}
 }
 
@@ -34,9 +38,11 @@ func DeploymentStateFromNative(vpState ververicaplatformv1beta1.DeploymentState)
 		return string(ververicaplatformv1beta1.TransitioningState), nil
 	case ververicaplatformv1beta1.SuspendedState:
 		return string(ververicaplatformv1beta1.SuspendedState), nil
+	case ververicaplatformv1beta1.Finishedstate:
+		return string(ververicaplatformv1beta1.Finishedstate), nil
 	case ververicaplatformv1beta1.FailedState:
 		return string(ververicaplatformv1beta1.FailedState), nil
 	default:
-		return "", errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FAILED")
+		return "", ErrInvalidDeploymentState
 	}
 }

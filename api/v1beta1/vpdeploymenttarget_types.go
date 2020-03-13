@@ -45,8 +45,6 @@ type VpKubernetesTarget struct {
 // VpDeploymentTargetSpec allows a users to set defaults for deployments and configure K8s
 type VpDeploymentTargetSpec struct {
 	Kubernetes VpKubernetesTarget `json:"kubernetes"`
-	// +optional
-	DeploymentPatchSet []JSONPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }
 
 // VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
