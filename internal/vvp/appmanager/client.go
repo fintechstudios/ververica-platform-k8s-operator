@@ -86,7 +86,7 @@ func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, n
 		CreateDeploymentTargetUsingPOST(ctx, depTarget, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &target, err
@@ -96,7 +96,7 @@ func (s *deploymentTargetsService) DeleteDeploymentTarget(ctx context.Context, n
 	depTarget, res, err := s.client.apiClient.DeploymentTargetResourceApi.DeleteDeploymentTargetUsingDELETE(ctx, name, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &depTarget, err
@@ -125,7 +125,7 @@ func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opt
 	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, (*appmanagerapi.GetEventsUsingGETOpts)(opts))
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &eventsList, err
@@ -154,7 +154,7 @@ func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, i
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentUsingGET(ctx, id, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &deployment, err
@@ -164,7 +164,7 @@ func (s *deploymentsService) ListDeployments(ctx context.Context, namespaceName 
 	depList, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentsUsingGET(ctx, namespaceName, nil)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &depList, err
@@ -194,7 +194,7 @@ func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.CreateDeploymentUsingPOST(ctx, dep, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &deployment, err
@@ -204,7 +204,7 @@ func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.UpdateDeploymentUsingPATCH(ctx, dep, id, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &deployment, err
@@ -214,7 +214,7 @@ func (s *deploymentsService) DeleteDeployment(ctx context.Context, namespaceName
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.DeleteDeploymentUsingDELETE(ctx, id, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &deployment, err
@@ -235,7 +235,7 @@ func (s *savepointsService) GetSavepoint(ctx context.Context, namespaceName, id 
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.GetSavepointUsingGET(ctx, namespaceName, id)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &savepoint, err
@@ -245,7 +245,7 @@ func (s *savepointsService) CreateSavepoint(ctx context.Context, namespaceName s
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.CreateSavepointUsingPOST(ctx, namespaceName, savepoint)
 
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	return &savepoint, err

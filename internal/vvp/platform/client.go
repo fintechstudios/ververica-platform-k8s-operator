@@ -56,7 +56,7 @@ type namespacesService struct {
 func (n *namespacesService) GetNamespace(ctx context.Context, namespaceName string) (*platformapi.Namespace, error) {
 	namespaceRes, res, err := n.client.apiClient.NamespacesApi.GetNamespace(ctx, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (n *namespacesService) CreateNamespace(ctx context.Context, namespace platf
 
 	namespaceRes, res, err := n.client.apiClient.NamespacesApi.CreateNamespace(ctx, namespace)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -92,7 +92,7 @@ func (n *namespacesService) UpdateNamespace(ctx context.Context, namespaceName s
 
 	namespaceRes, res, err := n.client.apiClient.NamespacesApi.UpdateNamespace(ctx, namespace, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (n *namespacesService) UpdateNamespace(ctx context.Context, namespaceName s
 func (n *namespacesService) DeleteNamespace(ctx context.Context, namespaceName string) (*platformapi.Namespace, error) {
 	namespaceRes, res, err := n.client.apiClient.NamespacesApi.DeleteNamespace(ctx, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -141,7 +141,7 @@ type apiTokensService struct {
 func (s *apiTokensService) GetApiToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error) {
 	tokenRes, res, err := s.client.apiClient.ApiTokensApi.GetApiToken(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -157,7 +157,7 @@ func (s *apiTokensService) CreateApiToken(ctx context.Context, namespaceName str
 
 	tokenRes, res, err := s.client.apiClient.ApiTokensApi.CreateApiToken(ctx, apiToken, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return nil, vvperrors.FormatResponseError(res)
+		return nil, vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
@@ -170,7 +170,7 @@ func (s *apiTokensService) CreateApiToken(ctx context.Context, namespaceName str
 func (s *apiTokensService) DeleteApiToken(ctx context.Context, namespaceName, name string) error {
 	_, res, err := s.client.apiClient.ApiTokensApi.DeleteApiToken(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
-		return vvperrors.FormatResponseError(res)
+		return vvperrors.FormatResponseError(res, err)
 	}
 
 	if err != nil {
