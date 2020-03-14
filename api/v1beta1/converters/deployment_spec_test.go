@@ -70,9 +70,6 @@ var _ = Describe("DeploymentSpec", func() {
 					Kind:                  deploymentRestoreStrategy,
 					AllowNonRestoredState: deploymentRestoreAllowNonRestored,
 				},
-				StartFromSavepoint: &vpAPI.DeploymentStartFromSavepoint{
-					Kind: deploymentStartFromSavepoint,
-				},
 				Template: &vpAPI.DeploymentTemplate{
 					Metadata: &vpAPI.DeploymentTemplateMetadata{
 						Annotations: annotations,
@@ -229,7 +226,6 @@ var _ = Describe("DeploymentSpec", func() {
 		It("should map an API deployment spec to K8s native", func() {
 			spec, err := DeploymentSpecFromNative(vpDeploymentSpec)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(spec.StartFromSavepoint.Kind).To(Equal(deploymentStartFromSavepoint))
 
 			Expect(spec.RestoreStrategy.Kind).To(Equal(deploymentRestoreStrategy))
 			Expect(spec.RestoreStrategy.AllowNonRestoredState).To(Equal(deploymentRestoreAllowNonRestored))
