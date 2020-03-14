@@ -72,14 +72,24 @@ type deploymentTargetsService struct {
 }
 
 func (s *deploymentTargetsService) GetDeploymentTarget(ctx context.Context, namespaceName, name string) (*appmanagerapi.DeploymentTarget, error) {
-	depTarget, _, err := s.client.apiClient.DeploymentTargetResourceApi.GetDeploymentTargetUsingGET(ctx, name, namespaceName)
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	depTarget, res, err := s.client.apiClient.DeploymentTargetResourceApi.GetDeploymentTargetUsingGET(ctx, name, namespaceName)
+
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res, err)
+	}
+
 	return &depTarget, err
 }
 
 func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, namespaceName string, depTarget appmanagerapi.DeploymentTarget) (*appmanagerapi.DeploymentTarget, error) {
-	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
 	if err != nil {
-		return nil, vvperrors.ErrAuthContext
+		return nil, err
 	}
 
 	target, res, err := s.client.apiClient.DeploymentTargetResourceApi.
@@ -93,6 +103,11 @@ func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, n
 }
 
 func (s *deploymentTargetsService) DeleteDeploymentTarget(ctx context.Context, namespaceName, name string) (*appmanagerapi.DeploymentTarget, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	depTarget, res, err := s.client.apiClient.DeploymentTargetResourceApi.DeleteDeploymentTargetUsingDELETE(ctx, name, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
@@ -118,9 +133,9 @@ type eventsService struct {
 }
 
 func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opts *GetEventsOpts) (*appmanagerapi.ResourceListOfEvent, error) {
-	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
 	if err != nil {
-		return nil, vvperrors.ErrAuthContext
+		return nil, err
 	}
 	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, (*appmanagerapi.GetEventsUsingGETOpts)(opts))
 
@@ -147,9 +162,9 @@ type deploymentsService struct {
 }
 
 func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, id string) (*appmanagerapi.Deployment, error) {
-	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
 	if err != nil {
-		return nil, vvperrors.ErrAuthContext
+		return nil, err
 	}
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentUsingGET(ctx, id, namespaceName)
 
@@ -161,6 +176,10 @@ func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, i
 }
 
 func (s *deploymentsService) ListDeployments(ctx context.Context, namespaceName string) (*appmanagerapi.ResourceListOfDeployment, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
 	depList, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentsUsingGET(ctx, namespaceName, nil)
 
 	if vvperrors.IsResponseError(res) {
@@ -191,6 +210,11 @@ func (s *deploymentsService) GetDeploymentByName(ctx context.Context, namespaceN
 }
 
 func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.CreateDeploymentUsingPOST(ctx, dep, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
@@ -201,6 +225,11 @@ func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName
 }
 
 func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName, id string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.UpdateDeploymentUsingPATCH(ctx, dep, id, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
@@ -211,6 +240,11 @@ func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName
 }
 
 func (s *deploymentsService) DeleteDeployment(ctx context.Context, namespaceName, id string) (*appmanagerapi.Deployment, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.DeleteDeploymentUsingDELETE(ctx, id, namespaceName)
 
 	if vvperrors.IsResponseError(res) {
@@ -232,6 +266,11 @@ type savepointsService struct {
 }
 
 func (s *savepointsService) GetSavepoint(ctx context.Context, namespaceName, id string) (*appmanagerapi.Savepoint, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.GetSavepointUsingGET(ctx, namespaceName, id)
 
 	if vvperrors.IsResponseError(res) {
@@ -242,6 +281,11 @@ func (s *savepointsService) GetSavepoint(ctx context.Context, namespaceName, id 
 }
 
 func (s *savepointsService) CreateSavepoint(ctx context.Context, namespaceName string, savepoint appmanagerapi.Savepoint) (*appmanagerapi.Savepoint, error) {
+	ctx, err := s.client.authStore.ContextForNamespace(ctx, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.CreateSavepointUsingPOST(ctx, namespaceName, savepoint)
 
 	if vvperrors.IsResponseError(res) {

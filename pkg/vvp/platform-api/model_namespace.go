@@ -15,7 +15,7 @@ import (
 )
 
 type Namespace struct {
-	CreateTime time.Time       `json:"createTime,omitempty"`
+	CreateTime *time.Time       `json:"createTime,omitempty"`
 	LifecyclePhase string      `json:"lifecyclePhase,omitempty"`
 	Name string                `json:"name,omitempty"`
 	RoleBindings []RoleBinding `json:"roleBindings,omitempty"`

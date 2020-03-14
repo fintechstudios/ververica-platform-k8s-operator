@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	// TODO: make custom types or wrap w/ response body content
+	// Response errors
 	ErrBadRequest   = errors.New("bad request")
 	ErrUnauthorized = errors.New("unathorized")
 	ErrForbidden    = errors.New("forbidden")
@@ -18,6 +18,7 @@ var (
 	ErrNotFound     = errors.New("not found")
 	ErrUnknown      = errors.New("unknown error")
 
+	// Authorized context errors
 	ErrAuthContext = errors.New("couldn't get authorized context")
 )
 
@@ -60,10 +61,8 @@ func IsResponseError(res *http.Response) bool {
 	return res != nil && res.StatusCode >= 400
 }
 
-func FormatResponseError(res *http.Response, clientError error) error {
-	message := getClientErrorMessage(clientError)
-
-	switch res.StatusCode {
+func errForStatusCode(code int, message string) error {
+	switch code {
 	case 400:
 		return fmt.Errorf("%w: %v", ErrBadRequest, message)
 	case 401:
@@ -77,4 +76,13 @@ func FormatResponseError(res *http.Response, clientError error) error {
 	default:
 		return fmt.Errorf("%w: %v", ErrUnknown, message)
 	}
+}
+
+func FormatResponseError(res *http.Response, clientError error) error {
+	message := getClientErrorMessage(clientError)
+	return errForStatusCode(res.StatusCode, message)
+}
+
+func WrapAuthContextError(namespaceName string, err error) error {
+	return fmt.Errorf("%w for namespace %v: %v", ErrAuthContext, namespaceName, err)
 }

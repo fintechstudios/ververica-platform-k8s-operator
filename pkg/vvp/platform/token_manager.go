@@ -13,8 +13,8 @@ type TokenManager struct {
 	PlatformClient Client
 }
 
-func (p *TokenManager) TokenExists(ctx context.Context, name, namespace string) (bool, error) {
-	_, err := p.PlatformClient.ApiTokens().GetApiToken(ctx, name, namespace)
+func (p *TokenManager) TokenExists(ctx context.Context, namespaceName, name string) (bool, error) {
+	_, err := p.PlatformClient.ApiTokens().GetApiToken(ctx, namespaceName, name)
 
 	if errors.Is(err, vvperrors.ErrNotFound) || errors.Is(err, vvperrors.ErrForbidden) {
 		return false, nil
@@ -27,8 +27,8 @@ func (p *TokenManager) TokenExists(ctx context.Context, name, namespace string) 
 	return true, nil
 }
 
-func (p *TokenManager) CreateToken(ctx context.Context, name, role, namespace string) (string, error) {
-	token, err := p.PlatformClient.ApiTokens().CreateApiToken(ctx, namespace, platformapi.ApiToken{
+func (p *TokenManager) CreateToken(ctx context.Context, namespaceName, name, role string) (string, error) {
+	token, err := p.PlatformClient.ApiTokens().CreateApiToken(ctx, namespaceName, platformapi.ApiToken{
 		Name: name,
 		Role: role,
 	})
@@ -40,8 +40,8 @@ func (p *TokenManager) CreateToken(ctx context.Context, name, role, namespace st
 	return token.Secret, nil
 }
 
-func (p *TokenManager) RemoveToken(ctx context.Context, name, namespace string) (bool, error) {
-	err := p.PlatformClient.ApiTokens().DeleteApiToken(ctx, name, namespace)
+func (p *TokenManager) RemoveToken(ctx context.Context, namespaceName, name string) (bool, error) {
+	err := p.PlatformClient.ApiTokens().DeleteApiToken(ctx, namespaceName, name)
 
 	// We're ok if it's not found
 	if errors.Is(err, vvperrors.ErrNotFound) {
