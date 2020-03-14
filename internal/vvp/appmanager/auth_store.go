@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
 )
 
 const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
@@ -39,19 +39,24 @@ type TokenManager interface {
 	RemoveToken(ctx context.Context, name, namespace string) (bool, error)
 }
 
-type AuthStore struct {
+type AuthStore interface {
+	ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error)
+	RemoveAllCreatedTokens(ctx context.Context) ([]string, error)
+}
+
+type authStore struct {
 	namespaceTokenCache map[string]*TokenData
 	tokenManager        TokenManager
 }
 
-func NewAuthStore(tokenManager TokenManager) *AuthStore {
-	return &AuthStore{
+func NewAuthStore(tokenManager TokenManager) AuthStore {
+	return &authStore{
 		namespaceTokenCache: make(map[string]*TokenData),
 		tokenManager:        tokenManager,
 	}
 }
 
-func (s *AuthStore) findTokenForNamespaceInEnv(namespace string) *string {
+func (s *authStore) findTokenForNamespaceInEnv(namespace string) *string {
 	namespaceTokenEnvVar := fmt.Sprintf("%s_%s", defaultTokenEnvVar, strings.ToUpper(namespace))
 
 	for _, e := range os.Environ() {
@@ -74,7 +79,7 @@ func (s *AuthStore) findTokenForNamespaceInEnv(namespace string) *string {
 // - environment in form VP_API_TOKEN_{NAMESPACE}
 // - environment in form VP_API_TOKEN
 // if none are found, will attempt to create a token
-func (s *AuthStore) getTokenForNamespace(ctx context.Context, namespace string) (string, error) {
+func (s *authStore) getTokenForNamespace(ctx context.Context, namespace string) (string, error) {
 	if s.namespaceTokenCache[namespace] != nil {
 		return s.namespaceTokenCache[namespace].value, nil
 	}
@@ -98,7 +103,7 @@ func (s *AuthStore) getTokenForNamespace(ctx context.Context, namespace string) 
 }
 
 // getOrCreateTokenForNamespace gets a token for a namespace from the token manager or creates one if none are found
-func (s *AuthStore) getOrCreateTokenForNamespace(ctx context.Context, namespace string) (*TokenData, error) {
+func (s *authStore) getOrCreateTokenForNamespace(ctx context.Context, namespace string) (*TokenData, error) {
 	exists, err := s.tokenManager.TokenExists(ctx, tokenName, namespace)
 	if err != nil {
 		return nil, err
@@ -126,7 +131,7 @@ func (s *AuthStore) getOrCreateTokenForNamespace(ctx context.Context, namespace 
 }
 
 // ContextForNamespace gets a context with an authorization token for a namespace
-func (s *AuthStore) ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error) {
+func (s *authStore) ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error) {
 	var token string
 	var err error
 	if token, err = s.getTokenForNamespace(baseCtx, namespace); err != nil {
@@ -137,7 +142,7 @@ func (s *AuthStore) ContextForNamespace(baseCtx context.Context, namespace strin
 }
 
 // RemoveAllCreatedTokens deletes all tokens that have been created by the store
-func (s *AuthStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
+func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
 	var deletedTokens []string
 	for namespace, tokenData := range s.namespaceTokenCache {
 		existed, err := s.tokenManager.RemoveToken(ctx, tokenData.Name, namespace)

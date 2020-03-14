@@ -2,9 +2,7 @@ package utils
 
 import (
 	"errors"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
-	appManagerApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -14,18 +12,6 @@ func IsNotFoundError(err error) bool {
 		return false
 	}
 
-	if errors.Is(err, appmanager.ErrNotFound) {
-		return true
-	}
-
-	switch err := err.(type) {
-	// internal
-	case platformApiClient.GenericSwaggerError:
-		return err.StatusCode() == 404
-	case appManagerApiClient.GenericSwaggerError:
-		return err.StatusCode() == 404
-	// external
-	default:
-		return apierrors.IsNotFound(err) // K8s
-	}
+	return errors.Is(err, vvperrors.ErrNotFound) ||
+		apierrors.IsNotFound(err) // k8s
 }

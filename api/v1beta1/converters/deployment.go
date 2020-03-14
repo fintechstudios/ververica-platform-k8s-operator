@@ -3,7 +3,7 @@ package converters
 import (
 	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
 )
 
 // DeploymentFromNative converts a native K8s VpDeployment to the Ververica Platform's representation

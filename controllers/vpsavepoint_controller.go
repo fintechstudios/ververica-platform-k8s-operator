@@ -19,16 +19,16 @@ package controllers
 import (
 	"context"
 	"errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp-errors"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,9 +37,9 @@ import (
 // VpSavepointReconciler reconciles a VpSavepoint object
 type VpSavepointReconciler struct {
 	client.Client
-	Log                 logr.Logger
-	AppManagerClient    appmanager.Client
-	pollerManager       polling.PollerManager
+	Log              logr.Logger
+	AppManagerClient appmanager.Client
+	pollerManager    polling.PollerManager
 }
 
 func (r *VpSavepointReconciler) getStatusPollerFunc(req ctrl.Request, namespace, id string) polling.PollerFunc {
@@ -157,9 +157,9 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		},
 	})
 
-	if errors.Is(err, appmanager.ErrBadRequest) {
+	if errors.Is(err, vvperrors.ErrBadRequest) {
 		// Bad Request, should not requeue
-		log.Error(err, "Bad request when creating savepoint: "+vvperrors.GetVVPErrorMessage(err))
+		log.Error(err, "Bad request when creating savepoint: "+err.Error())
 		return ctrl.Result{Requeue: false}, nil
 	}
 

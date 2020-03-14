@@ -3,8 +3,8 @@ package vvperrors
 import (
 	"encoding/json"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
-	platformApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
+	platformApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
 )
 
 func bodyMessage(err error, body []byte) string {
