@@ -46,5 +46,5 @@ COPY config/ config/
 COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
-COPY appmanager-api-client appmanager-api-client/
-COPY platform-api-client platform-api-client/
+COPY pkg/ pkg/
+COPY mocks/ mocks/
