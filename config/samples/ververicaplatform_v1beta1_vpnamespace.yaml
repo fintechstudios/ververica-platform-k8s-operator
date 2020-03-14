@@ -1,7 +1,8 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpNamespace
 metadata:
-  name: doc-ingestion
+  name: testing
+  namespace: vvp
 spec:
   roleBindings:
     - role: "owner"
