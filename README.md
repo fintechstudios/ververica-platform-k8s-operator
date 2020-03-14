@@ -122,15 +122,9 @@ To use the default test cluster, you'll need to store a `KUBECONFIG` env var poi
 The API Clients are auto-generated using the [Swagger Codegen utility](https://github.com/swagger-api/swagger-codegen.git).
 
 #### AppManager
-##### Pre-Generation Changes
 
 The original Swagger file was taken from their live API documentation (available at `${VP_URL}/api/swagger`),
 but the docs don't exactly match their API, which makes the generated client incorrect.
-
-Main changes necessary:
-* `Artifact` needs many other fields
-* `model_pods.go` needs to be updated with the proper Kubernetes types
-* `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
 
 ##### Post-Generation Changes
 
@@ -152,8 +146,13 @@ Affected files:
 - `api_savepoint_resource.go`
 
 
+Type Changes:
+* `model_pods.go` needs to be updated with the proper Kubernetes types
+* `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
+
+
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
-you must manually change [`model_any.go`](internal/appmanager-api-client/model_any.go) to:
+you must manually change [`model_any.go`](internal/vvp/appmanager-api-client/model_any.go) to:
 
 ```go
 package ververicaplatformapi

@@ -19,14 +19,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform"
 	"os"
 	"runtime"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
-	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
 	dotenv "github.com/joho/godotenv"
 	apiv1 "k8s.io/api/core/v1"
 	k8s "k8s.io/apimachinery/pkg/runtime"
@@ -129,18 +130,19 @@ func main() {
 
 	// Create clients
 	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
-	platformClient := platformapi.NewAPIClient(&platformapi.Configuration{
+	platformApiClient := platformapi.NewAPIClient(&platformapi.Configuration{
 		BasePath:      *platformAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
+	platformClient := platform.NewClient(platformApiClient)
 
 	appManagerApiClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
 		BasePath:      *appManagerAPIURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
-	appManagerAuthStore := appmanager.NewAuthStore(&appmanager.PlatformTokenManager{PlatformAPIClient: platformClient})
+	appManagerAuthStore := appmanager.NewAuthStore(&platform.TokenManager{PlatformClient: platformClient})
 	appManagerClient := appmanager.NewClient(appManagerApiClient, appManagerAuthStore)
 
 	cleanup := func(ctx context.Context) {
@@ -152,35 +154,35 @@ func main() {
 	}
 
 	err = (&controllers.VpNamespaceReconciler{
-		Client:            mgr.GetClient(),
-		Log:               ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		PlatformAPIClient: platformClient,
+		Client:         mgr.GetClient(),
+		Log:            ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+		PlatformClient: platformClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
 		os.Exit(1)
 	}
 	err = (&controllers.VpDeploymentTargetReconciler{
-		Client:              mgr.GetClient(),
-		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
-		AppManagerClient:    appManagerClient,
+		Client:           mgr.GetClient(),
+		Log:              ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),
+		AppManagerClient: appManagerClient,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeploymentTarget")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpDeploymentReconciler{
-		Client:              mgr.GetClient(),
-		Log:                 ctrl.Log.WithName("controllers").WithName("VpDeployment"),
-		AppManagerClient:    appManagerClient,
+		Client:           mgr.GetClient(),
+		Log:              ctrl.Log.WithName("controllers").WithName("VpDeployment"),
+		AppManagerClient: appManagerClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpDeployment")
 		os.Exit(1)
 	}
 	if err = (&controllers.VpSavepointReconciler{
-		Client:              mgr.GetClient(),
-		Log:                 ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
-		AppManagerClient:    appManagerClient,
+		Client:           mgr.GetClient(),
+		Log:              ctrl.Log.WithName("controllers").WithName("VpSavepoint"),
+		AppManagerClient: appManagerClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)

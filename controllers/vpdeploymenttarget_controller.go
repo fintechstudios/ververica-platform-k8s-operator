@@ -23,9 +23,9 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
 	"github.com/go-logr/logr"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"

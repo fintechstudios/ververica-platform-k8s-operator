@@ -11,5 +11,5 @@
 package appmanagerapi
 
 type DeploymentTargetSpec struct {
-	Kubernetes         *KubernetesTarget  `json:"kubernetes"`
+	Kubernetes         *KubernetesTarget `json:"kubernetes"`
 }

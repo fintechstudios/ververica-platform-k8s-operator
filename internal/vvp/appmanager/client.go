@@ -4,42 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/antihax/optional"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
-	"net/http"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
 )
-
-var (
-	// TODO: make custom types
-	ErrBadRequest   = errors.New("bad request")
-	ErrUnauthorized = errors.New("unathorized")
-	ErrForbidden = errors.New("forbidden")
-	ErrConflict     = errors.New("conflict")
-	ErrNotFound     = errors.New("not found")
-	ErrUnknown      = errors.New("unknown error")
-
-	ErrAuthContext = errors.New("couldn't get authorized context")
-)
-
-func isResponseError(res *http.Response) bool {
-	return res != nil && res.StatusCode >= 400
-}
-
-func formatResponseError(res *http.Response) error {
-	switch res.StatusCode {
-	case 400:
-		return ErrBadRequest
-	case 401:
-		return ErrUnauthorized
-	case 403:
-		return ErrForbidden
-	case 404:
-		return ErrNotFound
-	case 409:
-		return ErrConflict
-	default:
-		return ErrUnknown
-	}
-}
 
 type Client interface {
 	DeploymentTargets() DeploymentTargetsService
@@ -50,14 +17,14 @@ type Client interface {
 
 type client struct {
 	apiClient                *appmanagerapi.APIClient
-	authStore                *AuthStore // TODO: make an interface
+	authStore                AuthStore
 	deploymentsService       DeploymentsService
 	deploymentTargetsService DeploymentTargetsService
 	eventsService            EventsService
 	savepointsService        SavepointsService
 }
 
-func NewClient(apiClient *appmanagerapi.APIClient, authStore *AuthStore) Client {
+func NewClient(apiClient *appmanagerapi.APIClient, authStore AuthStore) Client {
 	return &client{
 		apiClient: apiClient,
 		authStore: authStore,
@@ -112,14 +79,14 @@ func (s *deploymentTargetsService) GetDeploymentTarget(ctx context.Context, name
 func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, namespaceName string, depTarget appmanagerapi.DeploymentTarget) (*appmanagerapi.DeploymentTarget, error) {
 	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
 	if err != nil {
-		return nil, ErrAuthContext
+		return nil, vvperrors.ErrAuthContext
 	}
 
 	target, res, err := s.client.apiClient.DeploymentTargetResourceApi.
 		CreateDeploymentTargetUsingPOST(ctx, depTarget, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &target, err
@@ -128,8 +95,8 @@ func (s *deploymentTargetsService) CreateDeploymentTarget(ctx context.Context, n
 func (s *deploymentTargetsService) DeleteDeploymentTarget(ctx context.Context, namespaceName, name string) (*appmanagerapi.DeploymentTarget, error) {
 	depTarget, res, err := s.client.apiClient.DeploymentTargetResourceApi.DeleteDeploymentTargetUsingDELETE(ctx, name, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &depTarget, err
@@ -153,12 +120,12 @@ type eventsService struct {
 func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opts *GetEventsOpts) (*appmanagerapi.ResourceListOfEvent, error) {
 	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
 	if err != nil {
-		return nil, ErrAuthContext
+		return nil, vvperrors.ErrAuthContext
 	}
 	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, (*appmanagerapi.GetEventsUsingGETOpts)(opts))
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &eventsList, err
@@ -182,12 +149,12 @@ type deploymentsService struct {
 func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, id string) (*appmanagerapi.Deployment, error) {
 	ctx, err := s.client.authStore.ContextForNamespace(context.Background(), namespaceName)
 	if err != nil {
-		return nil, ErrAuthContext
+		return nil, vvperrors.ErrAuthContext
 	}
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentUsingGET(ctx, id, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &deployment, err
@@ -196,8 +163,8 @@ func (s *deploymentsService) GetDeployment(ctx context.Context, namespaceName, i
 func (s *deploymentsService) ListDeployments(ctx context.Context, namespaceName string) (*appmanagerapi.ResourceListOfDeployment, error) {
 	depList, res, err := s.client.apiClient.DeploymentResourceApi.GetDeploymentsUsingGET(ctx, namespaceName, nil)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &depList, err
@@ -220,14 +187,14 @@ func (s *deploymentsService) GetDeploymentByName(ctx context.Context, namespaceN
 		}
 	}
 
-	return nil, ErrNotFound
+	return nil, vvperrors.ErrNotFound
 }
 
 func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.CreateDeploymentUsingPOST(ctx, dep, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &deployment, err
@@ -236,8 +203,8 @@ func (s *deploymentsService) CreateDeployment(ctx context.Context, namespaceName
 func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName, id string, dep appmanagerapi.Deployment) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.UpdateDeploymentUsingPATCH(ctx, dep, id, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &deployment, err
@@ -246,8 +213,8 @@ func (s *deploymentsService) UpdateDeployment(ctx context.Context, namespaceName
 func (s *deploymentsService) DeleteDeployment(ctx context.Context, namespaceName, id string) (*appmanagerapi.Deployment, error) {
 	deployment, res, err := s.client.apiClient.DeploymentResourceApi.DeleteDeploymentUsingDELETE(ctx, id, namespaceName)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &deployment, err
@@ -264,21 +231,21 @@ type savepointsService struct {
 	client *client
 }
 
-func (s savepointsService) GetSavepoint(ctx context.Context, namespaceName, id string) (*appmanagerapi.Savepoint, error) {
+func (s *savepointsService) GetSavepoint(ctx context.Context, namespaceName, id string) (*appmanagerapi.Savepoint, error) {
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.GetSavepointUsingGET(ctx, namespaceName, id)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &savepoint, err
 }
 
-func (s savepointsService) CreateSavepoint(ctx context.Context, namespaceName string, savepoint appmanagerapi.Savepoint) (*appmanagerapi.Savepoint, error) {
+func (s *savepointsService) CreateSavepoint(ctx context.Context, namespaceName string, savepoint appmanagerapi.Savepoint) (*appmanagerapi.Savepoint, error) {
 	savepoint, res, err := s.client.apiClient.SavepointResourceApi.CreateSavepointUsingPOST(ctx, namespaceName, savepoint)
 
-	if isResponseError(res) {
-		return nil, formatResponseError(res)
+	if vvperrors.IsResponseError(res) {
+		return nil, vvperrors.FormatResponseError(res)
 	}
 
 	return &savepoint, err

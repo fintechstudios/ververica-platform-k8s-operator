@@ -2,13 +2,14 @@ package appmanager
 
 import (
 	"context"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform"
 	"os"
 	"strconv"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/fintechstudios/ververica-platform-k8s-operator/internal/appmanager-api-client"
+	. "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
 )
 
 func removeTokenData(slice []testTokenData, s int) []testTokenData {
@@ -73,7 +74,7 @@ func (m *testTokenManager) RemoveToken(ctx context.Context, name, namespace stri
 	return false, nil
 }
 
-var _ = Describe("AuthStore", func() {
+var _ = Describe("authStore", func() {
 	const (
 		TestNsToken  = "test-ns-TokenData"
 		DefaultToken = "no-ns-TokenData"
@@ -87,10 +88,10 @@ var _ = Describe("AuthStore", func() {
 		_ = os.Unsetenv(defaultTokenEnvVar)
 	}
 
-	var authStore *AuthStore
+	var authStore *authStore
 	var ctx context.Context
 	BeforeEach(func() {
-		authStore = NewAuthStore(&PlatformTokenManager{})
+		authStore = NewAuthStore(&platform.TokenManager{})
 		ctx = context.Background()
 	})
 
