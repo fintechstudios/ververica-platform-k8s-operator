@@ -20,16 +20,8 @@ type TokenData struct {
 	wasCreated bool
 }
 
-// TokenNotFoundError represents when no auth token can be found for a namespace
-type TokenNotFoundError struct {
-	Namespace string
-	Name      string
-}
-
-func (err TokenNotFoundError) Error() string {
-	return fmt.Sprintf("no API token by name %s found in namespace %s", err.Name, err.Namespace)
-}
-
+// TokenManager handles the API token lifecycle.
+// TODO: move to platform package, and leave the app manager with just the AuthStore interface
 type TokenManager interface {
 	// TokenExists checks if a token exists in a namespace by name
 	TokenExists(ctx context.Context, name, namespace string) (bool, error)
