@@ -27,7 +27,6 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-	"time"
 )
 
 var (
@@ -389,60 +388,10 @@ func detectContentType(body interface{}) string {
 	return contentType
 }
 
-// Ripped from https://github.com/gregjones/httpcache/blob/master/httpcache.go
-type cacheControl map[string]string
-
-func parseCacheControl(headers http.Header) cacheControl {
-	cc := cacheControl{}
-	ccHeader := headers.Get("Cache-Control")
-	for _, part := range strings.Split(ccHeader, ",") {
-		part = strings.Trim(part, " ")
-		if part == "" {
-			continue
-		}
-		if strings.ContainsRune(part, '=') {
-			keyval := strings.Split(part, "=")
-			cc[strings.Trim(keyval[0], " ")] = strings.Trim(keyval[1], ",")
-		} else {
-			cc[part] = ""
-		}
-	}
-	return cc
-}
-
-// CacheExpires helper function to determine remaining time before repeating a request.
-func CacheExpires(r *http.Response) time.Time {
-	// Figure out when the cache expires.
-	var expires time.Time
-	now, err := time.Parse(time.RFC1123, r.Header.Get("date"))
-	if err != nil {
-		return time.Now()
-	}
-	respCacheControl := parseCacheControl(r.Header)
-
-	if maxAge, ok := respCacheControl["max-age"]; ok {
-		lifetime, err := time.ParseDuration(maxAge + "s")
-		if err != nil {
-			expires = now
-		}
-		expires = now.Add(lifetime)
-	} else {
-		expiresHeader := r.Header.Get("Expires")
-		if expiresHeader != "" {
-			expires, err = time.Parse(time.RFC1123, expiresHeader)
-			if err != nil {
-				expires = now
-			}
-		}
-	}
-	return expires
-}
-
 // GenericSwaggerError Provides access to the body, error and model on returned errors.
 type GenericSwaggerError struct {
 	body       []byte
 	error      string
-	statusCode int
 	model      interface{}
 }
 
@@ -456,17 +405,7 @@ func (e GenericSwaggerError) Body() []byte {
 	return e.body
 }
 
-// StatusCode returns the response status code
-func (e GenericSwaggerError) StatusCode() int {
-	return e.statusCode
-}
-
 // Model returns the unpacked model of the error
 func (e GenericSwaggerError) Model() interface{} {
 	return e.model
-}
-
-func (e GenericSwaggerError) WithStatusCode(statusCode int) GenericSwaggerError {
-	e.statusCode = statusCode
-	return e
 }

@@ -17,5 +17,5 @@ import (
 type DeploymentStatusRunning struct {
 	Conditions []DeploymentCondition `json:"conditions,omitempty"`
 	JobId string                     `json:"jobId,omitempty"`
-	TransitionTime time.Time         `json:"transitionTime,omitempty"`
+	TransitionTime *time.Time         `json:"transitionTime,omitempty"`
 }

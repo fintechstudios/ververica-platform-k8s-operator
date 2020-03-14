@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"strconv"
 	"time"
 
@@ -110,6 +111,19 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 
 	return func() interface{} {
 		log.Info("Polling")
+
+		var vpDeployment v1beta1.VpDeployment
+		if err := r.Get(context.Background(), req.NamespacedName, &vpDeployment); err != nil {
+			log.Error(err, "Error while getting latest k8s object")
+
+			if utils.IsNotFoundError(err) {
+				log.Info( "Object gone, stopping polling")
+				return polling.FinishedResult
+			}
+
+			return nil
+		}
+
 		events, err := r.AppManagerClient.Events().GetEvents(context.Background(), namespace, &appmanager.GetEventsOpts{
 			DeploymentId: optional.NewInterface(id),
 			JobId:        optional.EmptyInterface(),
@@ -117,12 +131,6 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 
 		if err != nil {
 			log.Error(err, "Error while polling events")
-			return nil
-		}
-
-		var vpDeployment v1beta1.VpDeployment
-		if err := r.Get(context.Background(), req.NamespacedName, &vpDeployment); err != nil {
-			log.Error(err, "Error while getting latest k8s object")
 			return nil
 		}
 
@@ -194,6 +202,8 @@ func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpD
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
 	// On each polling callback, push the update through the k8s client
 	poller := polling.NewPoller(r.getEventPollerFunc(req, nsName, vpID), eventPollingInterval)
+	log := r.getLogger(req)
+	log.Info("Adding new poller", "type", "event")
 	r.pollerManager.AddPoller("event", req.String(), poller)
 }
 
@@ -202,22 +212,23 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 	return func() interface{} {
 		log.Info("Polling")
 
+		var vpDeploymentUpdated v1beta1.VpDeployment
+		if err := r.Get(context.Background(), req.NamespacedName, &vpDeploymentUpdated); err != nil {
+			if utils.IsNotFoundError(err) {
+				log.Error(err, "VpDeployment not found while polling")
+				return polling.FinishedResult
+			} else {
+				log.Error(err, "Error getting VpDeployment while polling")
+			}
+			return nil
+		}
+
 		deployment, err := r.AppManagerClient.
 			Deployments().
 			GetDeployment(context.Background(), namespace, id)
 		if err != nil {
 			log.Error(err, "Error while polling deployment")
 			return nil
-		}
-
-		var vpDeploymentUpdated v1beta1.VpDeployment
-		if err = r.Get(context.Background(), req.NamespacedName, &vpDeploymentUpdated); err != nil {
-			if utils.IsNotFoundError(err) {
-				log.Error(err, "VpDeployment not found while polling")
-			} else {
-				log.Error(err, "Error getting VpDeployment while polling")
-			}
-			return deployment
 		}
 
 		if err = r.updateResource(&vpDeploymentUpdated, deployment); err != nil {
@@ -231,8 +242,11 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
+
 	poller := polling.NewPoller(r.getStatusPollerFunc(req, nsName, vpID), statusPollingInterval)
 
+	log := r.getLogger(req)
+	log.Info("Adding new poller", "type", "status")
 	r.pollerManager.AddPoller("status", req.String(), poller)
 }
 
@@ -287,7 +301,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 		Deployments().
 		CreateDeployment(context.Background(), namespace, deployment)
 
-	if errors.Is(err, appmanager.ErrBadRequest) {
+	if errors.Is(err, vvperrors.ErrBadRequest) {
 		// Bad Request, should not requeue
 		return ctrl.Result{Requeue: false}, err
 	}
@@ -331,7 +345,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 		Deployments().
 		UpdateDeployment(context.Background(), nsName, currentDeployment.Metadata.Id, desiredDeployment)
 
-	if errors.Is(err, appmanager.ErrBadRequest) {
+	if errors.Is(err, vvperrors.ErrBadRequest) {
 		// Bad Request, should not requeue
 		log.Error(err, "Error patching Deployment")
 		return ctrl.Result{Requeue: false}, nil
@@ -377,6 +391,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	if err != nil {
 		// If it's already gone, great!
+		r.removePollers(req)
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
@@ -405,6 +420,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 
 	deployment, err = r.AppManagerClient.Deployments().DeleteDeployment(ctx, nsName, deployment.Metadata.Id)
 	if err != nil {
+		r.removePollers(req)
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
@@ -453,6 +469,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 				return ctrl.Result{}, err
 			}
 		}
+		r.removePollers(req)
 
 		return res, nil
 	}

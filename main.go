@@ -90,10 +90,8 @@ func main() {
 		enableDebugMode = flag.Bool("debug", false, "Enable debug mode for logging.")
 		watchNamespace  = flag.String("watch-namespace", apiv1.NamespaceAll,
 			`Namespace to watch for resources. Default is to watch all namespaces`)
-		platformAPIURL = flag.String("platform-api-url", "http://localhost:8081",
-			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol, host, and base path.")
-		appManagerAPIURL = flag.String("app-manager-api-url", "http://localhost:8081/api",
-			"The URL to the Ververica Platform AppManager API, without a trailing slash. Should include the protocol, host, and base path.")
+		vvpURL = flag.String("vvp-url", "http://localhost:8081",
+			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol and host.")
 		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
 	flag.Parse()
@@ -131,14 +129,14 @@ func main() {
 	// Create clients
 	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
 	platformApiClient := platformapi.NewAPIClient(&platformapi.Configuration{
-		BasePath:      *platformAPIURL,
+		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
 	platformClient := platform.NewClient(platformApiClient)
 
 	appManagerApiClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
-		BasePath:      *appManagerAPIURL,
+		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	})
@@ -150,7 +148,7 @@ func main() {
 		if err != nil {
 			setupLog.Error(err, "error cleaning up")
 		}
-		setupLog.Info("Removed %i authe  tokens", len(tokens))
+		setupLog.Info("Removed %i auth tokens", len(tokens))
 	}
 
 	err = (&controllers.VpNamespaceReconciler{

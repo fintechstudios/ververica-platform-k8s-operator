@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"strconv"
 	"time"
 
@@ -116,7 +117,7 @@ func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarge
 		DeploymentTargets().
 		DeleteDeploymentTarget(context.Background(), nsName, req.Name)
 
-	if errors.Is(err, appmanager.ErrConflict) {
+	if errors.Is(err, vvperrors.ErrConflict) {
 		// Conflict - still have deployments referenced
 		// Can take a while to tear down
 		return ctrl.Result{RequeueAfter: time.Second * 30}, nil

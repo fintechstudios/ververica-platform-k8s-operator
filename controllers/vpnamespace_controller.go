@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform"
 	"time"
 
@@ -112,6 +114,11 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
 
+	if errors.Is(err, vvperrors.ErrBadRequest) {
+		log.Error(err, "Not requeuing")
+		return ctrl.Result{Requeue:false}, nil
+	}
+
 	if err != nil {
 		log.Info("Error creating VP namespace")
 		return ctrl.Result{}, err
@@ -131,6 +138,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 // handleUpdate updates the k8s resource when it already exists in the VP
 func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1beta1.VpNamespace, currentNamespace platformapiclient.Namespace) (ctrl.Result, error) {
 	ctx := context.TODO()
+	log := r.getLogger(req)
 
 	// lifecyclePhase and createTime must be left nil
 	updatedNamespace := platformapiclient.Namespace{
@@ -138,6 +146,12 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 		RoleBindings: converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
 	updated, err := r.PlatformClient.Namespaces().UpdateNamespace(ctx, vpNamespace.Name, updatedNamespace)
+
+	if errors.Is(err, vvperrors.ErrBadRequest) {
+		log.Error(err, "Not requeuing")
+		return ctrl.Result{Requeue:false}, nil
+	}
+
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -156,6 +170,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 
 	if err != nil {
 		// If it's already gone, great!
+		r.removePollers(req)
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 

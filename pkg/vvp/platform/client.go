@@ -68,7 +68,7 @@ func (n *namespacesService) GetNamespace(ctx context.Context, namespaceName stri
 
 func (n *namespacesService) CreateNamespace(ctx context.Context, namespace platformapi.Namespace) (*platformapi.Namespace, error) {
 	// name must be prefixed on creation
-	if strings.HasPrefix(namespace.Name, "namespaces/") {
+	if !strings.HasPrefix(namespace.Name, "namespaces/") {
 		namespace.Name = "namespaces/" + namespace.Name
 	}
 
@@ -86,7 +86,7 @@ func (n *namespacesService) CreateNamespace(ctx context.Context, namespace platf
 
 func (n *namespacesService) UpdateNamespace(ctx context.Context, namespaceName string, namespace platformapi.Namespace) (*platformapi.Namespace, error) {
 	// name must be prefixed on update
-	if strings.HasPrefix(namespace.Name, "namespaces/") {
+	if !strings.HasPrefix(namespace.Name, "namespaces/") {
 		namespace.Name = "namespaces/" + namespace.Name
 	}
 
