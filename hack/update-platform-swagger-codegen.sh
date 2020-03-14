@@ -23,7 +23,7 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")
 PROJECT_DIR="$(cd -P -- "$(dirname -- "${SCRIPT_ROOT}/../..")" && pwd -P)"
 SWAGGER_FILE=platform-api-swagger.json
 CONFIG_FILE=platform-swagger-gen-config.json
-OUT_DIR=internal/platform-api-client
+OUT_DIR=pkg/vvp/platform-api
 
 rm -rf "${PROJECT_DIR:?}"/${OUT_DIR}/**/* !"${PROJECT_DIR:?}"/${OUT_DIR}/.swagger-codegen-ignore
 mkdir -p "${PROJECT_DIR}"/${OUT_DIR}
