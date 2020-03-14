@@ -12,5 +12,5 @@ package platformapi
 
 type RoleBinding struct {
 	Members []string `json:"members,omitempty"`
-	Role string `json:"role,omitempty"`
+	Role    string   `json:"role,omitempty"`
 }

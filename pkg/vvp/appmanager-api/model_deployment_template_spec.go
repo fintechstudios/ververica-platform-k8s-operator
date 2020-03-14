@@ -11,11 +11,11 @@
 package appmanagerapi
 
 type DeploymentTemplateSpec struct {
-	Artifact *Artifact                   `json:"artifact,omitempty"`
-	FlinkConfiguration map[string]string `json:"flinkConfiguration,omitempty"`
-	Kubernetes *KubernetesOptions        `json:"kubernetes,omitempty"`
-	Logging *Logging                     `json:"logging,omitempty"`
-	NumberOfTaskManagers int32           `json:"numberOfTaskManagers,omitempty"`
-	Parallelism int32                    `json:"parallelism,omitempty"`
-	Resources map[string]ResourceSpec    `json:"resources,omitempty"`
+	Artifact             *Artifact               `json:"artifact,omitempty"`
+	FlinkConfiguration   map[string]string       `json:"flinkConfiguration,omitempty"`
+	Kubernetes           *KubernetesOptions      `json:"kubernetes,omitempty"`
+	Logging              *Logging                `json:"logging,omitempty"`
+	NumberOfTaskManagers int32                   `json:"numberOfTaskManagers,omitempty"`
+	Parallelism          int32                   `json:"parallelism,omitempty"`
+	Resources            map[string]ResourceSpec `json:"resources,omitempty"`
 }

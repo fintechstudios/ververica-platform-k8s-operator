@@ -38,9 +38,9 @@ import (
 // VpNamespaceReconciler reconciles a VpNamespace object
 type VpNamespaceReconciler struct {
 	client.Client
-	Log               logr.Logger
-	PlatformClient    platform.Client
-	pollerManager     polling.PollerManager
+	Log            logr.Logger
+	PlatformClient platform.Client
+	pollerManager  polling.PollerManager
 }
 
 func (r *VpNamespaceReconciler) ensurePollersAreRunning(req ctrl.Request, vpNamespace *v1beta1.VpNamespace) {
@@ -116,7 +116,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 
 	if errors.Is(err, vvperrors.ErrBadRequest) {
 		log.Error(err, "Not requeuing")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	if err != nil {
@@ -149,7 +149,7 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 
 	if errors.Is(err, vvperrors.ErrBadRequest) {
 		log.Error(err, "Not requeuing")
-		return ctrl.Result{Requeue:false}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 
 	if err != nil {

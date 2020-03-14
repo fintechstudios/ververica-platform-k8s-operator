@@ -302,17 +302,17 @@ func (c *APIClient) prepareRequest(
 }
 
 func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err error) {
-		if strings.Contains(contentType, "application/xml") {
-			if err = xml.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
-		} else if strings.Contains(contentType, "application/json") {
-			if err = json.Unmarshal(b, v); err != nil {
-				return err
-			}
-			return nil
+	if strings.Contains(contentType, "application/xml") {
+		if err = xml.Unmarshal(b, v); err != nil {
+			return err
 		}
+		return nil
+	} else if strings.Contains(contentType, "application/json") {
+		if err = json.Unmarshal(b, v); err != nil {
+			return err
+		}
+		return nil
+	}
 	return errors.New("undefined response type")
 }
 
@@ -441,10 +441,10 @@ func CacheExpires(r *http.Response) time.Time {
 
 // GenericSwaggerError Provides access to the body, error and model on returned errors.
 type GenericSwaggerError struct {
-	body  []byte
-	error string
+	body       []byte
+	error      string
 	statusCode int
-	model interface{}
+	model      interface{}
 }
 
 // Error returns non-empty string if there was an error.

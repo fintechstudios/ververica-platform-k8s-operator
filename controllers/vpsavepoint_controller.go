@@ -149,13 +149,13 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 	createdSavepoint, err := r.AppManagerClient.
 		Savepoints().
 		CreateSavepoint(context.Background(), nsName, appmanagerapi.Savepoint{
-		Kind:       "Savepoint",
-		ApiVersion: "v1",
-		Metadata: &appmanagerapi.SavepointMetadata{
-			DeploymentId: depID,
-			Namespace:    nsName,
-		},
-	})
+			Kind:       "Savepoint",
+			ApiVersion: "v1",
+			Metadata: &appmanagerapi.SavepointMetadata{
+				DeploymentId: depID,
+				Namespace:    nsName,
+			},
+		})
 
 	if errors.Is(err, vvperrors.ErrBadRequest) {
 		// Bad Request, should not requeue

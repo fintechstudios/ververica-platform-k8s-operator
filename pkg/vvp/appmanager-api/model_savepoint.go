@@ -11,9 +11,9 @@
 package appmanagerapi
 
 type Savepoint struct {
-	ApiVersion string           `json:"apiVersion,omitempty"`
-	Kind string                 `json:"kind,omitempty"`
-	Metadata *SavepointMetadata `json:"metadata,omitempty"`
-	Spec *SavepointSpec         `json:"spec,omitempty"`
-	Status *SavepointStatus     `json:"status,omitempty"`
+	ApiVersion string             `json:"apiVersion,omitempty"`
+	Kind       string             `json:"kind,omitempty"`
+	Metadata   *SavepointMetadata `json:"metadata,omitempty"`
+	Spec       *SavepointSpec     `json:"spec,omitempty"`
+	Status     *SavepointStatus   `json:"status,omitempty"`
 }

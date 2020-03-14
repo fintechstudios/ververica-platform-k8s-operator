@@ -15,13 +15,13 @@ import (
 )
 
 type SavepointMetadata struct {
-	Id string `json:"id,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
-	DeploymentId string `json:"deploymentId,omitempty"`
-	JobId string `json:"jobId,omitempty"`
-	Origin string `json:"origin,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+	Id              string            `json:"id,omitempty"`
+	Namespace       string            `json:"namespace,omitempty"`
+	CreatedAt       time.Time         `json:"createdAt,omitempty"`
+	ModifiedAt      time.Time         `json:"modifiedAt,omitempty"`
+	DeploymentId    string            `json:"deploymentId,omitempty"`
+	JobId           string            `json:"jobId,omitempty"`
+	Origin          string            `json:"origin,omitempty"`
+	Annotations     map[string]string `json:"annotations,omitempty"`
+	ResourceVersion int32             `json:"resourceVersion,omitempty"`
 }

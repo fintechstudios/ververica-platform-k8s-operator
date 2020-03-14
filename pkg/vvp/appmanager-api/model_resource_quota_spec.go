@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type ResourceQuotaSpec struct {
-	Limits *ResourceQuotaQuantity           `json:"limits,omitempty"`
+	Limits           *ResourceQuotaQuantity `json:"limits,omitempty"`
 	ToleratedOveruse *ResourceQuotaQuantity `json:"toleratedOveruse,omitempty"`
-	Type_ string                            `json:"type,omitempty"`
+	Type_            string                 `json:"type,omitempty"`
 }

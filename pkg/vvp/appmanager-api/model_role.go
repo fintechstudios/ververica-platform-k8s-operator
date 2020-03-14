@@ -10,8 +10,8 @@
 package appmanagerapi
 
 type Role struct {
-	Kind string            `json:"kind,omitempty"`
-	ApiVersion string      `json:"apiVersion,omitempty"`
-	Metadata *RoleMetadata `json:"metadata"`
-	Spec *RoleSpec         `json:"spec"`
+	Kind       string        `json:"kind,omitempty"`
+	ApiVersion string        `json:"apiVersion,omitempty"`
+	Metadata   *RoleMetadata `json:"metadata"`
+	Spec       *RoleSpec     `json:"spec"`
 }

@@ -11,8 +11,8 @@
 package appmanagerapi
 
 type RevisionInformation struct {
-	BuildTime string `json:"buildTime,omitempty"`
-	BuildVersion string `json:"buildVersion,omitempty"`
-	CommitShaLong string `json:"commitShaLong,omitempty"`
+	BuildTime      string `json:"buildTime,omitempty"`
+	BuildVersion   string `json:"buildVersion,omitempty"`
+	CommitShaLong  string `json:"commitShaLong,omitempty"`
 	CommitShaShort string `json:"commitShaShort,omitempty"`
 }

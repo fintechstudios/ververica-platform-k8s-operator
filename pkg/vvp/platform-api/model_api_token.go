@@ -16,7 +16,7 @@ import (
 
 type ApiToken struct {
 	CreateTime *time.Time `json:"createTime,omitempty"`
-	Name string `json:"name,omitempty"`
-	Role string `json:"role,omitempty"`
-	Secret string `json:"secret,omitempty"`
+	Name       string     `json:"name,omitempty"`
+	Role       string     `json:"role,omitempty"`
+	Secret     string     `json:"secret,omitempty"`
 }
