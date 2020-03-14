@@ -1,11 +1,11 @@
 package main
 
 import (
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 func TestMainPkg(t *testing.T) {
@@ -14,6 +14,6 @@ func TestMainPkg(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"main",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 
 }
