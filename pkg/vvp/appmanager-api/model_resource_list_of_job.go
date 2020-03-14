@@ -11,8 +11,8 @@
 package appmanagerapi
 
 type ResourceListOfJob struct {
-	ApiVersion string              `json:"apiVersion,omitempty"`
-	Items []Job                    `json:"items,omitempty"`
-	Kind string                    `json:"kind,omitempty"`
-	Metadata *ResourceListMetadata `json:"metadata,omitempty"`
+	ApiVersion string                `json:"apiVersion,omitempty"`
+	Items      []Job                 `json:"items,omitempty"`
+	Kind       string                `json:"kind,omitempty"`
+	Metadata   *ResourceListMetadata `json:"metadata,omitempty"`
 }

@@ -138,7 +138,7 @@ func (s *authStore) ContextForNamespace(baseCtx context.Context, namespaceName s
 func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
 	var deletedTokens []string
 	for namespace, tokenData := range s.namespaceTokenCache {
-		existed, err := s.tokenManager.RemoveToken(ctx, namespace, tokenData.Name,)
+		existed, err := s.tokenManager.RemoveToken(ctx, namespace, tokenData.Name)
 		if err != nil {
 			return deletedTokens, err
 		}

@@ -127,7 +127,6 @@ func formatTokenName(namespaceName, name string) string {
 	return fmt.Sprintf("namespaces/%s/apitokens/%s", namespaceName, name)
 }
 
-
 type ApiTokensService interface {
 	GetApiToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error)
 	CreateApiToken(ctx context.Context, namespaceName string, token platformapi.ApiToken) (*platformapi.ApiToken, error)

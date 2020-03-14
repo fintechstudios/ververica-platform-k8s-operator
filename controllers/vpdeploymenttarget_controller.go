@@ -76,7 +76,7 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 			Annotations: vpDepTarget.Spec.Metadata.Annotations,
 		},
 		Spec: &appmanagerapi.DeploymentTargetSpec{
-			Kubernetes:         &appmanagerapi.KubernetesTarget{Namespace: vpDepTarget.Spec.Spec.Kubernetes.Namespace},
+			Kubernetes: &appmanagerapi.KubernetesTarget{Namespace: vpDepTarget.Spec.Spec.Kubernetes.Namespace},
 		},
 	}
 	// create it

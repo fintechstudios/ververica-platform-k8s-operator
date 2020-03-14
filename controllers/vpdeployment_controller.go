@@ -117,7 +117,7 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 			log.Error(err, "Error while getting latest k8s object")
 
 			if utils.IsNotFoundError(err) {
-				log.Info( "Object gone, stopping polling")
+				log.Info("Object gone, stopping polling")
 				return polling.FinishedResult
 			}
 

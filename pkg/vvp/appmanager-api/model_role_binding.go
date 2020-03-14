@@ -10,8 +10,8 @@
 package appmanagerapi
 
 type RoleBinding struct {
-	Kind string                   `json:"kind,omitempty"`
-	ApiVersion string             `json:"apiVersion,omitempty"`
-	Metadata *RoleBindingMetadata `json:"metadata"`
-	Spec *RoleBindingSpec         `json:"spec"`
+	Kind       string               `json:"kind,omitempty"`
+	ApiVersion string               `json:"apiVersion,omitempty"`
+	Metadata   *RoleBindingMetadata `json:"metadata"`
+	Spec       *RoleBindingSpec     `json:"spec"`
 }

@@ -13,5 +13,5 @@ package appmanagerapi
 type JobStatus struct {
 	Failure *Failure          `json:"failure,omitempty"`
 	Started *JobStatusStarted `json:"started,omitempty"`
-	State string              `json:"state,omitempty"`
+	State   string            `json:"state,omitempty"`
 }

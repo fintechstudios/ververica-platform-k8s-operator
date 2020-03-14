@@ -110,7 +110,7 @@ manifests: controller-gen
 # Run gofmt against non-generated code
 .PHONY: fmt
 fmt:
-	gofmt -s -w ./api ./controllers *.go
+	gofmt -s -w ./api ./controllers ./pkg *.go
 
 .PHONY: lint
 lint:

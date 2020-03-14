@@ -11,8 +11,8 @@
 package appmanagerapi
 
 type Event struct {
-	ApiVersion string       `json:"apiVersion,omitempty"`
-	Kind string             `json:"kind,omitempty"`
-	Metadata *EventMetadata `json:"metadata,omitempty"`
-	Spec *EventSpec         `json:"spec,omitempty"`
+	ApiVersion string         `json:"apiVersion,omitempty"`
+	Kind       string         `json:"kind,omitempty"`
+	Metadata   *EventMetadata `json:"metadata,omitempty"`
+	Spec       *EventSpec     `json:"spec,omitempty"`
 }
