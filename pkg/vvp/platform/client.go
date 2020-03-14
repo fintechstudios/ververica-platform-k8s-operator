@@ -3,8 +3,8 @@ package platform
 import (
 	"context"
 	"fmt"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
-	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 	"regexp"
 	"strings"
 )

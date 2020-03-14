@@ -3,8 +3,8 @@ package utils
 import (
 	"errors"
 
-	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
-	platformApi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	appManagerApi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	platformApi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"

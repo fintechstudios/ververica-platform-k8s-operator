@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
-	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 	"net/http"
 )
 

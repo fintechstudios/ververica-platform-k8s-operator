@@ -18,13 +18,13 @@ package controllers
 
 import (
 	"context"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform"
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/polling"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/utils"
-	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
+	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"

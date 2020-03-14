@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
+	appmanager "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec

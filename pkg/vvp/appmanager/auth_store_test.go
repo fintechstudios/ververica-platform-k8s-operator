@@ -2,14 +2,14 @@ package appmanager
 
 import (
 	"context"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform"
 	"os"
 	"strconv"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
+	. "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 func removeTokenData(slice []testTokenData, s int) []testTokenData {

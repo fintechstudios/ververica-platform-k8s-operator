@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 )
 
 var ErrorInvalidNamespaceLifecyclePhase = errors.New("origin must be one of: LIFECYCLE_PHASE_ACTIVE, LIFECYCLE_PHASE_TERMINATING, UNRECOGNIZED, LIFECYCLE_PHASE_INVALID")

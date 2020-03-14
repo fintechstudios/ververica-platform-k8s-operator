@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/antihax/optional"
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/appmanager-api-client"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 )
 
 type Client interface {

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"errors"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 

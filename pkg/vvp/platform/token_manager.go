@@ -3,9 +3,9 @@ package platform
 import (
 	"context"
 	"errors"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/errors"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 
-	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/internal/vvp/platform-api-client"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 )
 
 // TokenManager manages creation / deletion / querying of Platform API Tokens

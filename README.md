@@ -152,7 +152,7 @@ Type Changes:
 
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
-you must manually change [`model_any.go`](internal/vvp/appmanager-api-client/model_any.go) to:
+you must manually change [`model_any.go`](pkg/vvp/appmanager-api/model_any.go) to:
 
 ```go
 package ververicaplatformapi
