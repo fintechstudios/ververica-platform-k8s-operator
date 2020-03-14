@@ -42,11 +42,15 @@ type authStore struct {
 	tokenManager        TokenManager
 }
 
-func NewAuthStore(tokenManager TokenManager) AuthStore {
+func newAuthStore(manager TokenManager) *authStore {
 	return &authStore{
 		namespaceTokenCache: make(map[string]*TokenData),
-		tokenManager:        tokenManager,
+		tokenManager:        manager,
 	}
+}
+
+func NewAuthStore(tokenManager TokenManager) AuthStore {
+	return newAuthStore(tokenManager)
 }
 
 func (s *authStore) findTokenForNamespaceInEnv(namespaceName string) *string {

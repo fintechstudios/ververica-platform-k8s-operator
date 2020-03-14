@@ -173,15 +173,6 @@ just override the entrypoint.
 the manager binary and copies it over into an image for distribution.
 
 
-## Future Work
-
-This is a MVP for Flink deployments at FinTech Studios. We would love to see this
-improved! 
-
-Some known issues + places to improve:
-* Make the Platform APIClient an `interface` so that something like [`mockery`](https://github.com/vektra/mockery) can mock it for tests.
-* Splitting tests into unit, integration, e2e tests against a live cluster, etc.
-
 ## Acknowledgements
 
 Other OSS that influenced this project:

@@ -32,8 +32,8 @@ EventResourceApiService Filter all events for a deployment or job
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace namespace
  * @param optional nil or *GetEventsUsingGETOpts - Optional Parameters:
-     * @param "DeploymentId" (optional.Interface of string) -  deploymentId
-     * @param "JobId" (optional.Interface of string) -  jobId
+     * @param "DeploymentID" (optional.Interface of string) -  deploymentId
+     * @param "JobID" (optional.Interface of string) -  jobId
 
 @return ResourceListOfEvent
 */

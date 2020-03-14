@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	vvpv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,19 +20,19 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 	var reconciler VpDeploymentTargetReconciler
 
 	BeforeEach(func() {
-		vpAPIClient := vpAPI.APIClient{}
+		client := &mocks.Client{}
 
 		reconciler = VpDeploymentTargetReconciler{
-			Client:              k8sClient,
-			Log:                 logger,
-			AppManagerAPIClient: &vpAPIClient,
+			Client:           k8sClient,
+			Log:              logger,
+			AppManagerClient: client,
 		}
 	})
 
 	Describe("updateResource", func() {
 		var (
 			key              types.NamespacedName
-			created, fetched *ververicaplatformv1beta1.VpDeploymentTarget
+			created, fetched *vvpv1beta1.VpDeploymentTarget
 		)
 
 		BeforeEach(func() {
@@ -38,7 +40,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &ververicaplatformv1beta1.VpDeploymentTarget{
+			created = &vvpv1beta1.VpDeploymentTarget{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        "foo",
 					Namespace:   "default",
@@ -53,10 +55,10 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 		})
 
 		It("should update a k8s deployment target with a VP deployment target", func() {
-			depTarget := &vpAPI.DeploymentTarget{
+			depTarget := &appmanagerapi.DeploymentTarget{
 				Kind:       "DeploymentTarget",
 				ApiVersion: "v1",
-				Metadata: &vpAPI.DeploymentTargetMetadata{
+				Metadata: &appmanagerapi.DeploymentTargetMetadata{
 					Id:              "2da2f867-5899-4bef-8ad0-9771bbac38b4",
 					Name:            created.Name,
 					CreatedAt:       time.Now(),
@@ -69,8 +71,8 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 						"non-production": "true",
 					},
 				},
-				Spec: &vpAPI.DeploymentTargetSpec{
-					Kubernetes: &vpAPI.KubernetesTarget{
+				Spec: &appmanagerapi.DeploymentTargetSpec{
+					Kubernetes: &appmanagerapi.KubernetesTarget{
 						Namespace: "default",
 					},
 				},
@@ -78,7 +80,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 
 			Expect(reconciler.updateResource(created, depTarget)).To(Succeed())
 
-			fetched = &ververicaplatformv1beta1.VpDeploymentTarget{}
+			fetched = &vvpv1beta1.VpDeploymentTarget{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(annotations.Get(fetched.Annotations, annotations.ResourceVersion)).To(Equal(fmt.Sprint(depTarget.Metadata.ResourceVersion)))
 			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(depTarget.Metadata.Id))

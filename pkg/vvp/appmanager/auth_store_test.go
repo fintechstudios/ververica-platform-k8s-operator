@@ -2,7 +2,6 @@ package appmanager
 
 import (
 	"context"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform"
 	"os"
 	"strconv"
 
@@ -31,16 +30,16 @@ type testTokenManager struct {
 	tokens []testTokenData
 }
 
-func (m *testTokenManager) TokenExists(ctx context.Context, name, namespace string) (bool, error) {
+func (m *testTokenManager) TokenExists(ctx context.Context, namespaceName, name string) (bool, error) {
 	for _, tokenData := range m.tokens {
-		if tokenData.namespace == namespace && tokenData.name == name {
+		if tokenData.namespace == namespaceName && tokenData.name == name {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func (m *testTokenManager) CreateToken(ctx context.Context, name, role, namespace string) (string, error) {
+func (m *testTokenManager) CreateToken(ctx context.Context, namespaceName, name, role string) (string, error) {
 	var id int
 	if len(m.tokens) > 0 {
 		lastTokenData := m.tokens[len(m.tokens)-1]
@@ -50,18 +49,18 @@ func (m *testTokenManager) CreateToken(ctx context.Context, name, role, namespac
 	}
 
 	m.tokens = append(m.tokens, testTokenData{
-		namespace,
+		namespaceName,
 		name,
 		role,
 		id,
 	})
-	return fakeTokenSecret(role, namespace, id), nil
+	return fakeTokenSecret(role, namespaceName, id), nil
 }
 
-func (m *testTokenManager) RemoveToken(ctx context.Context, name, namespace string) (bool, error) {
+func (m *testTokenManager) RemoveToken(ctx context.Context, namespaceName, name string) (bool, error) {
 	var index *int
 	for i, tokenData := range m.tokens {
-		if tokenData.namespace == namespace && tokenData.name == name {
+		if tokenData.namespace == namespaceName && tokenData.name == name {
 			index = &i
 		}
 	}
@@ -88,10 +87,10 @@ var _ = Describe("authStore", func() {
 		_ = os.Unsetenv(defaultTokenEnvVar)
 	}
 
-	var authStore *authStore
+	var store *authStore
 	var ctx context.Context
 	BeforeEach(func() {
-		authStore = NewAuthStore(&platform.TokenManager{})
+		store = newAuthStore(&testTokenManager{})
 		ctx = context.Background()
 	})
 
@@ -101,23 +100,23 @@ var _ = Describe("authStore", func() {
 			AfterEach(unsetEnv)
 
 			It("should should find the token with an exact namespace match", func() {
-				token, err := authStore.getTokenForNamespace(ctx, "test")
+				token, err := store.getTokenForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(TestNsToken))
 			})
 
 			It("should should find the token with a default match", func() {
-				token, err := authStore.getTokenForNamespace(ctx, "another-ns")
+				token, err := store.getTokenForNamespace(ctx, "another-ns")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(DefaultToken))
 			})
 
 			It("should cache tokens", func() {
-				token, err := authStore.getTokenForNamespace(ctx, "test")
+				token, err := store.getTokenForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(TestNsToken))
 				unsetEnv()
-				token, err = authStore.getTokenForNamespace(ctx, "test")
+				token, err = store.getTokenForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(TestNsToken))
 			})
@@ -136,18 +135,18 @@ var _ = Describe("authStore", func() {
 						},
 					},
 				}
-				authStore = NewAuthStore(&manager)
+				store = newAuthStore(&manager)
 			})
 
 			It("should create a token if one doesn't exist", func() {
-				token, err := authStore.getTokenForNamespace(ctx, "test-a")
+				token, err := store.getTokenForNamespace(ctx, "test-a")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(fakeTokenSecret("owner", "test-a", 2)))
 				Expect(len(manager.tokens)).To(Equal(2))
 			})
 
 			It("should create a new token and delete the old if one already exist", func() {
-				token, err := authStore.getTokenForNamespace(ctx, "test")
+				token, err := store.getTokenForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
 				Expect(token).To(Equal(fakeTokenSecret("owner", "test", 1)))
 				Expect(len(manager.tokens)).To(Equal(1))
@@ -161,7 +160,7 @@ var _ = Describe("authStore", func() {
 			AfterEach(unsetEnv)
 
 			It("should get a context for a namespace", func() {
-				ctx, err := authStore.ContextForNamespace(ctx, "test")
+				ctx, err := store.ContextForNamespace(ctx, "test")
 				Expect(err).To(BeNil())
 				Expect(ctx.Value(ContextAccessToken)).To(Equal(TestNsToken))
 			})

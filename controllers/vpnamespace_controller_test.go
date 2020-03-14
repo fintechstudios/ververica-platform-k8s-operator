@@ -6,9 +6,12 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
+	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/platform"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -26,12 +29,12 @@ var _ = Describe("VpNamespace Controller", func() {
 	var reconciler VpNamespaceReconciler
 
 	BeforeEach(func() {
-		platformClient := &platformApiClient.APIClient{}
+		client := &mocks.Client{}
 
 		reconciler = VpNamespaceReconciler{
-			Client:            k8sClient,
-			Log:               logger,
-			PlatformAPIClient: platformClient,
+			Client:         k8sClient,
+			Log:            logger,
+			PlatformClient: client,
 		}
 	})
 
@@ -73,11 +76,11 @@ var _ = Describe("VpNamespace Controller", func() {
 
 		It("should update a k8s vp namespace with a Platform namespace", func() {
 			phase := "LIFECYCLE_PHASE_ACTIVE"
-			namespace := &platformApiClient.Namespace{
+			namespace := &platformapi.Namespace{
 				CreateTime:     timeMustParse(time.RFC3339, "2019-10-18T14:27:58.328Z"),
-				LifecyclePhase: &phase,
+				LifecyclePhase: phase,
 				Name:           "foo",
-				RoleBindings: []platformApiClient.RoleBinding{
+				RoleBindings: []platformapi.RoleBinding{
 					{
 						Members: []string{"system:authenticated"},
 						Role:    "owner",

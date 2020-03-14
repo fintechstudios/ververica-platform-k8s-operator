@@ -11,6 +11,7 @@ import (
 
 var (
 	// Response errors
+
 	ErrBadRequest   = errors.New("bad request")
 	ErrUnauthorized = errors.New("unathorized")
 	ErrForbidden    = errors.New("forbidden")
@@ -19,6 +20,7 @@ var (
 	ErrUnknown      = errors.New("unknown error")
 
 	// Authorized context errors
+
 	ErrAuthContext = errors.New("couldn't get authorized context")
 )
 

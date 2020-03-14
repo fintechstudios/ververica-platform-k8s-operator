@@ -24,9 +24,9 @@ type client struct {
 	savepointsService        SavepointsService
 }
 
-func NewClient(apiClient *appmanagerapi.APIClient, authStore AuthStore) Client {
+func NewClient(config *appmanagerapi.Configuration, authStore AuthStore) Client {
 	return &client{
-		apiClient: apiClient,
+		apiClient: appmanagerapi.NewAPIClient(config),
 		authStore: authStore,
 	}
 }
@@ -120,8 +120,8 @@ func (s *deploymentTargetsService) DeleteDeploymentTarget(ctx context.Context, n
 // Events
 
 type GetEventsOpts struct {
-	DeploymentId optional.Interface
-	JobId        optional.Interface
+	DeploymentID optional.Interface
+	JobID        optional.Interface
 }
 
 type EventsService interface {
@@ -137,7 +137,10 @@ func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opt
 	if err != nil {
 		return nil, err
 	}
-	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, (*appmanagerapi.GetEventsUsingGETOpts)(opts))
+	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, &appmanagerapi.GetEventsUsingGETOpts{
+		DeploymentId: opts.DeploymentID,
+		JobId:        opts.JobID,
+	})
 
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
