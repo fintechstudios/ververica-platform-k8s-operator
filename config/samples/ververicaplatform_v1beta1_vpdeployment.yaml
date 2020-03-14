@@ -1,11 +1,12 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpDeployment
 metadata:
-  name: deployment
+  name: top-speed
+  namespace: vvp
 spec:
-  deploymentTargetName: dep-target-testing
+  deploymentTargetName: top-speed
   metadata:
-    namespace: doc-ingestion
+    namespace: testing
   spec:
     state: RUNNING
     upgradeStrategy:
@@ -21,15 +22,15 @@ spec:
       spec:
         artifact:
           kind: JAR
-          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.11/1.9.0/flink-examples-streaming_2.11-1.9.0-TopSpeedWindowing.jar
+          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.10.0/flink-examples-streaming_2.12-1.10.0-TopSpeedWindowing.jar
           mainArgs: --windowSize 10 --windowUnit minutes
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
-          flinkVersion: "1.9"
-          flinkImageRegistry: registry.platform.data-artisans.net/v2.0
+          flinkVersion: "1.10"
+          flinkImageRegistry: registry.platform.data-artisans.net/v2.1
           flinkImageRepository: flink
-          flinkImageTag: 1.9.0-stream1-scala_2.11
-        parallelism: 1
-        numberOfTaskManagers: 1
+          flinkImageTag: 1.10.0-stream1-scala_2.12
+        parallelism: 2
+        numberOfTaskManagers: 2
         resources:
           jobmanager:
             cpu: "1.5"
@@ -38,6 +39,7 @@ spec:
             memory: 1.5g
         flinkConfiguration:
           high-availability.storageDir:  s3://flink/haState
+          # Should replace these with a distributed file system URI
           state.savepoints.dir: file:///flink/state/savepoints
           state.checkpoints.dir: file:///flink/state/checkpoints
           taskmanager.numberOfTaskSlots: "1"
@@ -55,6 +57,8 @@ spec:
 #                volumeMount:
 #                  name: config
 #                  mountPath: /opt/flink/conf
+            labels:
+              fintechstudios.com/app: top-speed-windowing
             annotations:
               "iam.amazonaws.com/role": k8s-flink-job
 

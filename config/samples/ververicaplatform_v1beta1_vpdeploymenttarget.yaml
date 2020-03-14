@@ -1,10 +1,11 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpDeploymentTarget
 metadata:
-  name: dep-target
+  name: top-speed
+  namespace: vvp
 spec:
   metadata:
-    namespace: doc-ingestion
+    namespace: testing
   spec:
     kubernetes:
-      namespace: flink
+      namespace: vvp
