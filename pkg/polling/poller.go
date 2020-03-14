@@ -59,7 +59,7 @@ func (p *Poller) sendResult(result interface{}) {
 func (p *Poller) runPolling() {
 	for !p.IsStopped() {
 		if res := p.Poll(); res != nil {
-			if res == FinishedResult {
+			if cmdRes, ok := res.(commandResult); ok && &cmdRes == FinishedResult {
 				p.Stop()
 				break
 			}
@@ -85,9 +85,12 @@ func (p *Poller) Start() {
 		// already running
 		return
 	}
-
 	p.statusMutex.Lock()
 	defer p.statusMutex.Unlock()
+	if p.IsRunning() {
+		// changed to running by another routine
+		return
+	}
 	p.status = running
 
 	p.group.Add(1)

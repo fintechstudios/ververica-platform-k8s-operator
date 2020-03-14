@@ -39,7 +39,7 @@ func (m *manager) GetPoller(pollerType, name string) *Poller {
 }
 
 func (m *manager) HasPoller(pollerType, name string) bool {
-	return m.pollerMap == nil && m.pollerMap[pollerID(pollerType, name)] != nil
+	return m.pollerMap != nil && m.pollerMap[pollerID(pollerType, name)] != nil
 }
 
 func (m *manager) RemovePoller(pollerType, name string) bool {
