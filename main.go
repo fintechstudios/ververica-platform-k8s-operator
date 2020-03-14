@@ -128,20 +128,20 @@ func main() {
 
 	// Create clients
 	userAgent := fmt.Sprintf("VervericaPlatformK8sOperator/%s/go-%s", version.OperatorVersion, version.GoVersion)
-	platformApiClient := platformapi.NewAPIClient(&platformapi.Configuration{
+	platformAPIConfig := &platformapi.Configuration{
 		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
-	})
-	platformClient := platform.NewClient(platformApiClient)
+	}
+	platformClient := platform.NewClient(platformAPIConfig)
 
-	appManagerApiClient := appmanagerapi.NewAPIClient(&appmanagerapi.Configuration{
+	appManagerConfig := &appmanagerapi.Configuration{
 		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
-	})
+	}
 	appManagerAuthStore := appmanager.NewAuthStore(&platform.TokenManager{PlatformClient: platformClient})
-	appManagerClient := appmanager.NewClient(appManagerApiClient, appManagerAuthStore)
+	appManagerClient := appmanager.NewClient(appManagerConfig, appManagerAuthStore)
 
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)

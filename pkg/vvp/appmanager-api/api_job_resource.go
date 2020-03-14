@@ -118,11 +118,11 @@ func (a *JobResourceApiService) GetJobUsingGET(ctx context.Context, jobId string
 }
 
 /*
-JobResourceApiService List all jobs. Can be filtered by DeploymentId
+JobResourceApiService List all jobs. Can be filtered by DeploymentID
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespace namespace
  * @param optional nil or *GetJobsUsingGETOpts - Optional Parameters:
-     * @param "DeploymentId" (optional.Interface of string) -  deploymentId
+     * @param "DeploymentID" (optional.Interface of string) -  deploymentId
 
 @return ResourceListOfJob
 */

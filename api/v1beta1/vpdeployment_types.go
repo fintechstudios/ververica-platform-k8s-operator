@@ -39,12 +39,6 @@ type VpDeploymentRestoreStrategy struct {
 	AllowNonRestoredState bool `json:"allowNonRestoredState,omitempty"`
 }
 
-// VpDeploymentStartFromSavepoint describes which savepoint, if any, to start the job with
-type VpDeploymentStartFromSavepoint struct {
-	// +optional
-	Kind string `json:"kind,omitempty"`
-}
-
 // VpDeploymentTemplateMetadata
 type VpDeploymentTemplateMetadata struct {
 	// +optional
@@ -188,8 +182,6 @@ type VpDeploymentSpec struct {
 	UpgradeStrategy *VpDeploymentUpgradeStrategy `json:"upgradeStrategy"`
 	// +optional
 	RestoreStrategy *VpDeploymentRestoreStrategy `json:"restoreStrategy,omitempty"`
-	// +optional
-	StartFromSavepoint *VpDeploymentStartFromSavepoint `json:"startFromSavepoint,omitempty"`
 	// +optional
 	DeploymentTargetID string `json:"deploymentTargetId,omitempty"`
 	// +optional

@@ -14,7 +14,7 @@ type TokenManager struct {
 }
 
 func (p *TokenManager) TokenExists(ctx context.Context, namespaceName, name string) (bool, error) {
-	_, err := p.PlatformClient.ApiTokens().GetApiToken(ctx, namespaceName, name)
+	_, err := p.PlatformClient.APITokens().GetAPIToken(ctx, namespaceName, name)
 
 	if errors.Is(err, vvperrors.ErrNotFound) || errors.Is(err, vvperrors.ErrForbidden) {
 		return false, nil
@@ -28,7 +28,7 @@ func (p *TokenManager) TokenExists(ctx context.Context, namespaceName, name stri
 }
 
 func (p *TokenManager) CreateToken(ctx context.Context, namespaceName, name, role string) (string, error) {
-	token, err := p.PlatformClient.ApiTokens().CreateApiToken(ctx, namespaceName, platformapi.ApiToken{
+	token, err := p.PlatformClient.APITokens().CreateAPIToken(ctx, namespaceName, platformapi.ApiToken{
 		Name: name,
 		Role: role,
 	})
@@ -41,7 +41,7 @@ func (p *TokenManager) CreateToken(ctx context.Context, namespaceName, name, rol
 }
 
 func (p *TokenManager) RemoveToken(ctx context.Context, namespaceName, name string) (bool, error) {
-	err := p.PlatformClient.ApiTokens().DeleteApiToken(ctx, namespaceName, name)
+	err := p.PlatformClient.APITokens().DeleteAPIToken(ctx, namespaceName, name)
 
 	// We're ok if it's not found
 	if errors.Is(err, vvperrors.ErrNotFound) {

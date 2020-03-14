@@ -5,7 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	vvpv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -13,13 +13,12 @@ import (
 
 var _ = Describe("DeploymentSpec", func() {
 	var deploymentStateStr = "RUNNING"
-	var deploymentState = ververicaplatformv1beta1.RunningState
+	var deploymentState = vvpv1beta1.RunningState
 	var deploymentTargetID = "2dd1ded8-eedb-4064-ba9a-006740d0f87a"
 	var deploymentMaxSavepointAttempts = int32(4)
 	var deploymentMaxCreationAttempts = int32(2)
 	var deploymentUpgradeStrategy = "STATELESS"
 	var deploymentRestoreStrategy = "NONE"
-	var deploymentStartFromSavepoint = "s3://flink/a-savepoint"
 	var deploymentRestoreAllowNonRestored = false
 	var deploymentParallelism = int32(1)
 	var deploymentNumTaskManagers = int32(2)
@@ -37,7 +36,7 @@ var _ = Describe("DeploymentSpec", func() {
 		var annotations map[string]string
 		var flinkConfiguration map[string]string
 		var resources map[string]vpAPI.ResourceSpec
-		var vpResources map[string]ververicaplatformv1beta1.VpResourceSpec
+		var vpResources map[string]vvpv1beta1.VpResourceSpec
 		var log4jLoggers map[string]string
 		var pods vpAPI.Pods
 
@@ -103,7 +102,6 @@ var _ = Describe("DeploymentSpec", func() {
 		It("should map an API deployment spec to K8s native", func() {
 			vpSpec, err := DeploymentSpecToNative(deploymentSpec)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(vpSpec.StartFromSavepoint.Kind).To(Equal(deploymentStartFromSavepoint))
 
 			Expect(vpSpec.RestoreStrategy.Kind).To(Equal(deploymentRestoreStrategy))
 			Expect(vpSpec.RestoreStrategy.AllowNonRestoredState).To(Equal(deploymentRestoreAllowNonRestored))
@@ -152,13 +150,13 @@ var _ = Describe("DeploymentSpec", func() {
 	})
 
 	Describe("DeploymentSpecFromNative", func() {
-		var vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec
+		var vpDeploymentSpec vvpv1beta1.VpDeploymentSpec
 		var annotations map[string]string
 		var flinkConfiguration map[string]string
 		var resources map[string]vpAPI.ResourceSpec
-		var vpResources map[string]ververicaplatformv1beta1.VpResourceSpec
+		var vpResources map[string]vvpv1beta1.VpResourceSpec
 		var log4jLoggers map[string]string
-		var vpPods ververicaplatformv1beta1.VpPodSpec
+		var vpPods vvpv1beta1.VpPodSpec
 
 		BeforeEach(func() {
 			annotations = map[string]string{
@@ -166,7 +164,7 @@ var _ = Describe("DeploymentSpec", func() {
 				"high-availability": "true",
 			}
 			mem := "2g"
-			vpResources = map[string]ververicaplatformv1beta1.VpResourceSpec{
+			vpResources = map[string]vvpv1beta1.VpResourceSpec{
 				"jobmanager": {
 					CPU:    *resource.NewQuantity(2, resource.DecimalSI),
 					Memory: &mem,
@@ -177,28 +175,25 @@ var _ = Describe("DeploymentSpec", func() {
 				"":                   "DEBUG",
 				"com.fintechstudios": "VERBOSE",
 			}
-			vpPods = ververicaplatformv1beta1.VpPodSpec{}
-			vpDeploymentSpec = ververicaplatformv1beta1.VpDeploymentSpec{
+			vpPods = vvpv1beta1.VpPodSpec{}
+			vpDeploymentSpec = vvpv1beta1.VpDeploymentSpec{
 				State:                        deploymentState,
 				DeploymentTargetID:           deploymentTargetID,
 				MaxJobCreationAttempts:       &deploymentMaxCreationAttempts,
 				MaxSavepointCreationAttempts: &deploymentMaxSavepointAttempts,
-				UpgradeStrategy: &ververicaplatformv1beta1.VpDeploymentUpgradeStrategy{
+				UpgradeStrategy: &vvpv1beta1.VpDeploymentUpgradeStrategy{
 					Kind: deploymentUpgradeStrategy,
 				},
-				RestoreStrategy: &ververicaplatformv1beta1.VpDeploymentRestoreStrategy{
+				RestoreStrategy: &vvpv1beta1.VpDeploymentRestoreStrategy{
 					Kind:                  deploymentRestoreStrategy,
 					AllowNonRestoredState: deploymentRestoreAllowNonRestored,
 				},
-				StartFromSavepoint: &ververicaplatformv1beta1.VpDeploymentStartFromSavepoint{
-					Kind: deploymentStartFromSavepoint,
-				},
-				Template: &ververicaplatformv1beta1.VpDeploymentTemplate{
-					Metadata: &ververicaplatformv1beta1.VpDeploymentTemplateMetadata{
+				Template: &vvpv1beta1.VpDeploymentTemplate{
+					Metadata: &vvpv1beta1.VpDeploymentTemplateMetadata{
 						Annotations: annotations,
 					},
-					Spec: &ververicaplatformv1beta1.VpDeploymentTemplateSpec{
-						Artifact: &ververicaplatformv1beta1.VpArtifact{
+					Spec: &vvpv1beta1.VpDeploymentTemplateSpec{
+						Artifact: &vvpv1beta1.VpArtifact{
 							Kind:                 artifactKind,
 							JarURI:               artifactJarURI,
 							MainArgs:             artifactArgs,
@@ -212,10 +207,10 @@ var _ = Describe("DeploymentSpec", func() {
 						NumberOfTaskManagers: &deploymentNumTaskManagers,
 						Resources:            vpResources,
 						FlinkConfiguration:   flinkConfiguration,
-						Logging: &ververicaplatformv1beta1.VpLogging{
+						Logging: &vvpv1beta1.VpLogging{
 							Log4jLoggers: log4jLoggers,
 						},
-						Kubernetes: &ververicaplatformv1beta1.VpKubernetesOptions{
+						Kubernetes: &vvpv1beta1.VpKubernetesOptions{
 							Pods: &vpPods,
 						},
 					},

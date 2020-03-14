@@ -125,8 +125,8 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 		}
 
 		events, err := r.AppManagerClient.Events().GetEvents(context.Background(), namespace, &appmanager.GetEventsOpts{
-			DeploymentId: optional.NewInterface(id),
-			JobId:        optional.EmptyInterface(),
+			DeploymentID: optional.NewInterface(id),
+			JobID:        optional.EmptyInterface(),
 		})
 
 		if err != nil {
@@ -217,9 +217,8 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 			if utils.IsNotFoundError(err) {
 				log.Error(err, "VpDeployment not found while polling")
 				return polling.FinishedResult
-			} else {
-				log.Error(err, "Error getting VpDeployment while polling")
 			}
+			log.Error(err, "Error getting VpDeployment while polling")
 			return nil
 		}
 

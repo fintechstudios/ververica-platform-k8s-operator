@@ -11,18 +11,18 @@ import (
 
 type Client interface {
 	Namespaces() NamespacesService
-	ApiTokens() ApiTokensService
+	APITokens() APITokensService
 }
 
 type client struct {
 	apiClient         *platformapi.APIClient
 	namespacesService NamespacesService
-	apiTokensService  ApiTokensService
+	apiTokensService  APITokensService
 }
 
-func NewClient(apiClient *platformapi.APIClient) Client {
+func NewClient(config *platformapi.Configuration) Client {
 	return &client{
-		apiClient: apiClient,
+		apiClient: platformapi.NewAPIClient(config),
 	}
 }
 
@@ -33,7 +33,7 @@ func (c *client) Namespaces() NamespacesService {
 	return c.namespacesService
 }
 
-func (c *client) ApiTokens() ApiTokensService {
+func (c *client) APITokens() APITokensService {
 	if c.apiTokensService == nil {
 		c.apiTokensService = &apiTokensService{client: c}
 	}
@@ -127,17 +127,17 @@ func formatTokenName(namespaceName, name string) string {
 	return fmt.Sprintf("namespaces/%s/apitokens/%s", namespaceName, name)
 }
 
-type ApiTokensService interface {
-	GetApiToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error)
-	CreateApiToken(ctx context.Context, namespaceName string, token platformapi.ApiToken) (*platformapi.ApiToken, error)
-	DeleteApiToken(ctx context.Context, namespaceName, name string) error
+type APITokensService interface {
+	GetAPIToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error)
+	CreateAPIToken(ctx context.Context, namespaceName string, token platformapi.ApiToken) (*platformapi.ApiToken, error)
+	DeleteAPIToken(ctx context.Context, namespaceName, name string) error
 }
 
 type apiTokensService struct {
 	client *client
 }
 
-func (s *apiTokensService) GetApiToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error) {
+func (s *apiTokensService) GetAPIToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error) {
 	tokenRes, res, err := s.client.apiClient.ApiTokensApi.GetApiToken(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
@@ -150,7 +150,7 @@ func (s *apiTokensService) GetApiToken(ctx context.Context, namespaceName, name 
 	return tokenRes.ApiToken, nil
 }
 
-func (s *apiTokensService) CreateApiToken(ctx context.Context, namespaceName string, apiToken platformapi.ApiToken) (*platformapi.ApiToken, error) {
+func (s *apiTokensService) CreateAPIToken(ctx context.Context, namespaceName string, apiToken platformapi.ApiToken) (*platformapi.ApiToken, error) {
 	// name must be prefixed on creation
 	apiToken.Name = formatTokenName(namespaceName, apiToken.Name)
 
@@ -166,7 +166,7 @@ func (s *apiTokensService) CreateApiToken(ctx context.Context, namespaceName str
 	return tokenRes.ApiToken, nil
 }
 
-func (s *apiTokensService) DeleteApiToken(ctx context.Context, namespaceName, name string) error {
+func (s *apiTokensService) DeleteAPIToken(ctx context.Context, namespaceName, name string) error {
 	_, res, err := s.client.apiClient.ApiTokensApi.DeleteApiToken(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return vvperrors.FormatResponseError(res, err)

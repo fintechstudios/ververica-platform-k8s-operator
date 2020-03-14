@@ -93,13 +93,6 @@ spec:
                     kind:
                       type: string
                   type: object
-                startFromSavepoint:
-                  description: VpDeploymentStartFromSavepoint describes which savepoint,
-                    if any, to start the job with
-                  properties:
-                    kind:
-                      type: string
-                  type: object
                 state:
                   description: DeploymentState is the enum of all possible deployment
                     states Only one of the following states may be specified.

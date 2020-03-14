@@ -6,8 +6,10 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
+	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
-	appManager "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,12 +20,12 @@ var _ = Describe("VpDeployment Controller", func() {
 	var reconciler VpDeploymentReconciler
 
 	BeforeEach(func() {
-		vpAPIClient := appManager.APIClient{}
+		client := &mocks.Client{}
 
 		reconciler = VpDeploymentReconciler{
-			Client:              k8sClient,
-			Log:                 logger,
-			AppManagerAPIClient: &vpAPIClient,
+			Client:           k8sClient,
+			Log:              logger,
+			AppManagerClient: client,
 		}
 	})
 
@@ -70,10 +72,10 @@ var _ = Describe("VpDeployment Controller", func() {
 		})
 
 		It("should update a k8s deployment target with a VP deployment target", func() {
-			dep := &appManager.Deployment{
+			dep := &appmanagerapi.Deployment{
 				Kind:       "Deployment",
 				ApiVersion: "v1",
-				Metadata: &appManager.DeploymentMetadata{
+				Metadata: &appmanagerapi.DeploymentMetadata{
 					Id:              "2da2f867-5899-4bef-8ad0-9771bbac38b4",
 					Name:            created.Name,
 					CreatedAt:       time.Now(),
@@ -86,22 +88,22 @@ var _ = Describe("VpDeployment Controller", func() {
 						"non-production": "true",
 					},
 				},
-				Spec: &appManager.DeploymentSpec{
+				Spec: &appmanagerapi.DeploymentSpec{
 					DeploymentTargetId: "4wt2a128-5899-4bef-8ad0-9771bbac38b4",
-					UpgradeStrategy: &appManager.DeploymentUpgradeStrategy{
+					UpgradeStrategy: &appmanagerapi.DeploymentUpgradeStrategy{
 						Kind: "STATELESS",
 					},
 					State: "RUNNING",
-					Template: &appManager.DeploymentTemplate{
-						Spec: &appManager.DeploymentTemplateSpec{
-							Artifact: &appManager.Artifact{
+					Template: &appmanagerapi.DeploymentTemplate{
+						Spec: &appmanagerapi.DeploymentTemplateSpec{
+							Artifact: &appmanagerapi.Artifact{
 								Kind:   "JAR",
 								JarUri: "https://jars.com/peanut-butter",
 							},
 						},
 					},
 				},
-				Status: &appManager.DeploymentStatus{State: "RUNNING"},
+				Status: &appmanagerapi.DeploymentStatus{State: "RUNNING"},
 			}
 
 			Expect(reconciler.updateResource(created, dep)).To(Succeed())
