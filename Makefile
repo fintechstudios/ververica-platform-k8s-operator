@@ -63,7 +63,7 @@ ifeq (, $(shell which kind))
 	KIND_TMP_DIR=$$(mktemp -d) ;\
 	cd $$KIND_TMP_DIR ;\
 	go mod init tmp ;\
-	go get go get sigs.k8s.io/kind@v0.7.0 ;\
+	go get sigs.k8s.io/kind@v0.7.0 ;\
 	rm -rf $$KIND_TMP_DIR ;\
 	}
 KIND=$(GOBIN)/kind
@@ -71,16 +71,38 @@ else
 KIND=$(shell which kind)
 endif
 
+# find or download mocker
+.PHONY: mockery
+mockery:
+ifeq (, $(shell which mockery))
+	@{ \
+	set -e ;\
+	MOCKERY_TMP_DIR=$$(mktemp -d) ;\
+	cd $$MOCKERY_TMP_DIR ;\
+	go mod init tmp ;\
+	go get github.com/vektra/mockery/.../ ;\
+	rm -rf $$MOCKERY_TMP_DIR ;\
+	}
+MOCKERY=$(GOBIN)/mockery
+else
+MOCKERY=$(shell which mockery)
+endif
+
 
 # Run tests
 .PHONY: test
 test: generate manifests
-	go test -ldflags $(LD_FLAGS) ./api/... ./controllers/... ./ -coverprofile cover.out
+	go test -ldflags $(LD_FLAGS) ./pkg/... ./api/... ./controllers/... ./ -coverprofile cover.out
 
 # Build manager binary
 .PHONY: manager
 manager: generate
 	go build $(ARGS) -ldflags $(LD_FLAGS) -o bin/manager main.go
+
+mocks: mockery
+	rm -rf mocks \
+		&& $(MOCKERY) -dir pkg/vvp/appmanager -all -output ./mocks/vvp/appmanager -case=underscore \
+		&& $(MOCKERY) -dir pkg/vvp/platform -all -output ./mocks/vvp/platform -case=underscore
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 .PHONY: run
