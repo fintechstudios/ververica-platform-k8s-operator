@@ -1,4 +1,4 @@
-package native_converters
+package nativeconverters
 
 import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"

@@ -1,4 +1,4 @@
-package native_converters_test
+package nativeconverters_test
 
 import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"

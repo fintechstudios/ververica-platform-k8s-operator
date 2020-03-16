@@ -88,7 +88,7 @@ func (r *VpNamespaceReconciler) updateResource(resource *v1beta1.VpNamespace, na
 	ctx := context.Background()
 
 	var err error
-	if resource.Status.LifecyclePhase, err = native_converters.NamespaceLifecyclePhaseToNative(namespace.LifecyclePhase); err != nil {
+	if resource.Status.LifecyclePhase, err = nativeconverters.NamespaceLifecyclePhaseToNative(namespace.LifecyclePhase); err != nil {
 		return err
 	}
 
@@ -111,7 +111,7 @@ func (r *VpNamespaceReconciler) handleCreate(req ctrl.Request, vpNamespace v1bet
 	// create it
 	namespace, err := r.PlatformClient.Namespaces().CreateNamespace(ctx, platformapiclient.Namespace{
 		Name:         vpNamespace.Name,
-		RoleBindings: native_converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
+		RoleBindings: nativeconverters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	})
 
 	if errors.Is(err, vvperrors.ErrBadRequest) {
@@ -143,7 +143,7 @@ func (r *VpNamespaceReconciler) handleUpdate(req ctrl.Request, vpNamespace v1bet
 	// lifecyclePhase and createTime must be left nil
 	updatedNamespace := platformapiclient.Namespace{
 		Name:         vpNamespace.Name,
-		RoleBindings: native_converters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
+		RoleBindings: nativeconverters.NamespaceRoleBindingsFromNative(vpNamespace.Spec.RoleBindings),
 	}
 	updated, err := r.PlatformClient.Namespaces().UpdateNamespace(ctx, vpNamespace.Name, updatedNamespace)
 
@@ -176,7 +176,7 @@ func (r *VpNamespaceReconciler) handleDelete(req ctrl.Request) (ctrl.Result, err
 
 	log.Info("Deleting namespace")
 
-	lifecylePhase, err := native_converters.NamespaceLifecyclePhaseToNative(namespace.LifecyclePhase)
+	lifecylePhase, err := nativeconverters.NamespaceLifecyclePhaseToNative(namespace.LifecyclePhase)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

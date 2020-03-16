@@ -18,11 +18,10 @@ package v1beta1
 
 import (
 	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // log is for logging in this package.
-var vpdeploymentlog = logf.Log.WithName("vpdeployment-resource")
+//var vpdeploymentlog = logf.Log.WithName("vpdeployment-resource")
 
 func (r *VpDeployment) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).

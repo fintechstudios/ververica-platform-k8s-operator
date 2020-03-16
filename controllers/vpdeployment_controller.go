@@ -263,7 +263,7 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta2.VpDeployment, 
 		return err
 	}
 
-	state, err := native_converters.DeploymentStateToNative(deployment.Status.State)
+	state, err := nativeconverters.DeploymentStateToNative(deployment.Status.State)
 	if err != nil {
 		return err
 	}
@@ -282,7 +282,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 
 	// See if there already exists a deployment by that name
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	deployment, err := native_converters.DeploymentFromNative(vpDeployment)
+	deployment, err := nativeconverters.DeploymentFromNative(vpDeployment)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -330,7 +330,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	log := r.getLogger(req)
 	log.Info("Patching VP Deployment")
 
-	desiredDeployment, err := native_converters.DeploymentFromNative(vpDeployment)
+	desiredDeployment, err := nativeconverters.DeploymentFromNative(vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -354,7 +354,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	vpDeployment.Status.State, err = native_converters.DeploymentStateToNative(updatedDep.Status.State)
+	vpDeployment.Status.State, err = nativeconverters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {
 		return ctrl.Result{}, err

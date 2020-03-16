@@ -48,7 +48,7 @@ func (src *VpDeploymentTarget) ConvertTo(dstRaw conversion.Hub) error {
 }
 
 // ConvertTo converts from the "Hub" version to a v1beta2 version
-func (dst *VpDeploymentTarget) ConvertFrom(srcRaw conversion.Hub) error {
+func (dst *VpDeploymentTarget) ConvertFrom(srcRaw conversion.Hub) error { // nolint:golint
 	src := srcRaw.(*v1beta1.VpDeploymentTarget)
 
 	// base conversion

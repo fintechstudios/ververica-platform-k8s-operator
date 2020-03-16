@@ -109,7 +109,7 @@ func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, sa
 		return err
 	}
 
-	state, err := native_converters.SavepointStateToNative(savepoint.Status.State)
+	state, err := nativeconverters.SavepointStateToNative(savepoint.Status.State)
 	if err != nil {
 		return err
 	}

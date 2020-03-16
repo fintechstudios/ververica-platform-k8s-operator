@@ -102,14 +102,14 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	dstTmpl.Spec.FlinkConfiguration = srcTmpl.Spec.FlinkConfiguration
 
 	if srcTmpl.Spec.Resources != nil {
-		dstRes := dstTmpl.Spec.Resources
-		dstRes = make(map[string]v1beta1.VpResourceSpec)
+		dstRes := make(map[string]v1beta1.VpResourceSpec)
 		for name, res := range srcTmpl.Spec.Resources {
 			dstRes[name] = v1beta1.VpResourceSpec{
 				CPU:    res.CPU,
 				Memory: res.Memory,
 			}
 		}
+		dstTmpl.Spec.Resources = dstRes
 	}
 
 	if srcTmpl.Spec.Logging != nil {
@@ -170,7 +170,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 }
 
 // ConvertTo converts from the "Hub" version to a v1beta2 version
-func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
+func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:golint
 	src := srcRaw.(*v1beta1.VpDeployment)
 
 	// base conversion
@@ -223,14 +223,14 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 	dstTmpl.Spec.FlinkConfiguration = srcTmpl.Spec.FlinkConfiguration
 
 	if srcTmpl.Spec.Resources != nil {
-		dstRes := dstTmpl.Spec.Resources
-		dstRes = make(map[string]VpResourceSpec)
+		dstRes := make(map[string]VpResourceSpec)
 		for name, res := range srcTmpl.Spec.Resources {
 			dstRes[name] = VpResourceSpec{
 				CPU:    res.CPU,
 				Memory: res.Memory,
 			}
 		}
+		dstTmpl.Spec.Resources = dstRes
 	}
 
 	if srcTmpl.Spec.Logging != nil {

@@ -96,7 +96,7 @@ var _ = Describe("VpNamespace Controller", func() {
 
 			fetched = &v1beta1.VpNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			updatedPhase, err := native_converters.NamespaceLifecyclePhaseFromNative(fetched.Status.LifecyclePhase)
+			updatedPhase, err := nativeconverters.NamespaceLifecyclePhaseFromNative(fetched.Status.LifecyclePhase)
 			Expect(err).To(BeNil())
 			Expect(updatedPhase).To(Equal(phase))
 		})

@@ -111,7 +111,7 @@ var _ = Describe("VpDeployment Controller", func() {
 			fetched = &v1beta2.VpDeployment{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(dep.Metadata.Id))
-			statusState, _ := native_converters.DeploymentStateToNative(dep.Status.State)
+			statusState, _ := nativeconverters.DeploymentStateToNative(dep.Status.State)
 			Expect(fetched.Status.State).To(Equal(statusState))
 		})
 	})
