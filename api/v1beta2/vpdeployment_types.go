@@ -198,8 +198,8 @@ type VpDeploymentObjectSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// VP
-	Metadata VpMetadata `json:"metadata"`
-	Spec     VpDeploymentSpec   `json:"spec"`
+	Metadata VpMetadata       `json:"metadata"`
+	Spec     VpDeploymentSpec `json:"spec"`
 
 	// DeploymentTargetName is an extension on the VP API
 	// Must provide a spec.deploymentTargetId if not set

@@ -12,14 +12,14 @@ import (
 // - added FINISHED Deployment State
 // - added Labels to pod specs
 
-const annotationBase = "v1beta2.VpDeployment"
+const depAnnotationBase = "v1beta2.VpDeployment"
 
 // use annotations to store version details
 var (
-	vpDepStartFromSavepoint = annotations.NewAnnotationName(annotationBase + ".start-from-savepoint")
-	vpDepState              = annotations.NewAnnotationName(annotationBase + ".state")
-	vpDepStatusState        = annotations.NewAnnotationName(annotationBase + ".status-state")
-	vpPodLabels             = annotations.NewAnnotationName(annotationBase + ".pod-labels")
+	annDepStartFromSavepoint = annotations.NewAnnotationName(depAnnotationBase + ".start-from-savepoint")
+	annDepState              = annotations.NewAnnotationName(depAnnotationBase + ".state")
+	annDepStatusState        = annotations.NewAnnotationName(depAnnotationBase + ".status-state")
+	annPodLabels             = annotations.NewAnnotationName(depAnnotationBase + ".pod-labels")
 )
 
 func convertToDeploymentState(state DeploymentState, annotation annotations.AnnotationName, notations map[string]string) v1beta1.DeploymentState {
@@ -62,7 +62,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	dst.Spec.Spec.UpgradeStrategy = &v1beta1.VpDeploymentUpgradeStrategy{
 		Kind: src.Spec.Spec.UpgradeStrategy.Kind,
 	}
-	dst.Spec.Spec.State = convertToDeploymentState(src.Spec.Spec.State, vpDepState, dst.Annotations)
+	dst.Spec.Spec.State = convertToDeploymentState(src.Spec.Spec.State, annDepState, dst.Annotations)
 
 	if src.Spec.Spec.RestoreStrategy != nil {
 		dst.Spec.Spec.RestoreStrategy = &v1beta1.VpDeploymentRestoreStrategy{
@@ -72,8 +72,8 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	}
 
 	// StartFromSavepoint in v1beta2 is gone, unless stored in annotation
-	if annotations.Has(src.Annotations, vpDepStartFromSavepoint) {
-		an := annotations.Get(src.Annotations, vpDepStartFromSavepoint)
+	if annotations.Has(src.Annotations, annDepStartFromSavepoint) {
+		an := annotations.Get(src.Annotations, annDepStartFromSavepoint)
 		if err := json.Unmarshal([]byte(an), dst.Spec.Spec.StartFromSavepoint); err != nil {
 			return err
 		}
@@ -134,7 +134,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 		}
 		annotations.Set(
 			dst.Annotations,
-			annotations.Pair(vpPodLabels, string(labels)),
+			annotations.Pair(annPodLabels, string(labels)),
 		)
 
 		dstPods := &v1beta1.VpPodSpec{
@@ -164,7 +164,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	dst.Spec.Spec.Template = dstTmpl
 
 	// Status
-	dst.Status.State = convertToDeploymentState(src.Status.State, vpDepStatusState, dst.Annotations)
+	dst.Status.State = convertToDeploymentState(src.Status.State, annDepStatusState, dst.Annotations)
 
 	return nil
 }
@@ -195,7 +195,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 			AllowNonRestoredState: src.Spec.Spec.RestoreStrategy.AllowNonRestoredState,
 		}
 	}
-	dst.Spec.Spec.State = convertFromDeploymentState(src.Spec.Spec.State, vpDepState, dst.Annotations)
+	dst.Spec.Spec.State = convertFromDeploymentState(src.Spec.Spec.State, annDepState, dst.Annotations)
 
 	if src.Spec.Spec.StartFromSavepoint != nil {
 		data, err := json.Marshal(src.Spec.Spec.StartFromSavepoint)
@@ -203,7 +203,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 			return err
 		}
 		annotations.Set(dst.Annotations,
-			annotations.Pair(vpDepStartFromSavepoint, string(data)))
+			annotations.Pair(annDepStartFromSavepoint, string(data)))
 	}
 
 	// Spec.Spec template
@@ -257,8 +257,8 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 			Tolerations:      srcPods.Tolerations,
 		}
 		// unbundle stored labels
-		if annotations.Has(src.Annotations, vpPodLabels) {
-			data := annotations.Get(src.Annotations, vpPodLabels)
+		if annotations.Has(src.Annotations, annPodLabels) {
+			data := annotations.Get(src.Annotations, annPodLabels)
 			if err := json.Unmarshal([]byte(data), dstPods.Labels); err != nil {
 				return err
 			}
@@ -281,7 +281,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 	dst.Spec.Spec.Template = dstTmpl
 
 	// Status
-	dst.Status.State = convertFromDeploymentState(src.Status.State, vpDepStatusState, dst.Annotations)
+	dst.Status.State = convertFromDeploymentState(src.Status.State, annDepStatusState, dst.Annotations)
 
 	return nil
 }

@@ -1,0 +1,7 @@
+apiVersion: ververicaplatform.fintechstudios.com/v1beta2
+kind: VpDeploymentTarget
+metadata:
+  name: vpdeploymenttarget-sample
+spec:
+  # Add fields here
+  foo: bar

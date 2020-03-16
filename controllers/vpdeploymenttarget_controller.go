@@ -32,7 +32,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	vvpv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 )
 
 // VpDeploymentTargetReconciler reconciles a VpDeploymentTarget object
@@ -43,7 +43,7 @@ type VpDeploymentTargetReconciler struct {
 }
 
 // updateResource takes a k8s resource and a VP resource and merges them
-func (r *VpDeploymentTargetReconciler) updateResource(resource *vvpv1beta1.VpDeploymentTarget, depTarget *appmanagerapi.DeploymentTarget) error {
+func (r *VpDeploymentTargetReconciler) updateResource(resource *v1beta2.VpDeploymentTarget, depTarget *appmanagerapi.DeploymentTarget) error {
 	ctx := context.Background()
 
 	resource.Annotations = annotations.Set(resource.Annotations,
@@ -63,7 +63,7 @@ func (r *VpDeploymentTargetReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // handleCreate creates VP resources
-func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarget vvpv1beta1.VpDeploymentTarget) (ctrl.Result, error) {
+func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarget v1beta2.VpDeploymentTarget) (ctrl.Result, error) {
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
 
@@ -101,14 +101,14 @@ func (r *VpDeploymentTargetReconciler) handleCreate(req ctrl.Request, vpDepTarge
 
 // handleUpdate updates the k8s resource when it already exists in the VP
 // updates are not supported on Deployment Targets in the VP API, so just need to mirror the latest state
-func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget vvpv1beta1.VpDeploymentTarget, depTarget appmanagerapi.DeploymentTarget) (ctrl.Result, error) {
+func (r *VpDeploymentTargetReconciler) handleUpdate(req ctrl.Request, vpDepTarget v1beta2.VpDeploymentTarget, depTarget appmanagerapi.DeploymentTarget) (ctrl.Result, error) {
 	r.getLogger(req).Info("cannot update deployment targets in the Ververica Platform - must delete and recreate")
 	err := r.updateResource(&vpDepTarget, &depTarget)
 	return ctrl.Result{}, err
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarget vvpv1beta1.VpDeploymentTarget) (ctrl.Result, error) {
+func (r *VpDeploymentTargetReconciler) handleDelete(req ctrl.Request, vpDepTarget v1beta2.VpDeploymentTarget) (ctrl.Result, error) {
 	log := r.getLogger(req)
 	nsName := utils.GetNamespaceOrDefault(vpDepTarget.Spec.Metadata.Namespace)
 
@@ -139,7 +139,7 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 	ctx := context.Background()
 	log := r.getLogger(req)
 
-	var vpDepTarget vvpv1beta1.VpDeploymentTarget
+	var vpDepTarget v1beta2.VpDeploymentTarget
 	// If it's gone, it's gone!
 	if err := r.Get(ctx, req.NamespacedName, &vpDepTarget); err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -191,6 +191,6 @@ func (r *VpDeploymentTargetReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 // SetupWithManager is a helper function to initial on manager boot
 func (r *VpDeploymentTargetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&vvpv1beta1.VpDeploymentTarget{}).
+		For(&v1beta2.VpDeploymentTarget{}).
 		Complete(r)
 }

@@ -16,4 +16,7 @@ resources:
 - group: ververicaplatform
   kind: VpDeployment
   version: v1beta2
+- group: ververicaplatform
+  kind: VpDeploymentTarget
+  version: v1beta2
 version: "2"

@@ -195,6 +195,10 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeployment")
 		os.Exit(1)
 	}
+	if err = (&ververicaplatformv1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeploymentTarget")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	// after the manager has quit, make sure to clean up created resources

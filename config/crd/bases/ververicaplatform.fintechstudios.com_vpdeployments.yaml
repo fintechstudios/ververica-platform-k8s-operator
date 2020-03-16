@@ -8,25 +8,6 @@ metadata:
   creationTimestamp: null
   name: vpdeployments.ververicaplatform.fintechstudios.com
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
-  - JSONPath: .status.state
-    name: State
-    type: string
-  - JSONPath: .spec.spec.template.spec.artifact.flinkVersion
-    name: Flink-Version
-    type: string
-  - JSONPath: .spec.spec.template.spec.artifact.flinkImageTag
-    name: Flink-Image-Tag
-    type: string
-  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRegistry
-    name: Flink-Image-Registry
-    type: string
-  - JSONPath: .spec.spec.template.spec.artifact.flinkImageRepository
-    name: Flink-Image-Repository
-    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeployment
@@ -34,8 +15,6 @@ spec:
     plural: vpdeployments
     singular: vpdeployment
   scope: Namespaced
-  subresources:
-    status: {}
   validation:
     openAPIV3Schema:
       description: VpDeployment is the Schema for the vpdeployments API
@@ -93,6 +72,13 @@ spec:
                     kind:
                       type: string
                   type: object
+                startFromSavepoint:
+                  description: VpDeploymentStartFromSavepoint describes which savepoint,
+                    if any, to start the job with
+                  properties:
+                    kind:
+                      type: string
+                  type: object
                 state:
                   description: DeploymentState is the enum of all possible deployment
                     states Only one of the following states may be specified.
@@ -102,7 +88,6 @@ spec:
                   - TRANSITIONING
                   - SUSPENDED
                   - FAILED
-                  - FINISHED
                   type: string
                 template:
                   description: VpDeploymentTemplate is the template for Deployment
@@ -1069,10 +1054,6 @@ spec:
                                         type: string
                                     type: object
                                   type: array
-                                labels:
-                                  additionalProperties:
-                                    type: string
-                                  type: object
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
@@ -2943,7 +2924,6 @@ spec:
               - TRANSITIONING
               - SUSPENDED
               - FAILED
-              - FINISHED
               type: string
           type: object
       required:
@@ -2955,6 +2935,9 @@ spec:
   - name: v1beta1
     served: true
     storage: true
+  - name: v1beta2
+    served: true
+    storage: false
 status:
   acceptedNames:
     kind: ""
