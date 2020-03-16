@@ -2,46 +2,46 @@ package native_converters
 
 import (
 	"errors"
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 )
 
 var ErrInvalidDeploymentState = errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FINISHED, FAILED")
 
 // DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation
-func DeploymentStateToNative(state string) (ververicaplatformv1beta1.DeploymentState, error) {
+func DeploymentStateToNative(state string) (v1beta2.DeploymentState, error) {
 	switch state {
-	case string(ververicaplatformv1beta1.CancelledState):
-		return ververicaplatformv1beta1.CancelledState, nil
-	case string(ververicaplatformv1beta1.RunningState):
-		return ververicaplatformv1beta1.RunningState, nil
-	case string(ververicaplatformv1beta1.TransitioningState):
-		return ververicaplatformv1beta1.TransitioningState, nil
-	case string(ververicaplatformv1beta1.SuspendedState):
-		return ververicaplatformv1beta1.SuspendedState, nil
-	case string(ververicaplatformv1beta1.FailedState):
-		return ververicaplatformv1beta1.FailedState, nil
-	case string(ververicaplatformv1beta1.Finishedstate):
-		return ververicaplatformv1beta1.Finishedstate, nil
+	case string(v1beta2.CancelledState):
+		return v1beta2.CancelledState, nil
+	case string(v1beta2.RunningState):
+		return v1beta2.RunningState, nil
+	case string(v1beta2.TransitioningState):
+		return v1beta2.TransitioningState, nil
+	case string(v1beta2.SuspendedState):
+		return v1beta2.SuspendedState, nil
+	case string(v1beta2.FailedState):
+		return v1beta2.FailedState, nil
+	case string(v1beta2.FinishedState):
+		return v1beta2.FinishedState, nil
 	default:
 		return "", ErrInvalidDeploymentState
 	}
 }
 
 // DeploymentStateFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func DeploymentStateFromNative(vpState ververicaplatformv1beta1.DeploymentState) (string, error) {
+func DeploymentStateFromNative(vpState v1beta2.DeploymentState) (string, error) {
 	switch vpState {
-	case ververicaplatformv1beta1.CancelledState:
-		return string(ververicaplatformv1beta1.CancelledState), nil
-	case ververicaplatformv1beta1.RunningState:
-		return string(ververicaplatformv1beta1.RunningState), nil
-	case ververicaplatformv1beta1.TransitioningState:
-		return string(ververicaplatformv1beta1.TransitioningState), nil
-	case ververicaplatformv1beta1.SuspendedState:
-		return string(ververicaplatformv1beta1.SuspendedState), nil
-	case ververicaplatformv1beta1.Finishedstate:
-		return string(ververicaplatformv1beta1.Finishedstate), nil
-	case ververicaplatformv1beta1.FailedState:
-		return string(ververicaplatformv1beta1.FailedState), nil
+	case v1beta2.CancelledState:
+		return string(v1beta2.CancelledState), nil
+	case v1beta2.RunningState:
+		return string(v1beta2.RunningState), nil
+	case v1beta2.TransitioningState:
+		return string(v1beta2.TransitioningState), nil
+	case v1beta2.SuspendedState:
+		return string(v1beta2.SuspendedState), nil
+	case v1beta2.FinishedState:
+		return string(v1beta2.FinishedState), nil
+	case v1beta2.FailedState:
+		return string(v1beta2.FailedState), nil
 	default:
 		return "", ErrInvalidDeploymentState
 	}

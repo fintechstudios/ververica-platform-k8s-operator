@@ -3,14 +3,13 @@ package native_converters
 import (
 	"encoding/json"
 	"errors"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 // DeploymentMetadataToNative converts a Ververica Platform deployment into its native K8s representation
-func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1beta1.VpMetadata, error) {
-	var vpMetadata v1beta1.VpMetadata
+func DeploymentMetadataToNative(deploymentMetadata appmanagerapi.DeploymentMetadata) (v1beta2.VpMetadata, error) {
+	var vpMetadata v1beta2.VpMetadata
 	metadataJSON, err := json.Marshal(deploymentMetadata)
 	if err != nil {
 		return vpMetadata, errors.New("cannot encode Metadata: " + err.Error())
@@ -25,8 +24,8 @@ func DeploymentMetadataToNative(deploymentMetadata vpAPI.DeploymentMetadata) (v1
 }
 
 // DeploymentMetadataFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func DeploymentMetadataFromNative(vpMetadata v1beta1.VpMetadata) (vpAPI.DeploymentMetadata, error) {
-	var deploymentMetadata vpAPI.DeploymentMetadata
+func DeploymentMetadataFromNative(vpMetadata v1beta2.VpMetadata) (appmanagerapi.DeploymentMetadata, error) {
+	var deploymentMetadata appmanagerapi.DeploymentMetadata
 	vpMetadataJSON, err := json.Marshal(vpMetadata)
 	if err != nil {
 		return deploymentMetadata, errors.New("cannot encode VpDeployment Metadata: " + err.Error())

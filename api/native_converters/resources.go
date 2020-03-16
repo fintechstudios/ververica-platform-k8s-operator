@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 // ResourcesToNative maps Ververica Platform API resources to native K8s  ones
-func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]ververicaplatformv1beta1.VpResourceSpec, error) {
-	vpResources := make(map[string]ververicaplatformv1beta1.VpResourceSpec)
+func ResourcesToNative(resources map[string]appmanagerapi.ResourceSpec) (map[string]v1beta2.VpResourceSpec, error) {
+	vpResources := make(map[string]v1beta2.VpResourceSpec)
 	for k, v := range resources {
-		res := ververicaplatformv1beta1.VpResourceSpec{}
+		res := v1beta2.VpResourceSpec{}
 		if len(v.Memory) > 0 {
 			res.Memory = &v.Memory
 		}
@@ -23,10 +23,10 @@ func ResourcesToNative(resources map[string]vpAPI.ResourceSpec) (map[string]verv
 }
 
 // ResourcesFromNative maps native K8s resources to Ververica Platform API ones
-func ResourcesFromNative(vpResources map[string]ververicaplatformv1beta1.VpResourceSpec) (map[string]vpAPI.ResourceSpec, error) {
-	resources := make(map[string]vpAPI.ResourceSpec)
+func ResourcesFromNative(vpResources map[string]v1beta2.VpResourceSpec) (map[string]appmanagerapi.ResourceSpec, error) {
+	resources := make(map[string]appmanagerapi.ResourceSpec)
 	for k, v := range vpResources {
-		res := vpAPI.ResourceSpec{}
+		res := appmanagerapi.ResourceSpec{}
 		if v.Memory != nil {
 			res.Memory = *v.Memory
 		}

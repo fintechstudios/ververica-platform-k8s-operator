@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 // Only difference from Ververica Platform
@@ -13,11 +13,11 @@ import (
 // Need to remove these first, if they exist, or an unmarshalling error will occur
 
 // DeploymentSpecToNative converts a Ververica Platform deployment into its native K8s representation
-func DeploymentSpecToNative(deploymentSpec vpAPI.DeploymentSpec) (ververicaplatformv1beta1.VpDeploymentSpec, error) {
-	var vpResources map[string]ververicaplatformv1beta1.VpResourceSpec
+func DeploymentSpecToNative(deploymentSpec appmanagerapi.DeploymentSpec) (v1beta2.VpDeploymentSpec, error) {
+	var vpResources map[string]v1beta2.VpResourceSpec
 	if deploymentSpec.Template == nil ||
 		deploymentSpec.Template.Spec == nil {
-		return ververicaplatformv1beta1.VpDeploymentSpec{}, errors.New("invalid deployment spec: must provide template")
+		return v1beta2.VpDeploymentSpec{}, errors.New("invalid deployment spec: must provide template")
 	}
 
 	if deploymentSpec.Template.Spec.Resources != nil {
@@ -25,7 +25,7 @@ func DeploymentSpecToNative(deploymentSpec vpAPI.DeploymentSpec) (ververicaplatf
 		deploymentSpec.Template.Spec.Resources = nil // don't try to marshal it
 	}
 
-	var vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec
+	var vpDeploymentSpec v1beta2.VpDeploymentSpec
 	specJSON, err := json.Marshal(deploymentSpec)
 	if err != nil {
 		return vpDeploymentSpec, errors.New("cannot encode VpDeployment spec: " + err.Error())
@@ -44,11 +44,11 @@ func DeploymentSpecToNative(deploymentSpec vpAPI.DeploymentSpec) (ververicaplatf
 }
 
 // DeploymentSpecFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func DeploymentSpecFromNative(vpDeploymentSpec ververicaplatformv1beta1.VpDeploymentSpec) (vpAPI.DeploymentSpec, error) {
-	var resources map[string]vpAPI.ResourceSpec
+func DeploymentSpecFromNative(vpDeploymentSpec v1beta2.VpDeploymentSpec) (appmanagerapi.DeploymentSpec, error) {
+	var resources map[string]appmanagerapi.ResourceSpec
 	if vpDeploymentSpec.Template == nil ||
 		vpDeploymentSpec.Template.Spec == nil {
-		return vpAPI.DeploymentSpec{}, errors.New("invalid deployment spec: must provide template")
+		return appmanagerapi.DeploymentSpec{}, errors.New("invalid deployment spec: must provide template")
 	}
 
 	if vpDeploymentSpec.Template.Spec.Resources != nil {
@@ -58,7 +58,7 @@ func DeploymentSpecFromNative(vpDeploymentSpec ververicaplatformv1beta1.VpDeploy
 		vpDeploymentSpec.Template.Spec.Resources = nil
 	}
 
-	var deploymentSpec vpAPI.DeploymentSpec
+	var deploymentSpec appmanagerapi.DeploymentSpec
 	vpSpecJSON, err := json.Marshal(vpDeploymentSpec)
 	if err != nil {
 		return deploymentSpec, errors.New("cannot encode VpDeployment spec: " + err.Error())
