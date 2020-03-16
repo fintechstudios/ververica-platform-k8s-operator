@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
@@ -111,7 +111,7 @@ var _ = Describe("VpDeployment Controller", func() {
 			fetched = &v1beta1.VpDeployment{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(dep.Metadata.Id))
-			statusState, _ := converters.DeploymentStateToNative(dep.Status.State)
+			statusState, _ := native_converters.DeploymentStateToNative(dep.Status.State)
 			Expect(fetched.Status.State).To(Equal(statusState))
 		})
 	})

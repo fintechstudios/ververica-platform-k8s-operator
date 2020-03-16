@@ -1,4 +1,4 @@
-package v1beta1
+package v1beta2
 
 // VpMetadata represents the base metadata for VP resources
 type VpMetadata struct {

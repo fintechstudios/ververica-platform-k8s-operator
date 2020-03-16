@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/platform"
 	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 
@@ -96,7 +96,7 @@ var _ = Describe("VpNamespace Controller", func() {
 
 			fetched = &v1beta1.VpNamespace{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			updatedPhase, err := converters.NamespaceLifecyclePhaseFromNative(fetched.Status.LifecyclePhase)
+			updatedPhase, err := native_converters.NamespaceLifecyclePhaseFromNative(fetched.Status.LifecyclePhase)
 			Expect(err).To(BeNil())
 			Expect(updatedPhase).To(Equal(phase))
 		})

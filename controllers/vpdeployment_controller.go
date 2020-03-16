@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
@@ -263,7 +263,7 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, 
 		return err
 	}
 
-	state, err := converters.DeploymentStateToNative(deployment.Status.State)
+	state, err := native_converters.DeploymentStateToNative(deployment.Status.State)
 	if err != nil {
 		return err
 	}
@@ -282,7 +282,7 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 
 	// See if there already exists a deployment by that name
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	deployment, err := converters.DeploymentFromNative(vpDeployment)
+	deployment, err := native_converters.DeploymentFromNative(vpDeployment)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -330,7 +330,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 	log := r.getLogger(req)
 	log.Info("Patching VP Deployment")
 
-	desiredDeployment, err := converters.DeploymentFromNative(vpDeployment)
+	desiredDeployment, err := native_converters.DeploymentFromNative(vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -354,7 +354,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	vpDeployment.Status.State, err = converters.DeploymentStateToNative(updatedDep.Status.State)
+	vpDeployment.Status.State, err = native_converters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {
 		return ctrl.Result{}, err

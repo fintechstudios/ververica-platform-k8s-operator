@@ -1,0 +1,24 @@
+# permissions for end users to edit vpdeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vpdeployment-editor-role
+rules:
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
+  - vpdeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ververicaplatform.fintechstudios.com
+  resources:
+  - vpdeployments/status
+  verbs:
+  - get

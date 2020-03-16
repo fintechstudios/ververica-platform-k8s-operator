@@ -1,4 +1,4 @@
-package converters
+package native_converters
 
 import (
 	"encoding/json"

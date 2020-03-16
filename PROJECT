@@ -1,16 +1,19 @@
-version: "2"
 domain: fintechstudios.com
 repo: github.com/fintechstudios/ververica-platform-k8s-operator
 resources:
 - group: ververicaplatform
-  version: v1beta1
   kind: VpNamespace
-- group: ververicaplatform
   version: v1beta1
+- group: ververicaplatform
   kind: VpDeploymentTarget
-- group: ververicaplatform
   version: v1beta1
+- group: ververicaplatform
   kind: VpDeployment
-- group: ververicaplatform
   version: v1beta1
+- group: ververicaplatform
   kind: VpSavepoint
+  version: v1beta1
+- group: ververicaplatform
+  kind: VpDeployment
+  version: v1beta2
+version: "2"

@@ -1,7 +1,7 @@
-package converters
+package native_converters
 
 import (
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 
 	"reflect"
@@ -62,7 +62,7 @@ var _ = Describe("DeploymentMetadata", func() {
 	Describe("DeploymentMetadataFromNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
-		var vpMetadata ververicaplatformv1beta1.VpMetadata
+		var vpMetadata v1beta1.VpMetadata
 
 		BeforeEach(func() {
 			annotations = map[string]string{
@@ -72,7 +72,7 @@ var _ = Describe("DeploymentMetadata", func() {
 			labels = map[string]string{
 				"excellent": "adventure",
 			}
-			vpMetadata = ververicaplatformv1beta1.VpMetadata{
+			vpMetadata = v1beta1.VpMetadata{
 				Annotations: annotations,
 				Labels:      labels,
 				Namespace:   deploymentNamespace,
