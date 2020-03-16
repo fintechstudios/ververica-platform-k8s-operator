@@ -259,7 +259,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error {
 		// unbundle stored labels
 		if annotations.Has(src.Annotations, annPodLabels) {
 			data := annotations.Get(src.Annotations, annPodLabels)
-			if err := json.Unmarshal([]byte(data), dstPods.Labels); err != nil {
+			if err := json.Unmarshal([]byte(data), &dstPods.Labels); err != nil {
 				return err
 			}
 		}

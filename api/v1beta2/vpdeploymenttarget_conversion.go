@@ -35,7 +35,7 @@ func (src *VpDeploymentTarget) ConvertTo(dstRaw conversion.Hub) error {
 	if annotations.Has(src.Annotations, annDepTargetPatchSet) {
 		// store as an annotation
 		data := annotations.Get(src.Annotations, annDepTargetPatchSet)
-		if err := json.Unmarshal([]byte(data), dst.Spec.Spec.DeploymentPatchSet); err != nil {
+		if err := json.Unmarshal([]byte(data), &dst.Spec.Spec.DeploymentPatchSet); err != nil {
 			return err
 		}
 	}

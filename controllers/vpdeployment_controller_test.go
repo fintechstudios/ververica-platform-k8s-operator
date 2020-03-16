@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
@@ -32,7 +32,7 @@ var _ = Describe("VpDeployment Controller", func() {
 	Describe("updateResource", func() {
 		var (
 			key              types.NamespacedName
-			created, fetched *v1beta1.VpDeployment
+			created, fetched *v1beta2.VpDeployment
 		)
 
 		BeforeEach(func() {
@@ -40,21 +40,21 @@ var _ = Describe("VpDeployment Controller", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &v1beta1.VpDeployment{
+			created = &v1beta2.VpDeployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: v1beta1.VpDeploymentObjectSpec{
-					Metadata: v1beta1.VpMetadata{},
-					Spec: v1beta1.VpDeploymentSpec{
-						UpgradeStrategy: &v1beta1.VpDeploymentUpgradeStrategy{
+				Spec: v1beta2.VpDeploymentObjectSpec{
+					Metadata: v1beta2.VpMetadata{},
+					Spec: v1beta2.VpDeploymentSpec{
+						UpgradeStrategy: &v1beta2.VpDeploymentUpgradeStrategy{
 							Kind: "STATELESS",
 						},
-						State: v1beta1.CancelledState,
-						Template: &v1beta1.VpDeploymentTemplate{
-							Spec: &v1beta1.VpDeploymentTemplateSpec{
-								Artifact: &v1beta1.VpArtifact{
+						State: v1beta2.CancelledState,
+						Template: &v1beta2.VpDeploymentTemplate{
+							Spec: &v1beta2.VpDeploymentTemplateSpec{
+								Artifact: &v1beta2.VpArtifact{
 									Kind:   "JAR",
 									JarURI: "https://jars.com/peanut-butter",
 								},
@@ -108,7 +108,7 @@ var _ = Describe("VpDeployment Controller", func() {
 
 			Expect(reconciler.updateResource(created, dep)).To(Succeed())
 
-			fetched = &v1beta1.VpDeployment{}
+			fetched = &v1beta2.VpDeployment{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(dep.Metadata.Id))
 			statusState, _ := native_converters.DeploymentStateToNative(dep.Status.State)
