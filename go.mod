@@ -16,6 +16,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
 	k8s.io/api v0.17.3
 	k8s.io/apimachinery v0.17.4
-	k8s.io/client-go v0.17.2
+	k8s.io/client-go v0.17.4
 	sigs.k8s.io/controller-runtime v0.5.1
 )
