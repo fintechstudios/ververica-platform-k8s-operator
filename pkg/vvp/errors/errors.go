@@ -24,7 +24,7 @@ var (
 	ErrAuthContext = errors.New("couldn't get authorized context")
 )
 
-func bodyMessage(err error, body []byte) string {
+func bodyOrErrMessage(err error, body []byte) string {
 	if body == nil {
 		return err.Error()
 	}
@@ -51,9 +51,9 @@ func getClientErrorMessage(err error) string {
 
 	switch err := err.(type) {
 	case appmanagerapi.GenericSwaggerError:
-		return bodyMessage(err, err.Body())
+		return bodyOrErrMessage(err, err.Body())
 	case platformapi.GenericSwaggerError:
-		return bodyMessage(err, err.Body())
+		return bodyOrErrMessage(err, err.Body())
 	default:
 		return err.Error()
 	}

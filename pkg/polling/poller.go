@@ -7,7 +7,7 @@ import (
 
 type commandResult struct{}
 
-// FinishedResult is a sentinel can be returned by a PollerFunc to signal polling should exit
+// FinishedResult is a sentinel that can be returned by a PollerFunc to signal polling should exit
 var FinishedResult = &commandResult{}
 
 // PollerFunc is a function to be polled
@@ -57,7 +57,7 @@ func (p *Poller) sendResult(result interface{}) {
 
 // runPolling is the actual polling mechanism that handles control flow
 func (p *Poller) runPolling() {
-	for !p.IsStopped() {
+	for !p.IsDone() {
 		if res := p.Poll(); res != nil {
 			if cmdRes, ok := res.(commandResult); ok && &cmdRes == FinishedResult {
 				p.Stop()
@@ -77,7 +77,7 @@ func (p *Poller) runPolling() {
 // Start starts the polling process -- cannot be restarted after stopping
 func (p *Poller) Start() {
 	// TODO: make this less panic-driven by accommodating this case
-	if p.IsStopped() {
+	if p.IsDone() {
 		panic("cannot restart poller after it has been stopped")
 	}
 
@@ -128,8 +128,12 @@ func (p *Poller) IsFinished() bool {
 	return p.status == finished
 }
 
-// IsStopped returns whether or not the polling worker has been stopped or is finished
-// perhaps should be refactored to IsClosed, or IsRunnable
+// IsStopped returns whether or not the polling worker has been stoped
 func (p *Poller) IsStopped() bool {
+	return p.status == stopped
+}
+
+// IsDone returns whether or not the polling worker has been stopped or is finished
+func (p *Poller) IsDone() bool {
 	return p.status == stopped || p.IsFinished()
 }

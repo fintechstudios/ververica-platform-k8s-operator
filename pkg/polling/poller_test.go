@@ -27,7 +27,7 @@ var _ = Describe("Poller", func() {
 		poller.Start()
 		poller.Stop()
 		Eventually(poller.Channel).Should(BeClosed())
-		Eventually(poller.IsStopped).Should(BeTrue())
+		Eventually(poller.IsDone).Should(BeTrue())
 		Eventually(poller.IsFinished).Should(BeTrue())
 	})
 
@@ -35,7 +35,7 @@ var _ = Describe("Poller", func() {
 		poller.Start()
 		poller.StopAndBlock()
 		Expect(poller.Channel).To(BeClosed())
-		Expect(poller.IsStopped()).To(BeTrue())
+		Expect(poller.IsDone()).To(BeTrue())
 		Expect(poller.IsFinished()).To(BeTrue())
 	})
 

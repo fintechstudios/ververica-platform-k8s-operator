@@ -57,5 +57,5 @@ func (m *manager) PollerIsRunning(pollerType, name string) bool {
 		return false
 	}
 
-	return !m.GetPoller(pollerType, name).IsStopped()
+	return !m.GetPoller(pollerType, name).IsDone()
 }
