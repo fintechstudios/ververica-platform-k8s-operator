@@ -23,9 +23,9 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform"
 	"time"
 
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
 	platformapiclient "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 
 	"github.com/go-logr/logr"

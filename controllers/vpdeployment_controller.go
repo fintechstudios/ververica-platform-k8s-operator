@@ -25,12 +25,12 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/native_converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
