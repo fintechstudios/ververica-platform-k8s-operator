@@ -32,8 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	ververicaplatformv1beta2 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
@@ -83,8 +82,7 @@ var (
 
 func init() {
 	_ = v1beta1.AddToScheme(scheme)
-	_ = ververicaplatformv1beta2.AddToScheme(scheme)
-	_ = ververicaplatformv1beta1.AddToScheme(scheme)
+	_ = v1beta2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -191,11 +189,11 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)
 	}
-	if err = (&ververicaplatformv1beta1.VpDeployment{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&v1beta1.VpDeployment{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeployment")
 		os.Exit(1)
 	}
-	if err = (&ververicaplatformv1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&v1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeploymentTarget")
 		os.Exit(1)
 	}
