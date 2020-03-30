@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"path/filepath"
 	"testing"
 
@@ -65,6 +66,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(cfg).ToNot(BeNil())
 
 	err = v1beta1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = v1beta2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
