@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-VERSION?=v0.6.0
+VERSION?=v0.7.0
 IMG?=fintechstudios/ververica-platform-k8s-operator
 PKG=github.com/fintechstudios.com/ververica-platform-k8s-operator
 VERSION_PKG=main
