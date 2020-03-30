@@ -1,8 +1,8 @@
-package converters
+package nativeconverters
 
 import (
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 
 	"reflect"
 	"time"
@@ -21,7 +21,7 @@ var _ = Describe("DeploymentMetadata", func() {
 		var labels map[string]string
 		var createdAt time.Time
 		var modifiedAt time.Time
-		var metadata vpAPI.DeploymentMetadata
+		var metadata appmanagerapi.DeploymentMetadata
 
 		BeforeEach(func() {
 			createdAt = time.Now()
@@ -33,7 +33,7 @@ var _ = Describe("DeploymentMetadata", func() {
 			labels = map[string]string{
 				"excellent": "adventure",
 			}
-			metadata = vpAPI.DeploymentMetadata{
+			metadata = appmanagerapi.DeploymentMetadata{
 				Id:          deploymentID,
 				Annotations: annotations,
 				Labels:      labels,
@@ -62,7 +62,7 @@ var _ = Describe("DeploymentMetadata", func() {
 	Describe("DeploymentMetadataFromNative", func() {
 		var annotations map[string]string
 		var labels map[string]string
-		var vpMetadata ververicaplatformv1beta1.VpMetadata
+		var vpMetadata v1beta2.VpMetadata
 
 		BeforeEach(func() {
 			annotations = map[string]string{
@@ -72,7 +72,7 @@ var _ = Describe("DeploymentMetadata", func() {
 			labels = map[string]string{
 				"excellent": "adventure",
 			}
-			vpMetadata = ververicaplatformv1beta1.VpMetadata{
+			vpMetadata = v1beta2.VpMetadata{
 				Annotations: annotations,
 				Labels:      labels,
 				Namespace:   deploymentNamespace,

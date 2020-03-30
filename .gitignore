@@ -28,3 +28,8 @@ resources.yaml
 *.tgz
 
 vvp-values.yaml
+
+## TLS
+*.pem
+*.crt
+*.key

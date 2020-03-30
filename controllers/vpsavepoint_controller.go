@@ -23,12 +23,12 @@ import (
 	"time"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -109,7 +109,7 @@ func (r *VpSavepointReconciler) updateResource(resource *v1beta1.VpSavepoint, sa
 		return err
 	}
 
-	state, err := converters.SavepointStateToNative(savepoint.Status.State)
+	state, err := nativeconverters.SavepointStateToNative(savepoint.Status.State)
 	if err != nil {
 		return err
 	}

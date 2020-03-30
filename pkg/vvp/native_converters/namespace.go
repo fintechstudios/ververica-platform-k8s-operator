@@ -1,10 +1,10 @@
-package converters
+package nativeconverters
 
 import (
 	"errors"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	platformApiClient "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
+	platformapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/platform-api"
 )
 
 var ErrorInvalidNamespaceLifecyclePhase = errors.New("origin must be one of: LIFECYCLE_PHASE_ACTIVE, LIFECYCLE_PHASE_TERMINATING, UNRECOGNIZED, LIFECYCLE_PHASE_INVALID")
@@ -39,10 +39,10 @@ func NamespaceLifecyclePhaseFromNative(vpPhase v1beta1.NamespaceLifecyclePhase) 
 	}
 }
 
-func NamespaceRoleBindingsFromNative(nativeBindings []v1beta1.NamespaceRoleBinding) []platformApiClient.RoleBinding {
-	bindings := make([]platformApiClient.RoleBinding, len(nativeBindings))
+func NamespaceRoleBindingsFromNative(nativeBindings []v1beta1.NamespaceRoleBinding) []platformapi.RoleBinding {
+	bindings := make([]platformapi.RoleBinding, len(nativeBindings))
 	for i, nativeBinding := range nativeBindings {
-		bindings[i] = platformApiClient.RoleBinding{
+		bindings[i] = platformapi.RoleBinding{
 			Members: nativeBinding.Members,
 			Role:    nativeBinding.Role,
 		}
@@ -50,7 +50,7 @@ func NamespaceRoleBindingsFromNative(nativeBindings []v1beta1.NamespaceRoleBindi
 	return bindings
 }
 
-func NamespaceRoleBindingsToNative(bindings []platformApiClient.RoleBinding) []v1beta1.NamespaceRoleBinding {
+func NamespaceRoleBindingsToNative(bindings []platformapi.RoleBinding) []v1beta1.NamespaceRoleBinding {
 	nativeBindings := make([]v1beta1.NamespaceRoleBinding, len(bindings))
 	for i, nativeBinding := range bindings {
 		nativeBindings[i] = v1beta1.NamespaceRoleBinding{

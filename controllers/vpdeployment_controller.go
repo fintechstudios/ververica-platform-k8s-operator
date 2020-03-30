@@ -19,18 +19,18 @@ package controllers
 import (
 	"context"
 	"errors"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"strconv"
 	"time"
 
 	"github.com/antihax/optional"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1/converters"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/polling"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -68,7 +68,7 @@ func (r *VpDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 }
 
 // getDeploymentTargetID gets the id of a deployment
-func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDeployment v1beta1.VpDeployment) (string, error) {
+func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDeployment v1beta2.VpDeployment) (string, error) {
 	if annotations.Has(vpDeployment.Annotations, annotations.DeploymentTargetID) {
 		return annotations.Get(vpDeployment.Annotations, annotations.DeploymentTargetID), nil
 	}
@@ -92,7 +92,7 @@ func (r *VpDeploymentReconciler) getDeploymentTargetID(ctx context.Context, vpDe
 	return depTarget.Metadata.Id, nil
 }
 
-func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+func (r *VpDeploymentReconciler) ensurePollersAreRunning(req ctrl.Request, vpDeployment *v1beta2.VpDeployment) {
 	if !r.pollerManager.PollerIsRunning("event", req.String()) {
 		r.addEventPollerForResource(req, vpDeployment)
 	}
@@ -112,7 +112,7 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 	return func() interface{} {
 		log.Info("Polling")
 
-		var vpDeployment v1beta1.VpDeployment
+		var vpDeployment v1beta2.VpDeployment
 		if err := r.Get(context.Background(), req.NamespacedName, &vpDeployment); err != nil {
 			log.Error(err, "Error while getting latest k8s object")
 
@@ -197,7 +197,7 @@ func (r *VpDeploymentReconciler) getEventPollerFunc(req ctrl.Request, namespace,
 	}
 }
 
-func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+func (r *VpDeploymentReconciler) addEventPollerForResource(req ctrl.Request, vpDeployment *v1beta2.VpDeployment) {
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
 	// On each polling callback, push the update through the k8s client
@@ -212,7 +212,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 	return func() interface{} {
 		log.Info("Polling")
 
-		var vpDeploymentUpdated v1beta1.VpDeployment
+		var vpDeploymentUpdated v1beta2.VpDeployment
 		if err := r.Get(context.Background(), req.NamespacedName, &vpDeploymentUpdated); err != nil {
 			if utils.IsNotFoundError(err) {
 				log.Error(err, "VpDeployment not found while polling")
@@ -238,7 +238,7 @@ func (r *VpDeploymentReconciler) getStatusPollerFunc(req ctrl.Request, namespace
 	}
 }
 
-func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta1.VpDeployment) {
+func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vpDeployment *v1beta2.VpDeployment) {
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	vpID := annotations.Get(vpDeployment.Annotations, annotations.ID)
 
@@ -250,7 +250,7 @@ func (r *VpDeploymentReconciler) addStatusPollerForResource(req ctrl.Request, vp
 }
 
 // updateResource takes a k8s resource and a VP resource and syncs them in k8s - does a full update
-func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, deployment *appmanagerapi.Deployment) error {
+func (r *VpDeploymentReconciler) updateResource(resource *v1beta2.VpDeployment, deployment *appmanagerapi.Deployment) error {
 	ctx := context.Background()
 
 	// save dynamic information as annotations
@@ -263,7 +263,7 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, 
 		return err
 	}
 
-	state, err := converters.DeploymentStateToNative(deployment.Status.State)
+	state, err := nativeconverters.DeploymentStateToNative(deployment.Status.State)
 	if err != nil {
 		return err
 	}
@@ -277,12 +277,12 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta1.VpDeployment, 
 }
 
 // handleCreate creates VP resources
-func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1beta1.VpDeployment) (ctrl.Result, error) {
+func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1beta2.VpDeployment) (ctrl.Result, error) {
 	log := r.getLogger(req)
 
 	// See if there already exists a deployment by that name
 	namespace := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
-	deployment, err := converters.DeploymentFromNative(vpDeployment)
+	deployment, err := nativeconverters.DeploymentFromNative(vpDeployment)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -326,11 +326,11 @@ func (r *VpDeploymentReconciler) handleCreate(req ctrl.Request, vpDeployment v1b
 // handleUpdate updates the k8s resource when it already exists in the VP
 // it also patches the deployment in the Ververica Platform, which could trigger a state transition
 // which we should wait for, if possible
-func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1beta1.VpDeployment, currentDeployment appmanagerapi.Deployment) (ctrl.Result, error) {
+func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1beta2.VpDeployment, currentDeployment appmanagerapi.Deployment) (ctrl.Result, error) {
 	log := r.getLogger(req)
 	log.Info("Patching VP Deployment")
 
-	desiredDeployment, err := converters.DeploymentFromNative(vpDeployment)
+	desiredDeployment, err := nativeconverters.DeploymentFromNative(vpDeployment)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -354,7 +354,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
-	vpDeployment.Status.State, err = converters.DeploymentStateToNative(updatedDep.Status.State)
+	vpDeployment.Status.State, err = nativeconverters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {
 		return ctrl.Result{}, err
@@ -372,7 +372,7 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 }
 
 // handleDelete will ensure that the Ververica Platform namespace is also cleaned up
-func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1beta1.VpDeployment) (ctrl.Result, error) {
+func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1beta2.VpDeployment) (ctrl.Result, error) {
 	log := r.getLogger(req)
 
 	// First must make sure the deployment is canceled, then must delete it.
@@ -395,12 +395,12 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 	}
 
 	// If the desired state is cancelled, we're good - just have to wait
-	if deployment.Status.State != string(v1beta1.CancelledState) {
+	if deployment.Status.State != string(v1beta2.CancelledState) {
 		// If the desired state is not cancelled, we're ~not~ good - must cancel and then wait
-		if deployment.Spec.State != string(v1beta1.CancelledState) {
+		if deployment.Spec.State != string(v1beta2.CancelledState) {
 			// must cancel it
 			log.Info("Cancelling Deployment")
-			deployment.Spec.State = string(v1beta1.CancelledState)
+			deployment.Spec.State = string(v1beta2.CancelledState)
 			deployment, err = r.AppManagerClient.Deployments().UpdateDeployment(ctx, vpDeployment.Spec.Metadata.Namespace, deployment.Metadata.Id, *deployment)
 
 			if err != nil {
@@ -438,7 +438,7 @@ func (r *VpDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	ctx := context.Background()
 	log := r.getLogger(req)
 
-	var vpDeployment v1beta1.VpDeployment
+	var vpDeployment v1beta2.VpDeployment
 	// If it's gone, it's gone!
 	if err := r.Get(ctx, req.NamespacedName, &vpDeployment); err != nil {
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
@@ -516,6 +516,6 @@ func (r *VpDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	r.manager = &mgr
 	r.pollerManager = polling.NewManager()
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1beta1.VpDeployment{}).
+		For(&v1beta2.VpDeployment{}).
 		Complete(r)
 }

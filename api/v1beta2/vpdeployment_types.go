@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package v1beta2
 
 import (
 	core "k8s.io/api/core/v1"
@@ -37,12 +37,6 @@ type VpDeploymentRestoreStrategy struct {
 	Kind string `json:"kind,omitempty"`
 	// +optional
 	AllowNonRestoredState bool `json:"allowNonRestoredState,omitempty"`
-}
-
-// VpDeploymentStartFromSavepoint describes which savepoint, if any, to start the job with
-type VpDeploymentStartFromSavepoint struct {
-	// +optional
-	Kind string `json:"kind,omitempty"`
 }
 
 // VpDeploymentTemplateMetadata
@@ -102,6 +96,9 @@ type VpPodSpec struct {
 	// +patchMergeKey=name
 	// +patchStrategy=merge
 	EnvVars []core.EnvVar `json:"envVars,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
 
 	// +optional
 	VolumeMounts []VpVolumeAndMount `json:"volumeMounts,omitempty"`
@@ -165,7 +162,7 @@ type VpDeploymentTemplate struct {
 
 // DeploymentState is the enum of all possible deployment states
 // Only one of the following states may be specified.
-// +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED
+// +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED;FINISHED
 type DeploymentState string
 
 // All the allowed DeploymentStates
@@ -175,6 +172,7 @@ const (
 	TransitioningState = DeploymentState("TRANSITIONING")
 	SuspendedState     = DeploymentState("SUSPENDED")
 	FailedState        = DeploymentState("FAILED")
+	FinishedState      = DeploymentState("FINISHED")
 )
 
 // VpDeploymentSpec is the spec in the Ververica Platform
@@ -184,8 +182,6 @@ type VpDeploymentSpec struct {
 	UpgradeStrategy *VpDeploymentUpgradeStrategy `json:"upgradeStrategy"`
 	// +optional
 	RestoreStrategy *VpDeploymentRestoreStrategy `json:"restoreStrategy,omitempty"`
-	// +optional
-	StartFromSavepoint *VpDeploymentStartFromSavepoint `json:"startFromSavepoint,omitempty"`
 	// +optional
 	DeploymentTargetID string `json:"deploymentTargetId,omitempty"`
 	// +optional
@@ -218,10 +214,11 @@ type VpDeploymentStatus struct {
 
 	// +optional
 	State DeploymentState `json:"state,omitempty"`
+
+	// TODO: add running status
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"

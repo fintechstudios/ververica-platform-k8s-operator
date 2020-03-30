@@ -1,18 +1,19 @@
-package converters
+package nativeconverters
 
 import (
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("DeploymentState", func() {
-	var deploymentStates = []ververicaplatformv1beta1.DeploymentState{
-		ververicaplatformv1beta1.CancelledState,
-		ververicaplatformv1beta1.RunningState,
-		ververicaplatformv1beta1.TransitioningState,
-		ververicaplatformv1beta1.SuspendedState,
-		ververicaplatformv1beta1.FailedState,
+	var deploymentStates = []v1beta2.DeploymentState{
+		v1beta2.CancelledState,
+		v1beta2.RunningState,
+		v1beta2.TransitioningState,
+		v1beta2.SuspendedState,
+		v1beta2.FailedState,
+		v1beta2.FinishedState,
 	}
 
 	Describe("DeploymentStateToNative", func() {
@@ -40,7 +41,7 @@ var _ = Describe("DeploymentState", func() {
 		})
 
 		It("should return an error given an invalid state", func() {
-			_, err := DeploymentStateFromNative(ververicaplatformv1beta1.DeploymentState("not-a-state"))
+			_, err := DeploymentStateFromNative(v1beta2.DeploymentState("not-a-state"))
 			Expect(err).To(HaveOccurred())
 		})
 	})

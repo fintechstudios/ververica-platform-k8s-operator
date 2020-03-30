@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package v1beta2
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,19 +22,6 @@ import (
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// JSONPatchGeneric is a generic JSON-Patch object
-type JSONPatchGeneric struct {
-	Op   string `json:"op"`
-	Path string `json:"path"`
-	// TODO: support any type of JSON as an interface
-	// 		 https://github.com/kubernetes-sigs/kubebuilder/issues/528
-	//       https://github.com/kubernetes-sigs/controller-tools/issues/294
-	// +optional
-	Value *string `json:"value,omitempty"`
-	// +optional
-	From string `json:"from,omitempty"`
-}
 
 // VpKubernetesTarget allows a user to configure k8s specific options
 type VpKubernetesTarget struct {
@@ -45,8 +32,6 @@ type VpKubernetesTarget struct {
 // VpDeploymentTargetSpec allows a users to set defaults for deployments and configure K8s
 type VpDeploymentTargetSpec struct {
 	Kubernetes VpKubernetesTarget `json:"kubernetes"`
-	// +optional
-	DeploymentPatchSet []JSONPatchGeneric `json:"deploymentPatchSet,omitempty"`
 }
 
 // VpDeploymentTargetObjectSpec defines the desired state of VpDeploymentTarget
@@ -61,7 +46,6 @@ type VpDeploymentTargetObjectSpec struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Namespace",type="string",JSONPath=".spec.metadata.namespace"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 

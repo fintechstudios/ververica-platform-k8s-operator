@@ -1,4 +1,4 @@
-package converters_test
+package nativeconverters_test
 
 import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -11,6 +11,6 @@ import (
 func TestConverters(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"converters",
+		"Native Converters",
 		[]Reporter{printer.NewlineReporter{}})
 }

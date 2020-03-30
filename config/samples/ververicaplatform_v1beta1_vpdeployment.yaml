@@ -42,7 +42,6 @@ spec:
           # Should replace these with a distributed file system URI
           state.savepoints.dir: file:///flink/state/savepoints
           state.checkpoints.dir: file:///flink/state/checkpoints
-          taskmanager.numberOfTaskSlots: "1"
         logging:
           log4jLoggers:
             "com.fintechstudios": DEBUG

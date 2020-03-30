@@ -1,8 +1,8 @@
-package converters
+package nativeconverters
 
 import (
-	ververicaplatformv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	vpAPI "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -12,7 +12,7 @@ var _ = Describe("Resources", func() {
 	Describe("ResourcesToNative", func() {
 		memory := "2g"
 		cpu := 2.0
-		resources := map[string]vpAPI.ResourceSpec{
+		resources := map[string]appmanagerapi.ResourceSpec{
 			"jobmanager": {
 				Cpu:    cpu,
 				Memory: memory,
@@ -40,7 +40,7 @@ var _ = Describe("Resources", func() {
 	Describe("ResourcesFromNative", func() {
 		memory := "2g"
 		cpu := resource.MustParse("2.0")
-		vpResources := map[string]ververicaplatformv1beta1.VpResourceSpec{
+		vpResources := map[string]v1beta2.VpResourceSpec{
 			"jobmanager": {
 				CPU:    cpu,
 				Memory: &memory,

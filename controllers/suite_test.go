@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"path/filepath"
 	"testing"
 
@@ -52,8 +53,8 @@ func TestControllers(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
-	logger = zap.LoggerTo(GinkgoWriter, true).WithName("Controller Tests")
+	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
+	logger = zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)).WithName("Controller Tests")
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -65,6 +66,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(cfg).ToNot(BeNil())
 
 	err = v1beta1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = v1beta2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

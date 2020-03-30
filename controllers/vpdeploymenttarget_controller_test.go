@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	vvpv1beta1 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	mocks "github.com/fintechstudios/ververica-platform-k8s-operator/mocks/vvp/appmanager"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
@@ -32,7 +32,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 	Describe("updateResource", func() {
 		var (
 			key              types.NamespacedName
-			created, fetched *vvpv1beta1.VpDeploymentTarget
+			created, fetched *v1beta2.VpDeploymentTarget
 		)
 
 		BeforeEach(func() {
@@ -40,7 +40,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 				Name:      "foo",
 				Namespace: "default",
 			}
-			created = &vvpv1beta1.VpDeploymentTarget{
+			created = &v1beta2.VpDeploymentTarget{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:        "foo",
 					Namespace:   "default",
@@ -80,7 +80,7 @@ var _ = Describe("VpDeploymentTarget Controller", func() {
 
 			Expect(reconciler.updateResource(created, depTarget)).To(Succeed())
 
-			fetched = &vvpv1beta1.VpDeploymentTarget{}
+			fetched = &v1beta2.VpDeploymentTarget{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(annotations.Get(fetched.Annotations, annotations.ResourceVersion)).To(Equal(fmt.Sprint(depTarget.Metadata.ResourceVersion)))
 			Expect(annotations.Get(fetched.Annotations, annotations.ID)).To(Equal(depTarget.Metadata.Id))
