@@ -160,24 +160,46 @@ type VpDeploymentTemplate struct {
 	Spec *VpDeploymentTemplateSpec `json:"spec"`
 }
 
-// DeploymentState is the enum of all possible deployment states
+// VpDeploymentState is the enum of all possible deployment states
 // Only one of the following states may be specified.
 // +kubebuilder:validation:Enum=CANCELLED;RUNNING;TRANSITIONING;SUSPENDED;FAILED;FINISHED
-type DeploymentState string
+type VpDeploymentState string
 
 // All the allowed DeploymentStates
 const (
-	CancelledState     = DeploymentState("CANCELLED") // non-US spelling intentional
-	RunningState       = DeploymentState("RUNNING")
-	TransitioningState = DeploymentState("TRANSITIONING")
-	SuspendedState     = DeploymentState("SUSPENDED")
-	FailedState        = DeploymentState("FAILED")
-	FinishedState      = DeploymentState("FINISHED")
+	CancelledState     = VpDeploymentState("CANCELLED") // non-US spelling intentional
+	RunningState       = VpDeploymentState("RUNNING")
+	TransitioningState = VpDeploymentState("TRANSITIONING")
+	SuspendedState     = VpDeploymentState("SUSPENDED")
+	FailedState        = VpDeploymentState("FAILED")
+	FinishedState      = VpDeploymentState("FINISHED")
 )
+
+// VpDeploymentRunningCondition provide more details
+// about the state of deployment
+type VpDeploymentRunningCondition struct {
+	Type               string      `json:"type"`
+	Status             string      `json:"status"`
+	Message            string      `json:"message"`
+	Reason             string      `json:"reason"`
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	LastUpdateTime     metav1.Time `json:"lastUpdateTime,omitempty"`
+}
+
+// VpDeploymentRunningStatus gives extra information about the
+// status of the underlying Flink job
+// see: https://docs.ververica.com/user_guide/deployments/index.html#running
+type VpDeploymentRunningStatus struct {
+	// +optional
+	Conditions []VpDeploymentRunningCondition `json:"conditions,omitempty"`
+	JobID      string                         `json:"jobId"`
+	// +optional
+	TransitionTime metav1.Time `json:"transitionTime,omitempty"`
+}
 
 // VpDeploymentSpec is the spec in the Ververica Platform
 type VpDeploymentSpec struct {
-	State DeploymentState `json:"state"`
+	State VpDeploymentState `json:"state"`
 
 	UpgradeStrategy *VpDeploymentUpgradeStrategy `json:"upgradeStrategy"`
 	// +optional
@@ -213,9 +235,11 @@ type VpDeploymentStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// +optional
-	State DeploymentState `json:"state,omitempty"`
+	State VpDeploymentState `json:"state,omitempty"`
 
-	// TODO: add running status
+	// see: https://docs.ververica.com/user_guide/deployments/index.html#running
+	// +optional
+	Running *VpDeploymentRunningStatus `json:"running,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -232,8 +256,9 @@ type VpDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   VpDeploymentObjectSpec `json:"spec"`
-	Status VpDeploymentStatus     `json:"status,omitempty"`
+	Spec VpDeploymentObjectSpec `json:"spec"`
+	// +optional
+	Status *VpDeploymentStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

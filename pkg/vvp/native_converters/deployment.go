@@ -31,13 +31,26 @@ func DeploymentFromNative(vpDeployment v1beta2.VpDeployment) (appmanagerapi.Depl
 	}
 	deployment.Spec = &deploymentSpec
 
+	if deployment.Status, err = DeploymentStatusFromNative(vpDeployment.Status); err != nil {
+		return deployment, err
+	}
+
 	if len(vpDeployment.Status.State) > 0 {
+		// we've got some state
 		state, err := DeploymentStateFromNative(vpDeployment.Status.State)
 		if err != nil {
 			return deployment, err
 		}
 
-		deployment.Status = &appmanagerapi.DeploymentStatus{State: state}
+		runningStatus, err := DeploymentRunningStatusFromNative(vpDeployment.Status.Running)
+		if err != nil {
+			return deployment, err
+		}
+
+		deployment.Status = &appmanagerapi.DeploymentStatus{
+			State:   state,
+			Running: runningStatus,
+		}
 	}
 
 	return deployment, nil

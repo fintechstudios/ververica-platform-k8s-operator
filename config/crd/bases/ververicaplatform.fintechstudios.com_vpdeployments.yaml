@@ -3113,7 +3113,7 @@ spec:
                         type: string
                     type: object
                   state:
-                    description: DeploymentState is the enum of all possible deployment
+                    description: VpDeploymentState is the enum of all possible deployment
                       states Only one of the following states may be specified.
                     enum:
                     - CANCELLED
@@ -6051,8 +6051,45 @@ spec:
           status:
             description: VpDeploymentStatus defines the observed state of VpDeployment
             properties:
+              running:
+                description: 'see: https://docs.ververica.com/user_guide/deployments/index.html#running'
+                properties:
+                  conditions:
+                    items:
+                      description: VpDeploymentRunningCondition provide more details
+                        about the state of deployment
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        lastUpdateTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - message
+                      - reason
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  jobId:
+                    type: string
+                  transitionTime:
+                    format: date-time
+                    type: string
+                required:
+                - jobId
+                type: object
               state:
-                description: DeploymentState is the enum of all possible deployment
+                description: VpDeploymentState is the enum of all possible deployment
                   states Only one of the following states may be specified.
                 enum:
                 - CANCELLED

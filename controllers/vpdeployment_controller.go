@@ -259,15 +259,14 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta2.VpDeployment, 
 		annotations.Pair(annotations.ResourceVersion, strconv.Itoa(int(deployment.Metadata.ResourceVersion))),
 		annotations.Pair(annotations.DeploymentTargetID, deployment.Spec.DeploymentTargetId))
 
-	if err := r.Update(ctx, resource); err != nil {
+	var err error
+	if err = r.Update(ctx, resource); err != nil {
 		return err
 	}
 
-	state, err := nativeconverters.DeploymentStateToNative(deployment.Status.State)
-	if err != nil {
+	if resource.Status, err = nativeconverters.DeploymentStatusToNative(deployment.Status); err != nil {
 		return err
 	}
-	resource.Status.State = state
 
 	if err := r.Status().Update(ctx, resource); err != nil {
 		return err

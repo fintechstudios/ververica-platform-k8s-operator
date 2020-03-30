@@ -8,7 +8,7 @@ import (
 var ErrInvalidDeploymentState = errors.New("state must be one of: CANCELLED, RUNNING, TRANSITIONING, SUSPENDED, FINISHED, FAILED")
 
 // DeploymentStateToNative converts a Ververica Platform deployment into its native K8s representation
-func DeploymentStateToNative(state string) (v1beta2.DeploymentState, error) {
+func DeploymentStateToNative(state string) (v1beta2.VpDeploymentState, error) {
 	switch state {
 	case string(v1beta2.CancelledState):
 		return v1beta2.CancelledState, nil
@@ -28,7 +28,7 @@ func DeploymentStateToNative(state string) (v1beta2.DeploymentState, error) {
 }
 
 // DeploymentStateFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
-func DeploymentStateFromNative(vpState v1beta2.DeploymentState) (string, error) {
+func DeploymentStateFromNative(vpState v1beta2.VpDeploymentState) (string, error) {
 	switch vpState {
 	case v1beta2.CancelledState:
 		return string(v1beta2.CancelledState), nil

@@ -19,12 +19,14 @@ package v1beta2
 import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
+	"time"
 )
 
 // These tests are written in BDD-style using Ginkgo framework. Refer to
@@ -61,6 +63,10 @@ var _ = Describe("VpDeployment conversion", func() {
 					},
 				},
 				DeploymentTargetName: "dep-target",
+			},
+			Status: &VpDeploymentStatus{
+				State:   "",
+				Running: nil,
 			},
 		}
 
@@ -284,7 +290,41 @@ var _ = Describe("VpDeployment conversion", func() {
 					},
 				},
 			},
-			Status: VpDeploymentStatus{State: FinishedState},
+			Status: &VpDeploymentStatus{
+				State: FinishedState,
+				Running: &VpDeploymentRunningStatus{
+					Conditions: []VpDeploymentRunningCondition{
+						{
+							Type:    "ClusterUnreachable",
+							Message: "Unknown cluster failure",
+							Status:  "Unknown",
+							Reason:  "Failed to contact cluster",
+							LastTransitionTime: metav1.NewTime(
+								utils.MustParseTime(time.RFC3339, "2020-01-02T15:04:05Z"),
+							),
+							LastUpdateTime: metav1.NewTime(
+								utils.MustParseTime(time.RFC3339, "2020-01-02T14:00:00Z"),
+							),
+						},
+						{
+							Type:    "JobFailing",
+							Message: "Something is not happy",
+							Status:  "True",
+							Reason:  "error message here?",
+							LastTransitionTime: metav1.NewTime(
+								utils.MustParseTime(time.RFC3339, "2021-01-02T15:04:05Z"),
+							),
+							LastUpdateTime: metav1.NewTime(
+								utils.MustParseTime(time.RFC3339, "2021-01-02T14:00:00Z"),
+							),
+						},
+					},
+					JobID: "a-job-id",
+					TransitionTime: metav1.NewTime(
+						utils.MustParseTime(time.RFC3339, "2020-01-02T15:04:05Z"),
+					),
+				},
+			},
 		}
 		v1 := &v1beta1.VpDeployment{}
 		Expect(v2.ConvertTo(v1)).To(Succeed())
