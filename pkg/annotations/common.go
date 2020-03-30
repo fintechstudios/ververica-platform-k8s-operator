@@ -24,6 +24,7 @@ const (
 )
 
 // NewAnnotationName creates a new annotation name with a given suffix
+// with the common base "ververicaplatform.fintechstudios.com/"
 func NewAnnotationName(key string) AnnotationName {
 	return AnnotationName(baseAnnotation + key)
 }
@@ -34,11 +35,12 @@ func Pair(attr AnnotationName, val string) AnnotationPair {
 }
 
 // Has determines whether or not an annotation is set
+// safe to call on nil annotations
 func Has(annotations Annotations, attr AnnotationName) bool {
 	return Get(annotations, attr) != ""
 }
 
-// Get retrieves a single annotation
+// Get retrieves a single annotation, safe to call on nil annotations
 func Get(annotations Annotations, attr AnnotationName) string {
 	if annotations == nil {
 		return ""
@@ -59,6 +61,7 @@ func Remove(annotations Annotations, attr AnnotationName) bool {
 }
 
 // Set adds all the pairs to the annotations map
+// safe to call on nil annotations
 func Set(annotations Annotations, attrs ...AnnotationPair) Annotations {
 	if annotations == nil {
 		return Create(attrs...)
@@ -73,4 +76,12 @@ func Set(annotations Annotations, attrs ...AnnotationPair) Annotations {
 // Create makes a new Annotations map from a list of pairs
 func Create(attrs ...AnnotationPair) Annotations {
 	return Set(make(Annotations, len(attrs)), attrs...)
+}
+
+// EnsureExist either creates an empty annotation set or returns the given one
+func EnsureExist(annotations Annotations) Annotations {
+	if annotations != nil {
+		return annotations
+	}
+	return Create()
 }
