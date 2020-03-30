@@ -1,0 +1,168 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
+  creationTimestamp: null
+  annotations:
+    certmanager.k8s.io/inject-ca-from: {{ template "vp-k8s-operator-crds.webhookCert" . }}
+    controller-gen.kubebuilder.io/version: v0.2.4
+spec:
+  additionalPrinterColumns:
+    - JSONPath: .spec.metadata.namespace
+      name: Namespace
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+  conversion:
+    strategy: Webhook
+    webhookClientConfig:
+      caBundle: {{ include "vp-k8s-operator-crds.webhookCaBundle" . }}
+      service:
+        name: {{ .Values.webhookService.name }}
+        namespace: {{ .Values.webhookService.namespace }}
+        path: /convert
+  group: ververicaplatform.fintechstudios.com
+  names:
+    kind: VpDeploymentTarget
+    listKind: VpDeploymentTargetList
+    plural: vpdeploymenttargets
+    singular: vpdeploymenttarget
+  scope: Namespaced
+  subresources: {}
+  version: v1beta1
+  versions:
+    - name: v1beta1
+      schema:
+        openAPIV3Schema:
+          description: VpDeploymentTarget is the Schema for the vpdeploymenttargets
+            API
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: VpDeploymentTargetObjectSpec defines the desired state of
+                VpDeploymentTarget
+              properties:
+                metadata:
+                  description: VpMetadata represents the base metadata for VP resources
+                  properties:
+                    annotations:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    labels:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    namespace:
+                      type: string
+                  type: object
+                spec:
+                  description: VpDeploymentTargetSpec allows a users to set defaults
+                    for deployments and configure K8s
+                  properties:
+                    deploymentPatchSet:
+                      items:
+                        description: JSONPatchGeneric is a generic JSON-Patch object
+                        properties:
+                          from:
+                            type: string
+                          op:
+                            type: string
+                          path:
+                            type: string
+                          value:
+                            description: "TODO: support any type of JSON as an interface
+                            \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528
+                            \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
+                            type: string
+                        required:
+                          - op
+                          - path
+                        type: object
+                      type: array
+                    kubernetes:
+                      description: VpKubernetesTarget allows a user to configure k8s
+                        specific options
+                      properties:
+                        namespace:
+                          type: string
+                      type: object
+                  required:
+                    - kubernetes
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: true
+    - name: v1beta2
+      schema:
+        openAPIV3Schema:
+          description: VpDeploymentTarget is the Schema for the vpdeploymenttargets
+            API
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: VpDeploymentTargetObjectSpec defines the desired state of
+                VpDeploymentTarget
+              properties:
+                metadata:
+                  description: VpMetadata represents the base metadata for VP resources
+                  properties:
+                    annotations:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    labels:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    namespace:
+                      type: string
+                  type: object
+                spec:
+                  description: VpDeploymentTargetSpec allows a users to set defaults
+                    for deployments and configure K8s
+                  properties:
+                    kubernetes:
+                      description: VpKubernetesTarget allows a user to configure k8s
+                        specific options
+                      properties:
+                        namespace:
+                          type: string
+                      type: object
+                  required:
+                    - kubernetes
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: false
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
