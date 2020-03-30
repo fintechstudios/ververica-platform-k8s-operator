@@ -168,7 +168,6 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 		}
 	}
 
-
 	dst.Spec.Spec.Template = dstTmpl
 
 	// Status

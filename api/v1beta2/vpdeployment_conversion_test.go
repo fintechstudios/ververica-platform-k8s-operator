@@ -127,7 +127,7 @@ var _ = Describe("VpDeployment conversion", func() {
 						AllowNonRestoredState: true,
 					},
 					State:                        RunningState,
-					DeploymentTargetID: "an-id",
+					DeploymentTargetID:           "an-id",
 					MaxSavepointCreationAttempts: pointer.Int32Ptr(4),
 					MaxJobCreationAttempts:       pointer.Int32Ptr(3),
 					Template: &VpDeploymentTemplate{
@@ -156,7 +156,7 @@ var _ = Describe("VpDeployment conversion", func() {
 								},
 								"jm": {
 									CPU:    resource.MustParse("2"),
-									Memory: pointer.StringPtr("2GB"),},
+									Memory: pointer.StringPtr("2GB")},
 							},
 							FlinkConfiguration: map[string]string{
 								"high-availability.storageDir": "s3://flink/haState",
