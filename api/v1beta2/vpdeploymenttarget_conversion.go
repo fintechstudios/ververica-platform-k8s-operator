@@ -33,6 +33,7 @@ func (src *VpDeploymentTarget) ConvertTo(dstRaw conversion.Hub) error {
 	}
 
 	if annotations.Has(src.Annotations, annDepTargetPatchSet) {
+		dst.Annotations = annotations.EnsureExist(dst.Annotations)
 		// store as an annotation
 		data := annotations.Get(src.Annotations, annDepTargetPatchSet)
 		if err := json.Unmarshal([]byte(data), &dst.Spec.Spec.DeploymentPatchSet); err != nil {
@@ -66,7 +67,7 @@ func (dst *VpDeploymentTarget) ConvertFrom(srcRaw conversion.Hub) error { // nol
 		if err != nil {
 			return err
 		}
-		annotations.Set(dst.Annotations,
+		dst.Annotations = annotations.Set(dst.Annotations,
 			annotations.Pair(annDepTargetPatchSet, string(data)))
 	}
 

@@ -48,6 +48,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 
 	// base conversion
 	dst.ObjectMeta = src.ObjectMeta
+	dst.Annotations = annotations.EnsureExist(dst.Annotations)
 	// Spec
 	dst.Spec.Metadata = v1beta1.VpMetadata{
 		Namespace:   src.Spec.Metadata.Namespace,
@@ -81,85 +82,92 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 
 	// Spec.Spec template
 	srcTmpl := src.Spec.Spec.Template
-	dstTmpl := &v1beta1.VpDeploymentTemplate{}
+	dstTmpl := &v1beta1.VpDeploymentTemplate{
+		Spec: &v1beta1.VpDeploymentTemplateSpec{},
+	}
 	if srcTmpl.Metadata != nil {
 		dstTmpl.Metadata = &v1beta1.VpDeploymentTemplateMetadata{
 			Annotations: srcTmpl.Metadata.Annotations,
 		}
 	}
 
-	dstTmpl.Spec.Artifact = &v1beta1.VpArtifact{
-		Kind:                 srcTmpl.Spec.Artifact.Kind,
-		JarURI:               srcTmpl.Spec.Artifact.JarURI,
-		MainArgs:             srcTmpl.Spec.Artifact.MainArgs,
-		EntryClass:           srcTmpl.Spec.Artifact.EntryClass,
-		FlinkVersion:         srcTmpl.Spec.Artifact.FlinkVersion,
-		FlinkImageRegistry:   srcTmpl.Spec.Artifact.FlinkImageRegistry,
-		FlinkImageRepository: srcTmpl.Spec.Artifact.FlinkImageRepository,
-		FlinkImageTag:        srcTmpl.Spec.Artifact.FlinkImageTag,
-	}
-
-	dstTmpl.Spec.FlinkConfiguration = srcTmpl.Spec.FlinkConfiguration
-
-	if srcTmpl.Spec.Resources != nil {
-		dstRes := make(map[string]v1beta1.VpResourceSpec)
-		for name, res := range srcTmpl.Spec.Resources {
-			dstRes[name] = v1beta1.VpResourceSpec{
-				CPU:    res.CPU,
-				Memory: res.Memory,
+	if srcTmpl.Spec != nil {
+		if srcTmpl.Spec.Artifact != nil {
+			dstTmpl.Spec.Artifact = &v1beta1.VpArtifact{
+				Kind:                 srcTmpl.Spec.Artifact.Kind,
+				JarURI:               srcTmpl.Spec.Artifact.JarURI,
+				MainArgs:             srcTmpl.Spec.Artifact.MainArgs,
+				EntryClass:           srcTmpl.Spec.Artifact.EntryClass,
+				FlinkVersion:         srcTmpl.Spec.Artifact.FlinkVersion,
+				FlinkImageRegistry:   srcTmpl.Spec.Artifact.FlinkImageRegistry,
+				FlinkImageRepository: srcTmpl.Spec.Artifact.FlinkImageRepository,
+				FlinkImageTag:        srcTmpl.Spec.Artifact.FlinkImageTag,
 			}
 		}
-		dstTmpl.Spec.Resources = dstRes
-	}
 
-	if srcTmpl.Spec.Logging != nil {
-		dstTmpl.Spec.Logging = &v1beta1.VpLogging{Log4jLoggers: srcTmpl.Spec.Logging.Log4jLoggers}
-	}
+		dstTmpl.Spec.FlinkConfiguration = srcTmpl.Spec.FlinkConfiguration
 
-	if srcTmpl.Spec.NumberOfTaskManagers != nil {
-		dstTmpl.Spec.NumberOfTaskManagers = srcTmpl.Spec.NumberOfTaskManagers
-	}
-
-	if srcTmpl.Spec.Parallelism != nil {
-		dstTmpl.Spec.Parallelism = srcTmpl.Spec.Parallelism
-	}
-
-	if srcTmpl.Spec.Kubernetes != nil && srcTmpl.Spec.Kubernetes.Pods != nil {
-		srcPods := srcTmpl.Spec.Kubernetes.Pods
-
-		// save the labels as an annotation
-		labels, err := json.Marshal(srcPods.Labels)
-		if err != nil {
-			return err
-		}
-		annotations.Set(
-			dst.Annotations,
-			annotations.Pair(annPodLabels, string(labels)),
-		)
-
-		dstPods := &v1beta1.VpPodSpec{
-			Annotations:      srcPods.Annotations,
-			EnvVars:          srcPods.EnvVars,
-			NodeSelector:     srcPods.NodeSelector,
-			SecurityContext:  srcPods.SecurityContext,
-			ImagePullSecrets: srcPods.ImagePullSecrets,
-			Affinity:         srcPods.Affinity,
-			Tolerations:      srcPods.Tolerations,
-		}
-
-		if srcPods.VolumeMounts != nil {
-			dstPods.VolumeMounts = make([]v1beta1.VpVolumeAndMount, len(srcPods.VolumeMounts))
-			for i, e := range srcPods.VolumeMounts {
-				dstPods.VolumeMounts[i] = v1beta1.VpVolumeAndMount{
-					Name:        e.Name,
-					Volume:      e.Volume,
-					VolumeMount: e.VolumeMount,
+		if srcTmpl.Spec.Resources != nil {
+			dstRes := make(map[string]v1beta1.VpResourceSpec)
+			for name, res := range srcTmpl.Spec.Resources {
+				dstRes[name] = v1beta1.VpResourceSpec{
+					CPU:    res.CPU,
+					Memory: res.Memory,
 				}
 			}
+			dstTmpl.Spec.Resources = dstRes
 		}
 
-		dstTmpl.Spec.Kubernetes = &v1beta1.VpKubernetesOptions{Pods: dstPods}
+		if srcTmpl.Spec.Logging != nil {
+			dstTmpl.Spec.Logging = &v1beta1.VpLogging{Log4jLoggers: srcTmpl.Spec.Logging.Log4jLoggers}
+		}
+
+		if srcTmpl.Spec.NumberOfTaskManagers != nil {
+			dstTmpl.Spec.NumberOfTaskManagers = srcTmpl.Spec.NumberOfTaskManagers
+		}
+
+		if srcTmpl.Spec.Parallelism != nil {
+			dstTmpl.Spec.Parallelism = srcTmpl.Spec.Parallelism
+		}
+
+		if srcTmpl.Spec.Kubernetes != nil && srcTmpl.Spec.Kubernetes.Pods != nil {
+			srcPods := srcTmpl.Spec.Kubernetes.Pods
+
+			// save the labels as an annotation
+			labels, err := json.Marshal(srcPods.Labels)
+			if err != nil {
+				return err
+			}
+			annotations.Set(
+				dst.Annotations,
+				annotations.Pair(annPodLabels, string(labels)),
+			)
+
+			dstPods := &v1beta1.VpPodSpec{
+				Annotations:      srcPods.Annotations,
+				EnvVars:          srcPods.EnvVars,
+				NodeSelector:     srcPods.NodeSelector,
+				SecurityContext:  srcPods.SecurityContext,
+				ImagePullSecrets: srcPods.ImagePullSecrets,
+				Affinity:         srcPods.Affinity,
+				Tolerations:      srcPods.Tolerations,
+			}
+
+			if srcPods.VolumeMounts != nil {
+				dstPods.VolumeMounts = make([]v1beta1.VpVolumeAndMount, len(srcPods.VolumeMounts))
+				for i, e := range srcPods.VolumeMounts {
+					dstPods.VolumeMounts[i] = v1beta1.VpVolumeAndMount{
+						Name:        e.Name,
+						Volume:      e.Volume,
+						VolumeMount: e.VolumeMount,
+					}
+				}
+			}
+
+			dstTmpl.Spec.Kubernetes = &v1beta1.VpKubernetesOptions{Pods: dstPods}
+		}
 	}
+
 
 	dst.Spec.Spec.Template = dstTmpl
 
@@ -175,6 +183,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 
 	// base conversion
 	dst.ObjectMeta = src.ObjectMeta
+	dst.Annotations = annotations.EnsureExist(dst.Annotations)
 	// Spec
 	dst.Spec.Metadata = VpMetadata{
 		Namespace:   src.Spec.Metadata.Namespace,
@@ -208,7 +217,16 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 
 	// Spec.Spec template
 	srcTmpl := src.Spec.Spec.Template
-	dstTmpl := &VpDeploymentTemplate{}
+	dstTmpl := &VpDeploymentTemplate{
+		Spec: &VpDeploymentTemplateSpec{},
+	}
+
+	if srcTmpl.Metadata != nil {
+		dstTmpl.Metadata = &VpDeploymentTemplateMetadata{
+			Annotations: srcTmpl.Metadata.Annotations,
+		}
+	}
+
 	dstTmpl.Spec.Artifact = &VpArtifact{
 		Kind:                 srcTmpl.Spec.Artifact.Kind,
 		JarURI:               srcTmpl.Spec.Artifact.JarURI,
@@ -256,7 +274,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 			Affinity:         srcPods.Affinity,
 			Tolerations:      srcPods.Tolerations,
 		}
-		// unbundle stored labels
+		// un-bundle stored labels
 		if annotations.Has(src.Annotations, annPodLabels) {
 			data := annotations.Get(src.Annotations, annPodLabels)
 			if err := json.Unmarshal([]byte(data), &dstPods.Labels); err != nil {
