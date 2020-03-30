@@ -7,5 +7,5 @@ spec:
   template:
     spec:
       containers:
-      - image: fintechstudios/ververica-platform-k8s-operator:v0.6.0
+      - image: fintechstudios/ververica-platform-k8s-operator:v0.7.0
         name: manager
