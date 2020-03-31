@@ -6,8 +6,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("DeploymentState", func() {
-	var deploymentStates = []v1beta2.DeploymentState{
+var _ = Describe("VpDeploymentState", func() {
+	var deploymentStates = []v1beta2.VpDeploymentState{
 		v1beta2.CancelledState,
 		v1beta2.RunningState,
 		v1beta2.TransitioningState,
@@ -41,7 +41,7 @@ var _ = Describe("DeploymentState", func() {
 		})
 
 		It("should return an error given an invalid state", func() {
-			_, err := DeploymentStateFromNative(v1beta2.DeploymentState("not-a-state"))
+			_, err := DeploymentStateFromNative(v1beta2.VpDeploymentState("not-a-state"))
 			Expect(err).To(HaveOccurred())
 		})
 	})

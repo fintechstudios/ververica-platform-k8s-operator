@@ -8,6 +8,8 @@ import (
 	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 )
 
+// Client is a simple interface to expose the various resources
+// of the VVP AppManager
 type Client interface {
 	DeploymentTargets() DeploymentTargetsService
 	Events() EventsService

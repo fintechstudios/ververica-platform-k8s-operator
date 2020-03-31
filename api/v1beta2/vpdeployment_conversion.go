@@ -19,10 +19,11 @@ var (
 	annDepStartFromSavepoint = annotations.NewAnnotationName(depAnnotationBase + ".start-from-savepoint")
 	annDepState              = annotations.NewAnnotationName(depAnnotationBase + ".state")
 	annDepStatusState        = annotations.NewAnnotationName(depAnnotationBase + ".status-state")
+	annDepStatusRunning      = annotations.NewAnnotationName(depAnnotationBase + ".status-running")
 	annPodLabels             = annotations.NewAnnotationName(depAnnotationBase + ".pod-labels")
 )
 
-func convertToDeploymentState(state DeploymentState, annotation annotations.AnnotationName, notations map[string]string) v1beta1.DeploymentState {
+func convertToDeploymentState(state VpDeploymentState, annotation annotations.AnnotationName, notations map[string]string) v1beta1.DeploymentState {
 	// If deployment status is FINISHED, mark it as RUNNING and add an annotation in v1beta1, otherwise, do a conversion
 	if state == FinishedState {
 		annotations.Set(
@@ -34,12 +35,47 @@ func convertToDeploymentState(state DeploymentState, annotation annotations.Anno
 	return v1beta1.DeploymentState(string(state))
 }
 
-func convertFromDeploymentState(state v1beta1.DeploymentState, annotation annotations.AnnotationName, notations map[string]string) DeploymentState {
-	if annotations.Has(notations, annotation) {
-		return DeploymentState(annotations.Get(notations, annotation))
+func convertToDeploymentStatus(status *VpDeploymentStatus, notations map[string]string) (v1beta1.VpDeploymentStatus, error) {
+	v1Status := v1beta1.VpDeploymentStatus{
+		State: convertToDeploymentState(status.State, annDepStatusState, notations),
 	}
 
-	return DeploymentState(string(state))
+	if status.Running != nil {
+		// save the running status as JSON
+		runningJSON, err := json.Marshal(status.Running)
+		if err != nil {
+			return v1Status, err
+		}
+		annotations.Set(
+			notations,
+			annotations.Pair(annDepStatusRunning, string(runningJSON)),
+		)
+	}
+
+	return v1Status, nil
+}
+
+func convertFromDeploymentState(state v1beta1.DeploymentState, annotation annotations.AnnotationName, notations map[string]string) VpDeploymentState {
+	if annotations.Has(notations, annotation) {
+		return VpDeploymentState(annotations.Get(notations, annotation))
+	}
+
+	return VpDeploymentState(string(state))
+}
+
+func convertFromDeploymentStatus(v1Status v1beta1.VpDeploymentStatus, notations map[string]string) (*VpDeploymentStatus, error) {
+	status := &VpDeploymentStatus{
+		State: convertFromDeploymentState(v1Status.State, annDepStatusState, notations),
+	}
+
+	if annotations.Has(notations, annDepStatusRunning) {
+		data := annotations.Get(notations, annDepStatusRunning)
+		if err := json.Unmarshal([]byte(data), &status.Running); err != nil {
+			return status, err
+		}
+	}
+
+	return status, nil
 }
 
 // ConvertTo converts this v1beta2 version to a v1beta1 "Hub" version
@@ -171,7 +207,10 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	dst.Spec.Spec.Template = dstTmpl
 
 	// Status
-	dst.Status.State = convertToDeploymentState(src.Status.State, annDepStatusState, dst.Annotations)
+	var err error
+	if dst.Status, err = convertToDeploymentStatus(src.Status, dst.Annotations); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -298,7 +337,10 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 	dst.Spec.Spec.Template = dstTmpl
 
 	// Status
-	dst.Status.State = convertFromDeploymentState(src.Status.State, annDepStatusState, dst.Annotations)
+	var err error
+	if dst.Status, err = convertFromDeploymentStatus(src.Status, dst.Annotations); err != nil {
+		return err
+	}
 
 	return nil
 }

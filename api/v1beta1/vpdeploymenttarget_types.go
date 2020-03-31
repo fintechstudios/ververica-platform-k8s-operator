@@ -27,9 +27,7 @@ import (
 type JSONPatchGeneric struct {
 	Op   string `json:"op"`
 	Path string `json:"path"`
-	// TODO: support any type of JSON as an interface
-	// 		 https://github.com/kubernetes-sigs/kubebuilder/issues/528
-	//       https://github.com/kubernetes-sigs/controller-tools/issues/294
+
 	// +optional
 	Value *string `json:"value,omitempty"`
 	// +optional
