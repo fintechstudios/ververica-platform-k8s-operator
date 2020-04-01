@@ -5,6 +5,7 @@ kind: CustomResourceDefinition
 metadata:
   name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
 spec:
+  preserveUnknownFields: false
   conversion:
     strategy: Webhook
     webhookClientConfig:

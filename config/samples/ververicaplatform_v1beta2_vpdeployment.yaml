@@ -1,7 +1,63 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeployment
 metadata:
-  name: vpdeployment-sample
+  name: top-speed-v2
+  namespace: vvp
 spec:
-  # Add fields here
-  foo: bar
+  deploymentTargetName: top-speed-v2
+  metadata:
+    namespace: testing
+  spec:
+    state: RUNNING
+    upgradeStrategy:
+      kind: STATEFUL
+    restoreStrategy:
+      kind: LATEST_SAVEPOINT
+    maxSavepointCreationAttempts: 4
+    maxJobCreationAttempts: 4
+    template:
+      metadata:
+        annotations:
+          test: "true"
+      spec:
+        artifact:
+          kind: JAR
+          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.10.0/flink-examples-streaming_2.12-1.10.0-TopSpeedWindowing.jar
+          mainArgs: --windowSize 10 --windowUnit minutes
+          entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
+          flinkVersion: "1.10"
+          flinkImageRegistry: registry.platform.data-artisans.net/v2.1
+          flinkImageRepository: flink
+          flinkImageTag: 1.10.0-stream1-scala_2.12
+        parallelism: 2
+        numberOfTaskManagers: 2
+        resources:
+          jobmanager:
+            cpu: "1.5"
+            memory: 1g
+          taskmanager:
+            memory: 1.5g
+        flinkConfiguration:
+          high-availability.storageDir:  s3://flink/haState
+          # Should replace these with a distributed file system URI
+          state.savepoints.dir: file:///flink/state/savepoints
+          state.checkpoints.dir: file:///flink/state/checkpoints
+        logging:
+          log4jLoggers:
+            "com.fintechstudios": DEBUG
+        kubernetes:
+          pods:
+            #            volumeMounts:
+            #              - name: config
+            #                volume:
+            #                  name: config
+            #                  configMap:
+            #                    name: test-configmap
+            #                volumeMount:
+            #                  name: config
+            #                  mountPath: /opt/flink/conf
+            annotations:
+              "iam.amazonaws.com/role": k8s-flink-job
+            labels:
+              "fintechstudios.com/very-important": "true"
+

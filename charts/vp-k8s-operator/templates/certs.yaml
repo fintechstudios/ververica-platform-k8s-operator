@@ -9,6 +9,7 @@ metadata:
 spec:
   commonName: {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc
   dnsNames:
+    - {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc
     - {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc.cluster.local
   issuerRef:
     kind: Issuer

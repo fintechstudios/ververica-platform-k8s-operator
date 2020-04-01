@@ -7,6 +7,8 @@ BUILD=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS?="crd"
 
+DOCKER_REPO=fintechstudios/ververica-platform-k8s-operator
+
 LD_FLAGS="-X $(VERSION_PKG).operatorVersion='$(VERSION)' -X $(VERSION_PKG).gitCommit='$(GIT_COMMIT)' -X $(VERSION_PKG).buildDate='$(BUILD)'"
 
 TEST_CLUSTER_NAME=ververica-platform-k8s-operator-cluster
@@ -151,7 +153,7 @@ patch-image:
 # Build the k8s resources for deployment
 .PHONY: kustomize-build
 kustomize-build: patch-image
-	$(KUSTOMIZE) build config/default > resources.yaml
+	rm -f resources.yaml && $(KUSTOMIZE) build config/default > resources.yaml
 
 # Update the Swagger Client API
 .PHONY: swagger-gen
@@ -159,14 +161,33 @@ swagger-gen:
 	./hack/update-app-manager-swagger-codegen.sh \
 	 && ./hack/update-platform-swagger-codegen.sh
 
+.PHONY: docker-build
+docker-build:
+	docker build -f Dockerfile_build \
+		--cache-from $(DOCKER_REPO)-builder:$(VERSION) \
+		--tag $(DOCKER_REPO)-builder:$(VERSION) \
+		. \
+	&& docker build \
+		--build-arg BUILD_IMG=$(DOCKER_REPO)-builder:$(VERSION) \
+		--build-arg GIT_COMMIT=$(GIT_COMMIT) \
+		--build-arg VERSION=$(VERSION) \
+		--cache-from $(DOCKER_REPO):$(VERSION) \
+		-f Dockerfile \
+		--tag $(DOCKER_REPO):$(VERSION) \
+		.
+
+.PHONY: test-cluster-load-image
+test-cluster-load-image: kind
+	$(KIND) load docker-image --name $(TEST_CLUSTER_NAME) $(DOCKER_REPO):$(VERSION)
+
 # Create the test cluster using kind
 # install local path storage as defult storage class (see: https://github.com/kubernetes-sigs/kind/issues/118#issuecomment-475134086)
-.PHONY: test-cluster-create
+.PHONY: test-cluster-create kind
 test-cluster-create:
 	$(KIND) create cluster --name $(TEST_CLUSTER_NAME)
 
 # Delete the test cluster using kind
-.PHONY: test-cluster-delete
+.PHONY: test-cluster-delete kind
 test-cluster-delete:
 	$(KIND) delete cluster --name $(TEST_CLUSTER_NAME)
 
@@ -181,3 +202,32 @@ test-cluster-install-vvp:
 		vvp \
 		ververica/ververica-platform
 
+.PHONY: test-cluster-install-cert-manager
+test-cluster-install-cert-manager:
+	kubectl apply \
+		--validate=false \
+		-f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.crds.yaml \
+	&& . ./hack/helm-init.sh \
+	&& helm upgrade --install \
+		--version v0.14.1 \
+		--namespace cert-manager \
+		cert-manager \
+		jetstack/cert-manager
+
+.PHONY: test-cluster-install-chart
+test-cluster-install-chart:
+	. ./hack/helm-init.sh \
+	&& helm upgrade --install \
+		--namespace vvp \
+		vp-k8s-operator \
+		./charts/vp-k8s-operator \
+		-f vp-k8s-values.yaml
+
+.PHONY: test-cluster-install-crds
+test-cluster-install-crds:
+	. ./hack/helm-init.sh \
+	&& helm upgrade --install \
+		--namespace default \
+		vp-k8s-operator-crds \
+		./charts/vp-k8s-operator-crds \
+		-f vp-k8s-crds-values.yaml

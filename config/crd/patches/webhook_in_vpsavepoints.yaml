@@ -5,6 +5,7 @@ kind: CustomResourceDefinition
 metadata:
   name: vpsavepoints.ververicaplatform.fintechstudios.com
 spec:
+  preserveUnknownFields: false
   conversion:
     strategy: Webhook
     webhookClientConfig:

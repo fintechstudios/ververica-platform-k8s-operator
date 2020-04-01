@@ -1,5 +1,5 @@
 # Adds namespace to all resources.
-namespace: ververica-platform-k8s-operator-system
+namespace: vvp
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
