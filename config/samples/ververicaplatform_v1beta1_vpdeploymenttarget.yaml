@@ -9,3 +9,8 @@ spec:
   spec:
     kubernetes:
       namespace: vvp
+    deploymentPatchSet:
+      - op: add
+        path: /hello
+        value: gazelle
+

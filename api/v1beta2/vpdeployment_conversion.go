@@ -36,9 +36,13 @@ func convertToDeploymentState(state VpDeploymentState, annotation annotations.An
 }
 
 func convertToDeploymentStatus(status *VpDeploymentStatus, notations map[string]string) (v1beta1.VpDeploymentStatus, error) {
-	v1Status := v1beta1.VpDeploymentStatus{
-		State: convertToDeploymentState(status.State, annDepStatusState, notations),
+	v1Status := v1beta1.VpDeploymentStatus{}
+
+	if status == nil {
+		return v1Status, nil
 	}
+
+	v1Status.State = convertToDeploymentState(status.State, annDepStatusState, notations)
 
 	if status.Running != nil {
 		// save the running status as JSON
@@ -57,7 +61,9 @@ func convertToDeploymentStatus(status *VpDeploymentStatus, notations map[string]
 
 func convertFromDeploymentState(state v1beta1.DeploymentState, annotation annotations.AnnotationName, notations map[string]string) VpDeploymentState {
 	if annotations.Has(notations, annotation) {
-		return VpDeploymentState(annotations.Get(notations, annotation))
+		val := annotations.Get(notations, annotation)
+		annotations.Remove(notations, annotation)
+		return VpDeploymentState(val)
 	}
 
 	return VpDeploymentState(string(state))
@@ -73,6 +79,7 @@ func convertFromDeploymentStatus(v1Status v1beta1.VpDeploymentStatus, notations 
 		if err := json.Unmarshal([]byte(data), &status.Running); err != nil {
 			return status, err
 		}
+		annotations.Remove(notations, annDepStatusRunning)
 	}
 
 	return status, nil
@@ -114,6 +121,7 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 		if err := json.Unmarshal([]byte(an), dst.Spec.Spec.StartFromSavepoint); err != nil {
 			return err
 		}
+		annotations.Remove(src.Annotations, annDepStartFromSavepoint)
 	}
 
 	// Spec.Spec template
@@ -318,6 +326,7 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 			if err := json.Unmarshal([]byte(data), &dstPods.Labels); err != nil {
 				return err
 			}
+			annotations.Remove(src.Annotations, annPodLabels)
 		}
 
 		if srcPods.VolumeMounts != nil {

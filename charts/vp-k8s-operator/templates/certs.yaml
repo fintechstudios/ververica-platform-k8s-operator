@@ -1,0 +1,28 @@
+{{- if .Values.certs.enabled }}
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ template "vp-k8s-operator.fullname" . }}-serving-cert
+  namespace: {{.Release.Namespace}}
+  labels:
+    {{ include "vp-k8s-operator.labels" . | nindent 4 }}
+spec:
+  commonName: {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc
+  dnsNames:
+    - {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc
+    - {{ template "vp-k8s-operator.fullname" . }}-webhook-service.{{.Release.Namespace}}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ template "vp-k8s-operator.fullname" . }}-selfsigned-issuer
+  secretName: {{ template "vp-k8s-operator.fullname" . }}-webhook-server-cert
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: {{ template "vp-k8s-operator.fullname" . }}-selfsigned-issuer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "vp-k8s-operator.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+{{- end }}

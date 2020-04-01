@@ -1,7 +1,11 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeploymentTarget
 metadata:
-  name: vpdeploymenttarget-sample
+  name: top-speed-v2
+  namespace: vvp
 spec:
-  # Add fields here
-  foo: bar
+  metadata:
+    namespace: testing
+  spec:
+    kubernetes:
+      namespace: vvp

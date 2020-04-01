@@ -27,7 +27,7 @@ resources.yaml
 .charts
 *.tgz
 
-vvp-values.yaml
+*-values.yaml
 
 ## TLS
 *.pem

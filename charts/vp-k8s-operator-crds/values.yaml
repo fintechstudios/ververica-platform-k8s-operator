@@ -1,0 +1,17 @@
+
+
+webhookCert:
+  ## Cert-manager Certificate location
+  #
+  namespace: ""
+  name: ""
+
+  ## caBundle
+  # set only if not using cert-manager to manage certificates
+  #
+  # caBundle: Cg==
+
+
+webhookService:
+  name: ""
+  namespace: ""

@@ -9,8 +9,6 @@ rbacProxy:
   imagePullPolicy: IfNotPresent
   port: 8443
 
-
-cleanupCustomResourceBeforeInstall: false
 imageRepository: fintechstudios/ververica-platform-k8s-operator
 imageTag: latest
 imagePullPolicy: IfNotPresent
@@ -18,7 +16,17 @@ imagePullPolicy: IfNotPresent
 metricsHost: 127.0.0.1
 metricsPort: 8080
 
+certs:
+  enabled: true
+
 metricsMonitorEnabled: true
 
-appManagerApiUrl: http://ververica-platform-ververica-platform/api
-platformApiUrl: http://ververica-platform-ververica-platform
+vvpUrl: http://ververica-platform-ververica-platform
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 30Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi

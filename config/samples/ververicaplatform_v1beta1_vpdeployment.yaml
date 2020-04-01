@@ -56,8 +56,6 @@ spec:
 #                volumeMount:
 #                  name: config
 #                  mountPath: /opt/flink/conf
-            labels:
-              fintechstudios.com/app: top-speed-windowing
             annotations:
               "iam.amazonaws.com/role": k8s-flink-job
 
