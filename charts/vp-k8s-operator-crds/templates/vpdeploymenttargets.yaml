@@ -7,7 +7,6 @@ metadata:
     cert-manager.io/inject-ca-from: {{ template "vp-k8s-operator-crds.webhookCert" . }}
     controller-gen.kubebuilder.io/version: v0.2.4
 spec:
-  preserveUnknownFields: false
   additionalPrinterColumns:
     - JSONPath: .spec.metadata.namespace
       name: Namespace
@@ -29,6 +28,7 @@ spec:
     listKind: VpDeploymentTargetList
     plural: vpdeploymenttargets
     singular: vpdeploymenttarget
+  preserveUnknownFields: false
   scope: Namespaced
   subresources: {}
   version: v1beta1
@@ -62,12 +62,25 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    createdAt:
+                      format: date-time
+                      type: string
+                    id:
+                      type: string
                     labels:
                       additionalProperties:
                         type: string
                       type: object
+                    modifiedAt:
+                      format: date-time
+                      type: string
+                    name:
+                      type: string
                     namespace:
                       type: string
+                    resourceVersion:
+                      format: int32
+                      type: integer
                   type: object
                 spec:
                   description: VpDeploymentTargetSpec allows a users to set defaults
@@ -84,9 +97,6 @@ spec:
                           path:
                             type: string
                           value:
-                            description: "TODO: support any type of JSON as an interface
-                            \t\t https://github.com/kubernetes-sigs/kubebuilder/issues/528
-                            \      https://github.com/kubernetes-sigs/controller-tools/issues/294"
                             type: string
                         required:
                           - op
@@ -136,12 +146,25 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    createdAt:
+                      format: date-time
+                      type: string
+                    id:
+                      type: string
                     labels:
                       additionalProperties:
                         type: string
                       type: object
+                    modifiedAt:
+                      format: date-time
+                      type: string
+                    name:
+                      type: string
                     namespace:
                       type: string
+                    resourceVersion:
+                      format: int32
+                      type: integer
                   type: object
                 spec:
                   description: VpDeploymentTargetSpec allows a users to set defaults

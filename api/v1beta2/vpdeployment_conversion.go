@@ -94,9 +94,14 @@ func (src *VpDeployment) ConvertTo(dstRaw conversion.Hub) error {
 	dst.Annotations = annotations.EnsureExist(dst.Annotations)
 	// Spec
 	dst.Spec.Metadata = v1beta1.VpMetadata{
-		Namespace:   src.Spec.Metadata.Namespace,
-		Labels:      src.Spec.Metadata.Labels,
-		Annotations: src.Spec.Metadata.Annotations,
+		Name:            src.Spec.Metadata.Name,
+		Namespace:       src.Spec.Metadata.Namespace,
+		Labels:          src.Spec.Metadata.Labels,
+		Annotations:     src.Spec.Metadata.Annotations,
+		CreatedAt:       src.Spec.Metadata.CreatedAt,
+		ModifiedAt:      src.Spec.Metadata.ModifiedAt,
+		ID:              src.Spec.Metadata.ID,
+		ResourceVersion: src.Spec.Metadata.ResourceVersion,
 	}
 	dst.Spec.DeploymentTargetName = src.Spec.DeploymentTargetName
 	// Spec.Spec
@@ -232,9 +237,14 @@ func (dst *VpDeployment) ConvertFrom(srcRaw conversion.Hub) error { // nolint:go
 	dst.Annotations = annotations.EnsureExist(dst.Annotations)
 	// Spec
 	dst.Spec.Metadata = VpMetadata{
-		Namespace:   src.Spec.Metadata.Namespace,
-		Labels:      src.Spec.Metadata.Labels,
-		Annotations: src.Spec.Metadata.Annotations,
+		Name:            src.Spec.Metadata.Name,
+		Namespace:       src.Spec.Metadata.Namespace,
+		Labels:          src.Spec.Metadata.Labels,
+		Annotations:     src.Spec.Metadata.Annotations,
+		CreatedAt:       src.Spec.Metadata.CreatedAt,
+		ModifiedAt:      src.Spec.Metadata.ModifiedAt,
+		ID:              src.Spec.Metadata.ID,
+		ResourceVersion: src.Spec.Metadata.ResourceVersion,
 	}
 	dst.Spec.DeploymentTargetName = src.Spec.DeploymentTargetName
 	// Spec.Spec

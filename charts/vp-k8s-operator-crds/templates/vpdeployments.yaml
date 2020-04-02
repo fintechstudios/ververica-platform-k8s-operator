@@ -7,7 +7,6 @@ metadata:
     cert-manager.io/inject-ca-from: {{ template "vp-k8s-operator-crds.webhookCert" . }}
     controller-gen.kubebuilder.io/version: v0.2.4
 spec:
-  preserveUnknownFields: false
   additionalPrinterColumns:
     - JSONPath: .metadata.creationTimestamp
       name: Age
@@ -41,6 +40,7 @@ spec:
     listKind: VpDeploymentList
     plural: vpdeployments
     singular: vpdeployment
+  preserveUnknownFields: false
   scope: Namespaced
   subresources:
     status: {}
@@ -77,12 +77,25 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    createdAt:
+                      format: date-time
+                      type: string
+                    id:
+                      type: string
                     labels:
                       additionalProperties:
                         type: string
                       type: object
+                    modifiedAt:
+                      format: date-time
+                      type: string
+                    name:
+                      type: string
                     namespace:
                       type: string
+                    resourceVersion:
+                      format: int32
+                      type: integer
                   type: object
                 spec:
                   description: VpDeploymentSpec is the spec in the Ververica Platform
@@ -3093,12 +3106,25 @@ spec:
                       additionalProperties:
                         type: string
                       type: object
+                    createdAt:
+                      format: date-time
+                      type: string
+                    id:
+                      type: string
                     labels:
                       additionalProperties:
                         type: string
                       type: object
+                    modifiedAt:
+                      format: date-time
+                      type: string
+                    name:
+                      type: string
                     namespace:
                       type: string
+                    resourceVersion:
+                      format: int32
+                      type: integer
                   type: object
                 spec:
                   description: VpDeploymentSpec is the spec in the Ververica Platform

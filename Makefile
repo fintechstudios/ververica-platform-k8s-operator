@@ -152,7 +152,7 @@ patch-image:
 
 # Build the k8s resources for deployment
 .PHONY: kustomize-build
-kustomize-build: patch-image
+kustomize-build: patch-image manifests
 	rm -f resources.yaml && $(KUSTOMIZE) build config/default > resources.yaml
 
 # Update the Swagger Client API

@@ -6,7 +6,6 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
 spec:
-  preserveUnknownFields: false
   additionalPrinterColumns:
     - JSONPath: .metadata.creationTimestamp
       name: Age
