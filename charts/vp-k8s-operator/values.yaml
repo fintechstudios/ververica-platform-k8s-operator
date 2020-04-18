@@ -13,15 +13,31 @@ imageRepository: fintechstudios/ververica-platform-k8s-operator
 imageTag: latest
 imagePullPolicy: IfNotPresent
 
+# Metrics
 metricsHost: 127.0.0.1
 metricsPort: 8080
+# Whether or not to create a Prometheus Operator ServiceMonitor
+metricsMonitorEnabled: false
+# Extra labels for the ServiceMonitor
+metricsMonitorLabels: {}
+# Optionally, override the ServiceMonitor namespace
+# metricsMonitorNamespace: ""
 
+# Whether or not to create CertManager certs for webhook serving
 certs:
   enabled: true
+  # If not enabled, must specify another secret with the certificates
+  # existingSecret: "secret-name"
 
-metricsMonitorEnabled: true
+# The URL of the Ververica Platform service
+vvpUrl: http://ververica-platform
 
-vvpUrl: http://ververica-platform-ververica-platform
+# The edition of the Ververica Platform to target
+# Either `enterprise` or `community`
+vvpEdition: enterprise
+
+# Extra arguments to pass to the manager
+# extraArgs: []
 
 resources:
   limits:

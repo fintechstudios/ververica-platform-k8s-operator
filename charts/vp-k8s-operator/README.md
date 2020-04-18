@@ -1,6 +1,6 @@
 # VP K8s Operator
 
-A little Helm chart for deploying the Ververica Platform Kubernetes Operator.
+A Helm chart for deploying the Ververica Platform Kubernetes Operator.
 
 ## Installing the Chart
 
@@ -18,6 +18,10 @@ A little Helm chart for deploying the Ververica Platform Kubernetes Operator.
 | `imagePullPolicy`            |                                                       | `IfNotPresent`                                     |
 | `metricsHost`                | Host for the metrics reporter.                        | `127.0.0.1`                                        |
 | `metricsPort`                | Port for the metrics reporter.                        | `8080`                                             |
-| `metricsMonitorEnabled`      | Whether or not to create a Prometheus ServiceMonitor. | `true`                                             |
-| `platformApiUrl`             | URL for the Ververica Platform API.                   | `http://ververica-platform-appmanager`             |
-| `appManagerApiUrl`           | URL for the Appmanager API.                           | `http://ververica-platform-appmanager/api`         |
+| `metricsMonitorEnabled`      | Whether or not to create a Prometheus ServiceMonitor. | `false`                                            |
+| `certs.enabled`              | Whether or not to create CertManager certs for webhook serving. | `true`                                   |
+| `certs.existingSecret`       | If not creating certs, must specify a secret with pre-existing certs. | `nil`                              |
+| `vvpUrl`                     | URL for the Ververica Platform.                       | `http://ververica-platform`                        |
+| `vvpEdition`                 | Ververica Platform Edition. Either `community` or `enterprise`. | `enterprise`                             |
+| `extraArgs`                  | Extra CLI args to pass to the controller manager.                | `enterprise`                                       |
+| `resources`                  | Resource specs for the manager deployment.             | `{ limits: { cpu: 100m, memory: 30Mi }, rqeuests: { cpu: 100m, memory 20Mi } }` |
