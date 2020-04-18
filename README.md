@@ -26,13 +26,14 @@ custom VP Resources will all be prefixed with `Vp`.
 ## Unsupported
 
 * `Job`
+* `DeploymentDefaults`
 * `Secret Value`
 * `Status`
 
 To avoid naming conflicts, and for simplicity, and VP `metadata` and `spec` fields
 are nested under the top-level `spec` field of the K8s resource.
 
-Look in [docs/mappings](./docs/mappings) for information on each supported resource.
+Look in [docs/mappings](docs/mappings) for information on each supported resource.
 
 ## Running
 
@@ -62,9 +63,9 @@ Specifying in the environment is a good way to integrate with namespaces that ar
 
 This operator works with both the Community and Enterprise editions of the Ververica Platform, with the caveats:
 * `VpNamespaces` are not supported by the Community Edition, so the manager will not register those resources
-* The `spec.metadata.namespace` field must either be left empty or set explicitly to `default` for all `Vp` resources
+* The `spec.metadata.namespace` field must either be left unset or set explicitly to `default` for all `Vp` resources
 
-Find out more about [the editions here](https://www.ververica.com/getting-started).
+Find out more about [the editions here](https://www.ververica.com/pricing-editions).
 
 ## Docker
 
@@ -75,9 +76,12 @@ Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ver
 
 ## Helm
 
-A base Helm chart is provided in [`./charts/vp-k8s-operator`](charts/vp-k8s-operator).
+A Helm chart for the operator lives in [`./charts/vp-k8s-operator`](charts/vp-k8s-operator),
+which sets up a deployment with a metrics server, RBAC policies, CRDs, and, optionally,
+an RBAC proxy for the metrics over HTTPS.
 
-This sets up a deployment with a metrics server, RBAC policies, CRDs, and, optionally, an RBAC proxy for the metrics over HTTPS.
+The CRDs are managed in a separate chart ([`./charts/vp-k8s-operator-crds`](charts/vp-k8s-operator-crds)), which also
+needs to be installed.
 
 ## Development
 
@@ -86,7 +90,7 @@ Built using [`kubebuilder`](https://github.com/kubernetes-sigs/kubebuilder).
 though something like `minikube` will also do.  
 
 More on the design of the controller and its resources can be found
-in [docs/design.md](./docs/design.md).
+in [docs/design.md](docs/design.md).
 
 Also built as a Go module - no vendor files here.
 
@@ -118,8 +122,10 @@ System Pre-requisites:
 #### For working with a local kind cluster
 
 - `make test-cluster-create` initializes a cluster for testing, using kind
-- `make test-cluster-setup` installs cert-manager, the Community VVP, the vp-k8s-crds, and the vp-k8s-operator on the test cluster
 - `make test-cluster-delete` deletes the testing cluster
+- `make test-cluster-setup` installs cert-manager, the Community VVP, the vp-k8s-crds, and the vp-k8s-operator on the test cluster
+- `make test-cluster-instal-chart` builds the operator and installs it on the test cluster from the local chart
+- `make test-cluster-instal-crds` installs the vp-k8s-operator CRDs on the test cluster from the local chart
 
 ### Environment
 
@@ -133,8 +139,8 @@ The API Clients are auto-generated using the [Swagger Codegen utility](https://g
 
 #### AppManager
 
-The original Swagger file was taken from their live API documentation (available at `${VP_URL}/api/swagger`),
-but the docs don't exactly match their API, which makes the generated client incorrect.
+The [`appmanager-api` Swagger file](appmanager-api-swagger.json) is from the live API documentation (available at `${VP_URL}/api/swagger`),
+but the generated client needs a few updates to work correctly.
 
 ##### Post-Generation Changes
 
@@ -165,7 +171,7 @@ There is also a bug that cannot handle an empty Swagger type to represent the `a
 you must manually change [`model_any.go`](pkg/vvp/appmanager-api/model_any.go) to:
 
 ```go
-package ververicaplatformapi
+package appmanagerapi
 
 type Any interface {}
 ```
@@ -180,7 +186,7 @@ The images are built in two steps:
 1. The [`build.Dockerfile`](build.Dockerfile) image is a full development environment for running tests, linting,
 and building the source with the correct tooling. This can also be used for development if you so like,
 just override the entrypoint.
-2. The build image is then passed as a build arg to the main [`Dockerfile`](./Dockerfile), which builds
+2. The build image is then passed as a build arg to the main [`Dockerfile`](Dockerfile), which builds
 the manager binary and copies it over into an image for distribution.
 
 
@@ -189,6 +195,8 @@ the manager binary and copies it over into an image for distribution.
 Other OSS that influenced this project:
 * [Kong Ingress Controller](https://github.com/Kong/kubernetes-ingress-controller)
 
-
 ## License
+
+[Licensed under Apache 2.0](LICENSE)
+
 [![FOSSA Status](https://app.fossa.io/api/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git.svg?type=large)](https://app.fossa.io/projects/custom%2B12442%2Fgit%40github.com%3Afintechstudios%2Fververica-platform-k8s-operator.git?ref=badge_large)
