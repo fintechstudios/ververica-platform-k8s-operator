@@ -7,7 +7,7 @@
 Makes Ververica Platform resources Kubernetes-Native! Defines CustomResourceDefinitions
 for mapping resources to K8s!
 
-Built for Ververica Platform version `2.x` with go version `1.13`.
+Built for Ververica Platform version `2.x` with go version `1.18`.
 
 [More about the Ververica Platform](https://www.ververica.com/platform-overview)  
 [Ververica Platform Docs](https://docs.ververica.com/)
