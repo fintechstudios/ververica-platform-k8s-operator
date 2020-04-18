@@ -32,7 +32,6 @@ type AuthStore interface {
 	RemoveAllCreatedTokens(ctx context.Context) ([]string, error)
 }
 
-
 const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
 
 // One token per namespace
@@ -153,4 +152,3 @@ func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error
 	}
 	return deletedTokens, nil
 }
-
