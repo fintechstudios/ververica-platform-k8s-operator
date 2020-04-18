@@ -2,11 +2,12 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeployment
 metadata:
   name: top-speed-v2
-  namespace: vvp
+  namespace: top-speed
 spec:
   deploymentTargetName: top-speed-v2
   metadata:
-    namespace: testing
+    # must be `default` for the Community Edition
+    namespace: default
   spec:
     state: RUNNING
     upgradeStrategy:
