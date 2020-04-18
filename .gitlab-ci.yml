@@ -5,25 +5,14 @@ variables:
   BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA
   RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
 
-.builder-image-job:
-  variables:
-    GIT_STRATEGY: none
-
-  image:
-    name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
-    entrypoint: [""] # override entrypoint to take arbitrary commands
-
-  before_script:
-    - cd /workspace # from build.Dockerfile
-
 stages:
   - install # install and cache the deps
   - test # build and test the code, lint, etc.
   - pre-release # build the release image
   - release # tag and release the docker image to repositories
 
-install:
-  stage: install
+# Jobs that need to interact with docker/ the dockerd
+.docker-job:
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
@@ -32,6 +21,20 @@ install:
   image: docker:stable
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+
+# Jobs that should run on the image built from build.Dockerfile
+.builder-image-job:
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
+    entrypoint: [""] # override entrypoint to take arbitrary commands
+  before_script:
+    - cd /workspace # from build.Dockerfile
+
+install:
+  extends: .docker-job
+  stage: install
   script:
     # per-branch test image will be created and used as the "cache"
     # pull test image from registry so it can be used as a cache for the build command
@@ -53,6 +56,8 @@ build:
   script:
     - make
 
+
+# ensure the configs can be built
 build-config:
   extends: .builder-image-job
   stage: test
@@ -60,7 +65,6 @@ build-config:
     changes:
       - config/**/*
   script:
-    # ensure the configs can be built
     - make kustomize-build
 
 lint:
@@ -79,8 +83,8 @@ license-check:
   stage: test
   image: debian:stretch-slim
   before_script:
-    - apt update
-    - apt install -y curl
+    - apt-get update
+    - apt-get install -y curl
     - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
   script:
     # if the test fails, likely because fossa is backed up, so wait 1 minutes and then retry.
@@ -106,14 +110,8 @@ lint-charts:
   needs: []
 
 release-docker-build:
+  extends: .docker-job
   stage: pre-release
-  variables:
-    DOCKER_DRIVER: overlay2
-  services:
-    - docker:dind
-  image: docker:stable
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   needs:
     - install
   script:
@@ -132,17 +130,11 @@ release-docker-build:
 
 # Two release stages - one for tags and one for latest on master
 .docker-release:
+  extends: .docker-job
   stage: release
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
   needs:
     - release-docker-build
     - test
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   script:
     # pull image from registry so it can be used as a cache for the build command
     - docker pull $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
