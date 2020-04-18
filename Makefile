@@ -161,13 +161,16 @@ swagger-gen:
 	./hack/update-app-manager-swagger-codegen.sh \
 	 && ./hack/update-platform-swagger-codegen.sh
 
-.PHONY: docker-build
-docker-build:
+.PHONY: docker-build-image
+docker-build-image:
 	docker build -f build.Dockerfile \
 		--cache-from $(DOCKER_REPO)-builder:$(VERSION) \
 		--tag $(DOCKER_REPO)-builder:$(VERSION) \
-		. \
-	&& docker build \
+		.
+
+.PHONY: docker-build
+docker-build: docker-build-image
+	docker build \
 		--build-arg BUILD_IMG=$(DOCKER_REPO)-builder:$(VERSION) \
 		--build-arg GIT_COMMIT=$(GIT_COMMIT) \
 		--build-arg VERSION=$(VERSION) \
@@ -233,9 +236,11 @@ test-cluster-install-chart: docker-build test-cluster-load-image
 		--namespace vvp \
 		vp-k8s-operator \
 		./charts/vp-k8s-operator \
-		-f vp-k8s-values.yaml \
 		--set imageRepository=$(DOCKER_REPO) \
-		--set imageTag=$(VERSION)
+		--set imageTag=$(VERSION) \
+		--set vvpEdition=community \
+		--set vvpUrl=http://vvp-ververica-platform \
+		$(HELM_EXTRA_ARGS)
 
 .PHONY: test-cluster-install-crds
 test-cluster-install-crds:
@@ -244,7 +249,7 @@ test-cluster-install-crds:
 		--namespace vvp \
 		vp-k8s-operator-crds \
 		./charts/vp-k8s-operator-crds \
-		-f vp-k8s-crds-values.yaml
+		$(HELM_EXTRA_ARGS)
 
 .PHONY: test-cluster-wait-for-cert-manager
 test-cluster-wait-for-cert-manager:
