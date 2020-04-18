@@ -102,8 +102,6 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Print(edition)
-
 	if *envFile == "" {
 		// ignore error if just trying to autoload
 		_ = dotenv.Load()
