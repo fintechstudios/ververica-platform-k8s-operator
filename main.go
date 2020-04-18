@@ -150,12 +150,19 @@ func main() {
 	}
 	platformClient := platform.NewClient(platformAPIConfig)
 
+	var tokenManager appmanager.TokenManager
+	if isEnterpriseEdition {
+		tokenManager = &platform.TokenManager{PlatformClient: platformClient}
+	} else {
+		tokenManager = &appmanager.NoOpTokenManager
+	}
+
 	appManagerConfig := &appmanagerapi.Configuration{
 		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	}
-	appManagerAuthStore := appmanager.NewAuthStore(&platform.TokenManager{PlatformClient: platformClient})
+	appManagerAuthStore := appmanager.NewAuthStore(tokenManager)
 	appManagerClient := appmanager.NewClient(appManagerConfig, appManagerAuthStore)
 
 	// function to cleanup when the manager is shutting down

@@ -3,18 +3,13 @@ package appmanager
 import (
 	"context"
 	"fmt"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"os"
 	"strings"
-
-	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
-const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
-
-// One token per namespace
-const tokenName = "vp-k8s-operator-admin-token" // nolint:gosec
-
+// TokenData wraps an API token
 type TokenData struct {
 	Name       string
 	value      string
@@ -36,6 +31,12 @@ type AuthStore interface {
 	ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error)
 	RemoveAllCreatedTokens(ctx context.Context) ([]string, error)
 }
+
+
+const defaultTokenEnvVar = "APPMANAGER_API_TOKEN" // nolint:gosec
+
+// One token per namespace
+const tokenName = "vp-k8s-operator-admin-token" // nolint:gosec
 
 type authStore struct {
 	namespaceTokenCache map[string]*TokenData
@@ -152,3 +153,4 @@ func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error
 	}
 	return deletedTokens, nil
 }
+
