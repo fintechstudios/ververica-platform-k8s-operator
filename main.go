@@ -96,6 +96,8 @@ func main() {
 			`Namespace to watch for resources. Default is to watch all namespaces`)
 		vvpURL = flag.String("vvp-url", "http://localhost:8081",
 			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol and host.")
+		edition = flag.String("vvp-edition", "enterprise",
+			"The Ververica Platform Edition, either `enterprise` or `community`.")
 		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
 	flag.Parse()
@@ -111,7 +113,14 @@ func main() {
 		}
 	}
 
-	setupLog.Info("Watching namespace", "namespace", watchNamespace)
+	isEnterpriseEdition := *edition == "enterprise"
+	setupLog.Info("Using edition", "edition", *edition)
+
+	if *watchNamespace == apiv1.NamespaceAll {
+		setupLog.Info("Watching namespace", "namespace", "all namespaces")
+	} else {
+		setupLog.Info("Watching namespace", "namespace", watchNamespace)
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(*enableDebugMode)))
 
@@ -139,31 +148,44 @@ func main() {
 	}
 	platformClient := platform.NewClient(platformAPIConfig)
 
+	var tokenManager appmanager.TokenManager
+	if isEnterpriseEdition {
+		tokenManager = &platform.TokenManager{PlatformClient: platformClient}
+	} else {
+		tokenManager = &appmanager.NoOpTokenManager
+	}
+
 	appManagerConfig := &appmanagerapi.Configuration{
 		BasePath:      *vvpURL,
 		DefaultHeader: make(map[string]string),
 		UserAgent:     userAgent,
 	}
-	appManagerAuthStore := appmanager.NewAuthStore(&platform.TokenManager{PlatformClient: platformClient})
+	appManagerAuthStore := appmanager.NewAuthStore(tokenManager)
 	appManagerClient := appmanager.NewClient(appManagerConfig, appManagerAuthStore)
 
+	// function to cleanup when the manager is shutting down
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
 		if err != nil {
 			setupLog.Error(err, "error cleaning up")
 		}
-		setupLog.Info("Removed %i auth tokens", len(tokens))
+		setupLog.Info(fmt.Sprintf("Removed %d auth tokens", len(tokens)))
 	}
 
-	err = (&controllers.VpNamespaceReconciler{
-		Client:         mgr.GetClient(),
-		Log:            ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		PlatformClient: platformClient,
-	}).SetupWithManager(mgr)
-	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
-		os.Exit(1)
+	// Enterprise-only controllers
+	if isEnterpriseEdition {
+		err = (&controllers.VpNamespaceReconciler{
+			Client:         mgr.GetClient(),
+			Log:            ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+			PlatformClient: platformClient,
+		}).SetupWithManager(mgr)
+		if err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
+			os.Exit(1)
+		}
 	}
+
+	// Controllers for all editions
 	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:           mgr.GetClient(),
 		Log:              ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),

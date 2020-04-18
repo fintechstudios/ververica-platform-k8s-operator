@@ -2,7 +2,7 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeploymentTarget
 metadata:
   name: top-speed-v2
-  namespace: vvp
+  namespace: top-speed
 spec:
   metadata:
     namespace: testing

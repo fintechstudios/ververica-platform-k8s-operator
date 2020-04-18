@@ -1,3 +1,4 @@
+# Not supported by the Community Edition
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpNamespace
 metadata:

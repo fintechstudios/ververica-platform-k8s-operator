@@ -97,6 +97,8 @@ spec:
         kubernetes:
           pods:
             annotations: map[string]string
+            labels: map[string]string
+            # ...
 status:
     state: STATE string
 ```

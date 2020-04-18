@@ -1,7 +1,6 @@
-# Ververica Platform Kubernetes Controller
+# Ververica Platform Kubernetes Operator
 
-
-Ensure the controller is running:
+Ensure the operator is running:
 
 kubectl get -n {{ .Release.Namespace }} deployments/{{ template "vp-k8s-operator.fullname" . }}-controller-manager
 

@@ -38,7 +38,11 @@ spec:
             - /manager
           args:
             - --metrics-addr={{.Values.metricsHost}}:{{.Values.metricsPort}}
-            - --vvp-url={{.Values.vvpUrl}}
+            - --vvp-url={{ .Values.vvpUrl }}
+            - --vvp-edition={{ .Values.vvpEdition }}
+            {{- if .Values.extraArgs }}
+            {{ toYaml .Values.extraArgs | nindent 12 }}
+            {{- end }}
           ports:
             - containerPort: 443
               name: webhook-server
@@ -54,4 +58,8 @@ spec:
         - name: cert
           secret:
             defaultMode: 420
+            {{- if .Values.certs.enabled }}
             secretName: {{ template "vp-k8s-operator.fullname" . }}-webhook-server-cert
+            {{- else }}
+            secretName: {{ .Values.certs.existingSecret }}
+            {{- end }}

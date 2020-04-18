@@ -2,13 +2,14 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpDeploymentTarget
 metadata:
   name: top-speed
-  namespace: vvp
+  namespace: top-speed
 spec:
   metadata:
-    namespace: testing
+    # must be `default` for the Community Edition
+    namespace: default
   spec:
     kubernetes:
-      namespace: vvp
+      namespace: top-speed
     deploymentPatchSet:
       - op: add
         path: /hello

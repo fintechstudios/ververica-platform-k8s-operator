@@ -7,9 +7,6 @@ are, whenever possible, directly embedded in the K8s resource's `spec`. The only
 is that the name is always taken from the K8s resource, and the API version and Kind
 are automatically mapped.
 
-The `status` of Ververica Platform resources is attempted to be mirrored back
-to the K8s resource `status`, where a bit of extra information is also stored.
-
 
 ## Reconciliation Loop
 
@@ -38,7 +35,6 @@ kubectl delete -f ./config/samples
 
 ## Resource Deletion
 
-All managed K8s resources are appended with a finalizer. When the resource
-is deleted in K8s, we wait until the resource is removed from the Ververica Platform
-to remove the finalizer, allowing K8s to be in sync. 
+All managed K8s resources are appended with a finalizer. When the resource is deleted in K8s, the operator waits
+until the resource is removed from the Ververica Platform to remove the finalizer. 
 

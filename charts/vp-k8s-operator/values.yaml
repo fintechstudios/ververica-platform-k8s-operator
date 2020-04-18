@@ -9,20 +9,35 @@ rbacProxy:
   imagePullPolicy: IfNotPresent
   port: 8443
 
+# Metrics
+metricsHost: 127.0.0.1
+metricsPort: 8080
+# Whether or not to create a Prometheus Operator ServiceMonitor
+metricsMonitorEnabled: false
+# Extra labels for the ServiceMonitor
+metricsMonitorLabels: {}
+# Optionally, override the ServiceMonitor namespace
+# metricsMonitorNamespace: ""
+
+# Whether or not to create CertManager certs for webhook serving
+certs:
+  enabled: true
+  # If not enabled, must specify another secret with the certificates
+  # existingSecret: "secret-name"
+
+# The URL of the Ververica Platform service
+vvpUrl: http://ververica-platform
+
+# The edition of the Ververica Platform to target
+# Either `enterprise` or `community`
+vvpEdition: enterprise
+
+# Image for the deployment
 imageRepository: fintechstudios/ververica-platform-k8s-operator
 imageTag: latest
 imagePullPolicy: IfNotPresent
 
-metricsHost: 127.0.0.1
-metricsPort: 8080
-
-certs:
-  enabled: true
-
-metricsMonitorEnabled: true
-
-vvpUrl: http://ververica-platform-ververica-platform
-
+# Resources for the deployment
 resources:
   limits:
     cpu: 100m
@@ -30,3 +45,6 @@ resources:
   requests:
     cpu: 100m
     memory: 20Mi
+
+# Extra arguments to pass to the manager
+# extraArgs: []
