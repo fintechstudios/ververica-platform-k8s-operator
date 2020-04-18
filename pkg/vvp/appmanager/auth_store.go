@@ -22,7 +22,6 @@ type TokenData struct {
 }
 
 // TokenManager handles the API token lifecycle.
-// TODO: move to platform package, and leave the app manager with just the AuthStore interface
 type TokenManager interface {
 	// TokenExists checks if a token exists in a namespace by name
 	TokenExists(ctx context.Context, namespaceName, name string) (bool, error)
@@ -32,11 +31,9 @@ type TokenManager interface {
 	RemoveToken(ctx context.Context, namespaceName, name string) (bool, error)
 }
 
+// AuthStore manages authorized contexts for AppManager API calls on a per-vpnamespace basis.
 type AuthStore interface {
 	ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error)
-	// RemoveAllCreatedTokens removes all tokens that have been created by the AuthStore
-	// and returns a list of their names.
-	// The returned list of tokens should never be nil
 	RemoveAllCreatedTokens(ctx context.Context) ([]string, error)
 }
 
@@ -143,7 +140,7 @@ func (s *authStore) ContextForNamespace(baseCtx context.Context, namespaceName s
 
 // RemoveAllCreatedTokens deletes all tokens that have been created by the store
 func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
-	deletedTokens := make([]string, 0)
+	var deletedTokens []string
 	for namespace, tokenData := range s.namespaceTokenCache {
 		existed, err := s.tokenManager.RemoveToken(ctx, namespace, tokenData.Name)
 		if err != nil {

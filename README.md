@@ -41,6 +41,7 @@ To run the binary directly, after building run `./bin/manager`.
 **Flags:**
 * `--help` prints usage
 * `--vvp-url=http://localhost:8081` the url, without trailing slash, for the Ververica Platform
+* `--vvp-edition=enterprise` the Ververica Platform Edition to support. See [Editions](#Editions) for more.
 * `--debug` debug mode for logging
 * `--enable-leader-election` to ensure only one manager is active with a multi-replica deployment
 * `--metrics-addr=:8080` address to bind metrics to 
@@ -57,6 +58,13 @@ Specifying in the environment is a good way to integrate with namespaces that ar
 * `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
 * `APPMANAGER_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
 
+## Editions
+
+This operator works with both the Community and Enterprise editions of the Ververica Platform, with the caveats:
+* `VpNamespaces` are not supported by the Community Edition, so the manager will not register those resources
+* The `spec.metadata.namespace` field must either be left empty or set explicitly to `default` for all `Vp` resources
+
+Find out more about [the editions here](https://www.ververica.com/getting-started).
 
 ## Docker
 
@@ -93,22 +101,25 @@ System Pre-requisites:
 
 - `make` alias for `manager`
 - `make manager` builds the entire app binary
-- `make run` runs the entire app
-- `make manifests` builds the CRDs
-- `make install` installs the CRDs on the cluster
+- `make run` runs the entire app locally
+- `make manifests` builds the CRDs from `./config/crd`
+- `make install` installs the CRDs from `./config/crd` on the cluster
 - `make deploy` installs the entire app on the cluster
 - `make docker-build` builds the docker image
 - `make docker-push` pushes the built docker image
 - `make generate` generates the controller code from the `./api` package
-- `make controller-gen` loads the correct controller-gen binary
 - `make swagger-gen` generates the swagger code
-- `make lint` runs the golangci linter 
+- `make lint` runs linting on the source code
 - `make fmt` runs `go fmt` on the package
 - `make test` runs the test suites with coverage
-- `make test-cluster-create` initializes a cluster for testing, using kind
-- `make test-cluster-delete` deletes the testing cluster
 - `make patch-image` sets the current version as the default deployment image tag
 - `make kustomize-build` builds the default k8s resources for deployment
+
+#### For working with a local kind cluster
+
+- `make test-cluster-create` initializes a cluster for testing, using kind
+- `make test-cluster-setup` installs cert-manager, the Community VVP, the vp-k8s-crds, and the vp-k8s-operator on the test cluster
+- `make test-cluster-delete` deletes the testing cluster
 
 ### Environment
 
@@ -166,7 +177,7 @@ You'll also have to change any usages of this type in `structs` to be embedded, 
 ### Building Images
 
 The images are built in two steps:
-1. The [`Dockerfile_build`](build.Dockerfile) image is a full development environment for running tests, linting,
+1. The [`build.Dockerfile`](build.Dockerfile) image is a full development environment for running tests, linting,
 and building the source with the correct tooling. This can also be used for development if you so like,
 just override the entrypoint.
 2. The build image is then passed as a build arg to the main [`Dockerfile`](./Dockerfile), which builds

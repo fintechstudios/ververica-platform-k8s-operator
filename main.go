@@ -115,7 +115,14 @@ func main() {
 		}
 	}
 
-	setupLog.Info("Watching namespace", "namespace", watchNamespace)
+	isEnterpriseEdition := *edition == "enterprise"
+	setupLog.Info("Using edition", "edition", *edition)
+
+	if *watchNamespace == apiv1.NamespaceAll {
+		setupLog.Info("Watching namespace", "namespace", "all namespaces")
+	} else {
+		setupLog.Info("Watching namespace", "namespace", watchNamespace)
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(*enableDebugMode)))
 
@@ -151,6 +158,7 @@ func main() {
 	appManagerAuthStore := appmanager.NewAuthStore(&platform.TokenManager{PlatformClient: platformClient})
 	appManagerClient := appmanager.NewClient(appManagerConfig, appManagerAuthStore)
 
+	// function to cleanup when the manager is shutting down
 	cleanup := func(ctx context.Context) {
 		tokens, err := appManagerAuthStore.RemoveAllCreatedTokens(ctx)
 		if err != nil {
@@ -159,15 +167,20 @@ func main() {
 		setupLog.Info(fmt.Sprintf("Removed %d auth tokens", len(tokens)))
 	}
 
-	err = (&controllers.VpNamespaceReconciler{
-		Client:         mgr.GetClient(),
-		Log:            ctrl.Log.WithName("controllers").WithName("VpNamespace"),
-		PlatformClient: platformClient,
-	}).SetupWithManager(mgr)
-	if err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
-		os.Exit(1)
+	// Enterprise-only controllers
+	if isEnterpriseEdition {
+		err = (&controllers.VpNamespaceReconciler{
+			Client:         mgr.GetClient(),
+			Log:            ctrl.Log.WithName("controllers").WithName("VpNamespace"),
+			PlatformClient: platformClient,
+		}).SetupWithManager(mgr)
+		if err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "VpNamespace")
+			os.Exit(1)
+		}
 	}
+
+	// Controllers for all editions
 	err = (&controllers.VpDeploymentTargetReconciler{
 		Client:           mgr.GetClient(),
 		Log:              ctrl.Log.WithName("controllers").WithName("VpDeploymentTarget"),

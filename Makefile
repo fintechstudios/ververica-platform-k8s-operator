@@ -163,7 +163,7 @@ swagger-gen:
 
 .PHONY: docker-build
 docker-build:
-	docker build -f Dockerfile_build \
+	docker build -f build.Dockerfile \
 		--cache-from $(DOCKER_REPO)-builder:$(VERSION) \
 		--tag $(DOCKER_REPO)-builder:$(VERSION) \
 		. \
@@ -191,16 +191,28 @@ test-cluster-create:
 test-cluster-delete:
 	$(KIND) delete cluster --name $(TEST_CLUSTER_NAME)
 
-.PHONY: test-cluster-install-vvp
-test-cluster-install-vvp:
+.PHONY: test-cluster-install-vvp-enterprise
+test-cluster-install-vvp-enterprise:
 	. ./hack/helm-init.sh \
 	&& helm upgrade --install \
-		--version 3.0.0 \
+		--version 4.0.0 \
 		--namespace vvp \
 		--set vvp.persistence.type=local \
-		-f ./vvp-values.yaml \
 		vvp \
-		ververica/ververica-platform
+		ververica/ververica-platform \
+		$(HELM_EXTRA_ARGS)
+
+.PHONY: test-cluster-install-vvp-community
+test-cluster-install-vvp-community:
+	. ./hack/helm-init.sh \
+	&& helm upgrade --install \
+		--version 4.0.0 \
+		--namespace vvp \
+		--set vvp.persistence.type=local \
+		--set acceptCommunityEditionLicense=true \
+		vvp \
+		ververica/ververica-platform \
+		$(HELM_EXTRA_ARGS)
 
 .PHONY: test-cluster-install-cert-manager
 test-cluster-install-cert-manager:
@@ -215,19 +227,38 @@ test-cluster-install-cert-manager:
 		jetstack/cert-manager
 
 .PHONY: test-cluster-install-chart
-test-cluster-install-chart:
+test-cluster-install-chart: docker-build test-cluster-load-image
 	. ./hack/helm-init.sh \
 	&& helm upgrade --install \
 		--namespace vvp \
 		vp-k8s-operator \
 		./charts/vp-k8s-operator \
-		-f vp-k8s-values.yaml
+		-f vp-k8s-values.yaml \
+		--set imageRepository=$(DOCKER_REPO) \
+		--set imageTag=$(VERSION)
 
 .PHONY: test-cluster-install-crds
 test-cluster-install-crds:
 	. ./hack/helm-init.sh \
 	&& helm upgrade --install \
-		--namespace default \
+		--namespace vvp \
 		vp-k8s-operator-crds \
 		./charts/vp-k8s-operator-crds \
 		-f vp-k8s-crds-values.yaml
+
+.PHONY: test-cluster-wait-for-cert-manager
+test-cluster-wait-for-cert-manager:
+	kubectl -n cert-manager wait --for=condition=available deployments --all
+
+.PHONY: test-cluster-wait-for-vvp
+test-cluster-wait-for-vvp:
+	kubectl -n vvp wait --for=condition=available deployments --all
+
+# Requires tiller to be running
+.PHONY: test-cluster-setup
+test-cluster-setup: test-cluster-install-cert-manager \
+					test-cluster-install-vvp-community \
+					test-cluster-wait-for-cert-manager \
+					test-cluster-wait-for-vvp \
+					test-cluster-install-chart \
+					test-cluster-install-crds
