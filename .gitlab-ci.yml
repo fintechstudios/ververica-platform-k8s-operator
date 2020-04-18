@@ -131,7 +131,7 @@ release-docker-build:
     - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
 
 # Two release stages - one for tags and one for latest on master
-.docker-releaser:
+.docker-release:
   stage: release
   image: docker:stable
   variables:
