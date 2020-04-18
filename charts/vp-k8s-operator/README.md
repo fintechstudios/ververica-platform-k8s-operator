@@ -23,5 +23,5 @@ A Helm chart for deploying the Ververica Platform Kubernetes Operator.
 | `certs.existingSecret`       | If not creating certs, must specify a secret with pre-existing certs. | `nil`                              |
 | `vvpUrl`                     | URL for the Ververica Platform.                       | `http://ververica-platform`                        |
 | `vvpEdition`                 | Ververica Platform Edition. Either `community` or `enterprise`. | `enterprise`                             |
-| `extraArgs`                  | Extra CLI args to pass to the controller manager.                | `enterprise`                                       |
+| `extraArgs`                  | Extra CLI args to pass to the controller manager.                | `[]`                                       |
 | `resources`                  | Resource specs for the manager deployment.             | `{ limits: { cpu: 100m, memory: 30Mi }, rqeuests: { cpu: 100m, memory 20Mi } }` |

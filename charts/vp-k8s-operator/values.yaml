@@ -9,10 +9,6 @@ rbacProxy:
   imagePullPolicy: IfNotPresent
   port: 8443
 
-imageRepository: fintechstudios/ververica-platform-k8s-operator
-imageTag: latest
-imagePullPolicy: IfNotPresent
-
 # Metrics
 metricsHost: 127.0.0.1
 metricsPort: 8080
@@ -36,9 +32,12 @@ vvpUrl: http://ververica-platform
 # Either `enterprise` or `community`
 vvpEdition: enterprise
 
-# Extra arguments to pass to the manager
-# extraArgs: []
+# Image for the deployment
+imageRepository: fintechstudios/ververica-platform-k8s-operator
+imageTag: latest
+imagePullPolicy: IfNotPresent
 
+# Resources for the deployment
 resources:
   limits:
     cpu: 100m
@@ -46,3 +45,6 @@ resources:
   requests:
     cpu: 100m
     memory: 20Mi
+
+# Extra arguments to pass to the manager
+# extraArgs: []
