@@ -9,7 +9,7 @@ spec:
     namespace: default
   spec:
     kubernetes:
-      namespace: vvp
+      namespace: top-speed
     deploymentPatchSet:
       - op: add
         path: /hello
