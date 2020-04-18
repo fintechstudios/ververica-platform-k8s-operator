@@ -34,6 +34,9 @@ type TokenManager interface {
 
 type AuthStore interface {
 	ContextForNamespace(baseCtx context.Context, namespace string) (context.Context, error)
+	// RemoveAllCreatedTokens removes all tokens that have been created by the AuthStore
+	// and returns a list of their names.
+	// The returned list of tokens should never be nil
 	RemoveAllCreatedTokens(ctx context.Context) ([]string, error)
 }
 
@@ -140,7 +143,7 @@ func (s *authStore) ContextForNamespace(baseCtx context.Context, namespaceName s
 
 // RemoveAllCreatedTokens deletes all tokens that have been created by the store
 func (s *authStore) RemoveAllCreatedTokens(ctx context.Context) ([]string, error) {
-	var deletedTokens []string
+	deletedTokens := make([]string, 0)
 	for namespace, tokenData := range s.namespaceTokenCache {
 		existed, err := s.tokenManager.RemoveToken(ctx, namespace, tokenData.Name)
 		if err != nil {

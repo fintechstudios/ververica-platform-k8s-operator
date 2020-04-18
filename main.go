@@ -96,9 +96,13 @@ func main() {
 			`Namespace to watch for resources. Default is to watch all namespaces`)
 		vvpURL = flag.String("vvp-url", "http://localhost:8081",
 			"The URL to the Ververica Platform API, without a trailing slash. Should include the protocol and host.")
+		edition = flag.String("vvp-edition", "enterprise",
+			"The Ververica Platform Edition, either `enterprise` or `community`.")
 		envFile = flag.String("env-file", "", "The path to an environment (`.env`) file to be loaded")
 	)
 	flag.Parse()
+
+	fmt.Print(edition)
 
 	if *envFile == "" {
 		// ignore error if just trying to autoload
@@ -152,7 +156,7 @@ func main() {
 		if err != nil {
 			setupLog.Error(err, "error cleaning up")
 		}
-		setupLog.Info("Removed %i auth tokens", len(tokens))
+		setupLog.Info(fmt.Sprintf("Removed %d auth tokens", len(tokens)))
 	}
 
 	err = (&controllers.VpNamespaceReconciler{
