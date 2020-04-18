@@ -4,18 +4,6 @@ variables:
   BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
   BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA
   RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
-  DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
-
-.dev-image-job: &dev-image-job
-  variables:
-    GIT_STRATEGY: none
-
-  image:
-    name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
-    entrypoint: [""] # override entrypoint to take arbitrary commands
-
-  before_script:
-    - cd /workspace # from Dockerfile_build
 
 stages:
   - install # install and cache the deps
@@ -23,15 +11,30 @@ stages:
   - pre-release # build the release image
   - release # tag and release the docker image to repositories
 
-install:
-  stage: install
+# Jobs that need to interact with docker/ the dockerd
+.docker-job:
   variables:
     DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
   services:
     - docker:dind
   image: docker:stable
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+
+# Jobs that should run on the image built from build.Dockerfile
+.builder-image-job:
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG # built in the install stage
+    entrypoint: [""] # override entrypoint to take arbitrary commands
+  before_script:
+    - cd /workspace # from build.Dockerfile
+
+install:
+  extends: .docker-job
+  stage: install
   script:
     # per-branch test image will be created and used as the "cache"
     # pull test image from registry so it can be used as a cache for the build command
@@ -39,7 +42,7 @@ install:
     # builds the test image using the pulled image as a cache (if available), tag it
     - "docker build \
         --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
-        -f Dockerfile_build \
+        -f build.Dockerfile \
         --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
         --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
         ."
@@ -48,29 +51,30 @@ install:
     - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
 
 build:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make
 
+
+# ensure the configs can be built
 build-config:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   only:
     changes:
       - config/**/*
   script:
-    # ensure the configs can be built
     - make kustomize-build
 
 lint:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make lint
 
 test:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make test
@@ -79,8 +83,8 @@ license-check:
   stage: test
   image: debian:stretch-slim
   before_script:
-    - apt update
-    - apt install -y curl
+    - apt-get update
+    - apt-get install -y curl
     - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash"
   script:
     # if the test fails, likely because fossa is backed up, so wait 1 minutes and then retry.
@@ -95,8 +99,7 @@ license-check:
     changes:
       - go.mod
       - go.sum
-  needs:
-    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
+  needs: []
 
 lint-charts:
   stage: test
@@ -104,19 +107,11 @@ lint-charts:
   script:
     - git fetch origin master # needed for diffing
     - ct lint --config ct.yaml --chart-yaml-schema chart-schema.yaml --validate-maintainers=false
-  needs:
-    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
-
+  needs: []
 
 release-docker-build:
+  extends: .docker-job
   stage: pre-release
-  variables:
-    DOCKER_DRIVER: overlay2
-  services:
-    - docker:dind
-  image: docker:stable
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   needs:
     - install
   script:
@@ -134,18 +129,12 @@ release-docker-build:
     - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
 
 # Two release stages - one for tags and one for latest on master
-.docker-releaser: &docker-releaser
+.docker-release:
+  extends: .docker-job
   stage: release
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
   needs:
     - release-docker-build
     - test
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   script:
     # pull image from registry so it can be used as a cache for the build command
     - docker pull $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
@@ -156,7 +145,7 @@ release-docker-build:
 
 # Release all tags
 docker-release-tags:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - tags
   variables:
@@ -164,7 +153,7 @@ docker-release-tags:
 
 # Release the commit version only on master, but not the tag as that will be run elsewhere
 docker-release-commit:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - /^master$/
   except:
@@ -175,7 +164,7 @@ docker-release-commit:
 
 # Release the latest version only on master, but not the tag as that will be run elsewhere
 docker-release-latest:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - /^master$/
   except:

@@ -83,7 +83,7 @@ in [docs/design.md](./docs/design.md).
 Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= `1.13.x`
+- `go` >= `1.14.x`
 - `make` >= `4`
 - `kubebuilder` == [`v2.2.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.2.0)
 - `docker` >= `19`
@@ -166,7 +166,7 @@ You'll also have to change any usages of this type in `structs` to be embedded, 
 ### Building Images
 
 The images are built in two steps:
-1. The [`Dockerfile_build`](./Dockerfile_build) image is a full development environment for running tests, linting,
+1. The [`Dockerfile_build`](build.Dockerfile) image is a full development environment for running tests, linting,
 and building the source with the correct tooling. This can also be used for development if you so like,
 just override the entrypoint.
 2. The build image is then passed as a build arg to the main [`Dockerfile`](./Dockerfile), which builds
