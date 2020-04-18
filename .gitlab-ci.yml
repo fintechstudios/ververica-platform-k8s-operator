@@ -4,9 +4,8 @@ variables:
   BUILDER_BRANCH_TAG: builder-$CI_COMMIT_REF_SLUG
   BUILDER_COMMIT_TAG: builder-$CI_COMMIT_SHA
   RELEASE_COMMIT_TAG: release-$CI_COMMIT_SHA
-  DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
 
-.dev-image-job: &dev-image-job
+.builder-image-job:
   variables:
     GIT_STRATEGY: none
 
@@ -15,7 +14,7 @@ variables:
     entrypoint: [""] # override entrypoint to take arbitrary commands
 
   before_script:
-    - cd /workspace # from Dockerfile_build
+    - cd /workspace # from build.Dockerfile
 
 stages:
   - install # install and cache the deps
@@ -27,6 +26,7 @@ install:
   stage: install
   variables:
     DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
   services:
     - docker:dind
   image: docker:stable
@@ -39,7 +39,7 @@ install:
     # builds the test image using the pulled image as a cache (if available), tag it
     - "docker build \
         --cache-from $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
-        -f Dockerfile_build \
+        -f build.Dockerfile \
         --tag $GL_IMAGE_REPO:$BUILDER_BRANCH_TAG \
         --tag $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG \
         ."
@@ -48,13 +48,13 @@ install:
     - docker push $GL_IMAGE_REPO:$BUILDER_COMMIT_TAG
 
 build:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make
 
 build-config:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   only:
     changes:
@@ -64,13 +64,13 @@ build-config:
     - make kustomize-build
 
 lint:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make lint
 
 test:
-  extends: .dev-image-job
+  extends: .builder-image-job
   stage: test
   script:
     - make test
@@ -95,8 +95,7 @@ license-check:
     changes:
       - go.mod
       - go.sum
-  needs:
-    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
+  needs: []
 
 lint-charts:
   stage: test
@@ -104,9 +103,7 @@ lint-charts:
   script:
     - git fetch origin master # needed for diffing
     - ct lint --config ct.yaml --chart-yaml-schema chart-schema.yaml --validate-maintainers=false
-  needs:
-    - install # TODO: change to empty after https://gitlab.com/gitlab-org/gitlab/issues/30631
-
+  needs: []
 
 release-docker-build:
   stage: pre-release
@@ -134,7 +131,7 @@ release-docker-build:
     - docker push $GL_IMAGE_REPO:$RELEASE_COMMIT_TAG
 
 # Two release stages - one for tags and one for latest on master
-.docker-releaser: &docker-releaser
+.docker-releaser:
   stage: release
   image: docker:stable
   variables:
@@ -156,7 +153,7 @@ release-docker-build:
 
 # Release all tags
 docker-release-tags:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - tags
   variables:
@@ -164,7 +161,7 @@ docker-release-tags:
 
 # Release the commit version only on master, but not the tag as that will be run elsewhere
 docker-release-commit:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - /^master$/
   except:
@@ -175,7 +172,7 @@ docker-release-commit:
 
 # Release the latest version only on master, but not the tag as that will be run elsewhere
 docker-release-latest:
-  <<: *docker-releaser
+  extends: .docker-release
   only:
     - /^master$/
   except:
