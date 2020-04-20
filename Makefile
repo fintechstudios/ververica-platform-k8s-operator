@@ -249,6 +249,8 @@ test-cluster-install-crds:
 		--namespace vvp \
 		vp-k8s-operator-crds \
 		./charts/vp-k8s-operator-crds \
+		--set webhookCert.name=vp-k8s-operator-serving-cert \
+		--set webhookService.name=vp-k8s-operator-webhook-service \
 		$(HELM_EXTRA_ARGS)
 
 .PHONY: test-cluster-wait-for-cert-manager

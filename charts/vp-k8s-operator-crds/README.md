@@ -8,9 +8,13 @@ Find out more about [managing CRDs with Helm here](https://helm.sh/docs/chart_be
 
 ## Installing the Chart
 
+All values default to the resources created in the default installation of the Operator chart with
+the name `vp-k8s-operator`.
+
 | Parameter                    | Description                                           | Default                                            |
 |------------------------------|-------------------------------------------------------|----------------------------------------------------|
-| `webhookCert.namespace`      | Namespace of the secret containing the TLS cert for the webhook.              | ``                                             |
-| `webhookCert.name`           | Name of the secret containing the TLS cert for the webhook.              | ``                                             |
-| `webhookService.namespace`   | Namespace of the webhook service. (deployed w/ the operator)              | ``                                             |
-| `webhookService.name`        | Name of the webhook service. (deployed w/ the operator)             | ``                                             |
+| `webhookCert.namespace`      | Namespace of the secret containing the TLS cert for the webhook.              | `{{ .Release.Namespace }}`                                             |
+| `webhookCert.name`           | Name of the secret containing the TLS cert for the webhook.              | `vp-k8s-operator-serving-cert`                                             |
+| `webhookCert.caBundle`       | PEM-encoded CA bundle for the webhook, if not using cert-manager.              | `Cg==`                                             |
+| `webhookService.namespace`   | Namespace of the webhook service.              | `{{ .Release.Namespace }}`                                             |
+| `webhookService.name`        | Name of the webhook service.             | `vp-k8s-operator-webhook-service`                                             |

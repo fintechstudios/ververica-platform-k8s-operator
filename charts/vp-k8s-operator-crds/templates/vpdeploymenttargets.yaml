@@ -21,7 +21,7 @@ spec:
       caBundle: {{ include "vp-k8s-operator-crds.webhookCaBundle" . }}
       service:
         name: {{ .Values.webhookService.name }}
-        namespace: {{ .Values.webhookService.namespace }}
+        namespace: {{ default .Release.Namespace .Values.webhookService.namespace }}
         path: /convert
   group: ververicaplatform.fintechstudios.com
   names:
