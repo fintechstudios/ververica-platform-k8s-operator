@@ -1,7 +1,7 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpSavepoint
 metadata:
-  name: vpsavepoint-sample
+  name: top-speed-savepoint-1
   namespace: top-speed
 spec:
   deploymentName: top-speed

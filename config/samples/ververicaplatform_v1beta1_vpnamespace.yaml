@@ -2,8 +2,8 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpNamespace
 metadata:
-  name: testing
-  namespace: vvp
+  name: top-speed
+  namespace: top-speed
 spec:
   roleBindings:
     - role: "owner"

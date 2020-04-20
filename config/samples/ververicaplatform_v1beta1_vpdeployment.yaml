@@ -1,7 +1,7 @@
 apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpDeployment
 metadata:
-  name: top-speed
+  name: top-speed-v1
   namespace: top-speed
 spec:
   deploymentTargetName: top-speed

@@ -11,27 +11,38 @@ running in the cluster to provision certificates for the CRD webhooks.
 For the most up-to-date guide, refer to [the official getting started guide](https://www.ververica.com/getting-started).
 
 ```shell
+# 0.
+# Add the Ververica chart repository
 helm repo add ververica https://charts.ververica.com
 
-# Only for deploying jobs into namespaces outside of the VVP deployment namespace
-# In this case, the namespace associated with the sample configs
-VVP_ARGS="--set vvp.appmanager.rbac.additionalNamespaces[0]=top-speed"
+# 1. 
+# Deploy the Ververica Platform
 
-# For the Enterprise Edition
+# For deploying jobs into namespaces outside of the VVP deployment namespace,
+# specify the `rbac.additionalNamespaces` value with a set of namespaces.
+# In this case, add the `top-speed` namespace associated with the sample manifests in `/config/samples`.
+
+## For the Enterprise Edition
 helm install --namespace vvp \
-            vvp ververica/ververica-platform -f values-with-license.yaml \
-            ${VVP_ARGS}
+            --name vvp \
+            ververica/ververica-platform \
+            -f /path/to/values-with-license.yaml  \ # must specify a values file with the enterprise license
+            --set rbac.additionalNamespaces={top-speed}
 
-# For the Community Edition
+## Or, for the Community Edition
 helm install --namespace vvp \
-            vvp ververica/ververica-platform --set acceptCommunityEditionLicense=true \
-             ${VVP_ARGS}
+            --name vvp \
+            ververica/ververica-platform \
+            --set acceptCommunityEditionLicense=true \
+            --set rbac.additionalNamespaces={top-speed}
 
+# 2. 
 # Wait for the deployment to come up
 kubectl --namespace vvp wait --for=condition=available deployments --all
 
+# 3. 
 # Access the platform UI locally at port 8080
-kubectl port-forward --namespaces service/vvp-ververica-platform 8080:80
+kubectl port-forward --namespace vvp service/vvp-ververica-platform 8080:80 &
 ```
 
 ### Installing the Operator
@@ -44,16 +55,37 @@ in the same namespace as the Ververica Platform.
 This guide assumes you are operating in the base `ververica-platform-k8s-operator` directory.
 
 ```shell
+# 4. 
 # Install the Operator 
-helm install --namespace vvp vp-k8s-operator ./charts/vp-k8s-operator \
-    --set vvpEdition=community \ # Or enterprise
-    --set vvpUrl=http://vvp-ververica-platform # pointed at the service deployed with the Ververica Platform 
+# Pointed at the service deployed with the Ververica Platform.
+# NOTE: the pods might crash on startup and enter a restart loop until the CRDs
+#       are present, but this should be fine. 
 
+## Enterprise
+helm install --namespace vvp \
+    --name vp-k8s-operator \
+    ./charts/vp-k8s-operator \
+    --set vvpEdition=enterprise \
+    --set vvpUrl=http://vvp-ververica-platform
+
+## Community
+helm install --namespace vvp \
+    --name vp-k8s-operator \
+    ./charts/vp-k8s-operator \
+    --set vvpEdition=community \
+    --set vvpUrl=http://vvp-ververica-platform
+
+# 5. 
 # Install the CRDs
-helm install --namespace vvp vp-k8s-operator-crds ./charts/vp-k8s-operator-crds \
-    --set webhookCert.name=vp-k8s-operator-serving-cert \ # the Cert created by the operator chart for serving
-    --set webhookCert.name=vp-k8s-operator-webhook-service # the webhook conversion service of the operator
+# Using the Cert created by the operator chart for serving webhooks.
+# Pointed at the webhook conversion service of the operator.
+helm install --namespace vvp \
+    --name vp-k8s-operator-crds \
+    ./charts/vp-k8s-operator-crds \
+    --set webhookCert.name=vp-k8s-operator-serving-cert \
+    --set webhookService.name=vp-k8s-operator-webhook-service
 
+# 6. 
 # Wait for the deployment to come up
 kubectl --namespace vvp wait --for=condition=available deployments --all
 ```
@@ -63,8 +95,29 @@ kubectl --namespace vvp wait --for=condition=available deployments --all
 The samples can all be deployed through `kubectl`.
 
 ```shell
+# 7. 
 # Now install a DeploymentTarget in the top-speed namespace
-kubectl create namespace top-speed
+kubectl create namespace top-speed || true # create namespace if it doesn't exist
+
+# Create the VpDeploymentTarget
 kubectl apply -f config/samples/ververicaplatform_v1beta2_vpdeploymenttarget.yaml
+
+# Create the VpDeployment
 kubectl apply -f config/samples/ververicaplatform_v1beta2_vpdeployment.yaml
+
+# 8. 
+# Watch the Top Speed V2 deployment come online
+
+# Visit http://localhost:8080/app/#/namespaces/default/deployments to see the UI
+
+# View through K8s Events
+kubectl -n top-speed get events --sort-by='lastTimestamp'
+# Or live
+kubectl -n top-speed get events --watch
+
+# Once started, editing the resource vpdeployment/top-speed-v2 in the top-speed namespace
+# will trigger upgrades
+
+# Ex: cancell the deployment with a JSON Patch
+kubectl patch vpdeployment/top-speed-v2 --type merge --patch '{ "spec": { "spec": { "state": "CANCELLED" } } }'
 ```
