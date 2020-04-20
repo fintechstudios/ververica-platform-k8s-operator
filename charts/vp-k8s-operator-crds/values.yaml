@@ -1,17 +1,26 @@
+# Where to find the webhook service for CRD conversion
+webhookService:
+  ## Namespace of service, if deploying this CRD chart to a different namespace than the operator
+  #
+  # namespace: ""
+
+  ## Name of service, defaults to the name associated with a release by name `vp-k8s-operator`
+  #
+  name: "vp-k8s-operator-webhook-service"
 
 
+# Where to find the TLS cert for the webhook service
 webhookCert:
   ## Cert-manager Certificate location
   #
-  namespace: ""
-  name: ""
+  # namespace: ""
+
+  ## Name of Certificate,
+  #  defaults to the name associated with a release by name `vp-k8s-operator`, with cert generation enabled
+  #
+  name: "vp-k8s-operator-serving-cert"
 
   ## caBundle
   # set only if not using cert-manager to manage certificates
   #
   # caBundle: Cg==
-
-
-webhookService:
-  name: ""
-  namespace: ""
