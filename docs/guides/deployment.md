@@ -1,7 +1,7 @@
 # Deployment
 
 The only currently supported method of deploying the operator
-is through Helm. This guide also assumes that you have Cert-Manager
+is through Helm. This guide also assumes that you have [Cert-Manager](https://cert-manager.io/)
 running in the cluster to provision certificates for the CRD webhooks.
 
 ## Helm
