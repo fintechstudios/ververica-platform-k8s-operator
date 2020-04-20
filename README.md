@@ -35,7 +35,7 @@ are nested under the top-level `spec` field of the K8s resource.
 
 Look in [docs/mappings](docs/mappings) for information on each supported resource.
 
-## Geting Started
+## Getting Started
 
 Please have a look at the [`docs`](docs/README.md) for information on getting started using
 the operator.
