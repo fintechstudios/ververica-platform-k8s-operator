@@ -40,6 +40,14 @@ Look in [docs/mappings](docs/mappings) for information on each supported resourc
 Please have a look at the [`docs`](docs/README.md) for information on getting started using
 the operator.
 
+### Editions
+
+This operator works with both the Community and Enterprise editions of the Ververica Platform, with the caveats:
+* `VpNamespaces` are not supported by the Community Edition, so the manager will not register those resources
+* The `spec.metadata.namespace` field must either be left unset or set explicitly to `default` for all `Vp` resources
+
+Find out more about [the editions here](https://www.ververica.com/pricing-editions).
+
 ## Running
 
 To run the binary directly, after building run `./bin/manager`.
@@ -63,14 +71,6 @@ Specifying in the environment is a good way to integrate with namespaces that ar
 **Environment:**
 * `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
 * `APPMANAGER_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
-
-## Editions
-
-This operator works with both the Community and Enterprise editions of the Ververica Platform, with the caveats:
-* `VpNamespaces` are not supported by the Community Edition, so the manager will not register those resources
-* The `spec.metadata.namespace` field must either be left unset or set explicitly to `default` for all `Vp` resources
-
-Find out more about [the editions here](https://www.ververica.com/pricing-editions).
 
 ## Docker
 
