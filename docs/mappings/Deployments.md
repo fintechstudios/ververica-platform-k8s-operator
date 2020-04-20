@@ -54,7 +54,7 @@ status:
 ## K8s Definition
 
 ```yaml
-apiVersion: ververicaplatform.fintechstudios.com/v1beta1
+apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeployment
 metadata:
   name: String
