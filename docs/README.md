@@ -4,7 +4,7 @@
 
 * [Concepts](#Concepts)
     * [Design](#Design)
-    * [Custom Resources](#Custom Resources)
+    * [Custom Resources](#Custom)
 * [Guides](#Guides)
 
 ## Concepts
