@@ -96,8 +96,10 @@ The samples can all be deployed through `kubectl`.
 
 ```shell
 # 7. 
-# Now install a DeploymentTarget in the top-speed namespace
-kubectl create namespace top-speed || true # create namespace if it doesn't exist
+# Install the samples in the top-speed namespace.
+
+# Create namespace if it doesn't exist
+kubectl create namespace top-speed || true 
 
 # Create the VpDeploymentTarget
 kubectl apply -f config/samples/ververicaplatform_v1beta2_vpdeploymenttarget.yaml
