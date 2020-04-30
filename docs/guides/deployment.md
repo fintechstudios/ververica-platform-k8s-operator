@@ -22,6 +22,9 @@ helm repo add ververica https://charts.ververica.com
 # specify the `rbac.additionalNamespaces` value with a set of namespaces.
 # In this case, add the `top-speed` namespace associated with the sample manifests in `/config/samples`.
 
+# Create the `top-speed` namespace if it doesn't exist
+kubectl create namespace top-speed || true 
+
 ## For the Enterprise Edition
 helm install --namespace vvp \
             --name vvp \
@@ -98,9 +101,6 @@ The samples can all be deployed through `kubectl`.
 # 7. 
 # Install the samples in the top-speed namespace.
 
-# Create namespace if it doesn't exist
-kubectl create namespace top-speed || true 
-
 # Create the VpDeploymentTarget
 kubectl apply -f config/samples/ververicaplatform_v1beta2_vpdeploymenttarget.yaml
 
@@ -121,5 +121,5 @@ kubectl -n top-speed get events --watch
 # will trigger upgrades
 
 # Ex: cancell the deployment with a JSON Patch
-kubectl patch vpdeployment/top-speed-v2 --type merge --patch '{ "spec": { "spec": { "state": "CANCELLED" } } }'
+kubectl patch -n top-speed vpdeployment/top-speed-v2 --type merge --patch '{ "spec": { "spec": { "state": "CANCELLED" } } }'
 ```

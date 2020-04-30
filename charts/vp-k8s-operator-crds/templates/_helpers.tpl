@@ -60,7 +60,8 @@ Create the name of the service account to use
 Webhook cert injection
 */}}
 {{- define "vp-k8s-operator-crds.webhookCert" -}}
-{{ printf "%s/%s" (default .Release.Namespace .Values.webhookCert.namespace) .Values.webhookCert.name }}
+{{- $ns := .Values.webhookCert.namespace | default .Release.Namespace -}}
+{{ printf "%s/%s" $ns .Values.webhookCert.name }}
 {{- end -}}
 
 
