@@ -42,5 +42,5 @@ spec:
   selector:
     matchLabels:
       control-plane: {{ template "vp-k8s-operator.name" . }}-controller-manager
-      {{ include "vp-k8s-operator.labels" . | nindent 4 }}
+      {{ include "vp-k8s-operator.labels" . | nindent 6 }}
 {{- end }}
