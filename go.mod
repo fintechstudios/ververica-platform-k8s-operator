@@ -15,7 +15,7 @@ require (
 	k8s.io/api v0.18.5
 	k8s.io/apimachinery v0.18.5
 	k8s.io/client-go v0.18.5
-	k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89
-	sigs.k8s.io/controller-runtime v0.6.0
+	k8s.io/utils v0.0.0-20200603063816-c1c6865ac451
+	sigs.k8s.io/controller-runtime v0.6.1
 	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e // indirect
 )
