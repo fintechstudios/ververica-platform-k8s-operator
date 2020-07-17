@@ -37,11 +37,7 @@ var _ = Describe("VpDeploymentTarget conversion", func() {
 			Value: pointer.StringPtr("gazelle"),
 		},
 	}
-	jsonPatchStr := `[{
-		"op": "add",
-		"path": "/hello",
-		"value": "gazelle"
-	}]`
+	jsonPatchStr := "[{\"op\":\"add\",\"path\":\"/hello\",\"value\":\"gazelle\"}]"
 
 	It("should convert to the hub", func() {
 		// [{"op":"add","path":"/hello","value":"gazelle"}]
