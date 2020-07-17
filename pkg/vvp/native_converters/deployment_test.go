@@ -5,7 +5,9 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 	"time"
 )
 
@@ -20,7 +22,30 @@ var _ = Describe("Deployment", func() {
 					Spec: v1beta2.VpDeploymentSpec{
 						Template: &v1beta2.VpDeploymentTemplate{
 							Metadata: &v1beta2.VpDeploymentTemplateMetadata{},
-							Spec:     &v1beta2.VpDeploymentTemplateSpec{},
+							Spec:     &v1beta2.VpDeploymentTemplateSpec{
+								Kubernetes: &v1beta2.VpKubernetesOptions{
+									Pods: &v1beta2.VpPodSpec{
+										EnvVars: []core.EnvVar{
+											{
+												Name: "TEST_ENV",
+												Value: "TEST_VALUE",
+											},
+											{
+												Name: "API_KEY",
+												ValueFrom: &core.EnvVarSource{
+													SecretKeyRef: &core.SecretKeySelector{
+														LocalObjectReference: core.LocalObjectReference{
+															Name: "some-secret",
+														},
+														Key:      "api-key",
+														Optional: pointer.BoolPtr(true),
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -67,6 +92,15 @@ var _ = Describe("Deployment", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(dep.Spec).ToNot(BeNil())
 			Expect(dep.Metadata).ToNot(BeNil())
+
+			podSpec := dep.Spec.Template.Spec.Kubernetes.Pods
+			Expect(podSpec.EnvVars).To(HaveLen(2))
+			Expect(podSpec.EnvVars[1].ValueFrom.SecretKeyRef).ToNot(BeNil())
+			Expect(podSpec.EnvVars[1].ValueFrom.SecretKeyRef.Name).To(Equal("some-secret"))
+			Expect(podSpec.EnvVars[1].ValueFrom.SecretKeyRef.Key).To(Equal("api-key"))
+			Expect(podSpec.EnvVars[1].ValueFrom.SecretKeyRef.Optional).ToNot(BeNil())
+			Expect(*podSpec.EnvVars[1].ValueFrom.SecretKeyRef.Optional).To(BeTrue())
+
 			Expect(dep.Status).ToNot(BeNil())
 			Expect(dep.Status.State).To(Equal(string(v1beta2.RunningState)))
 			Expect(dep.Status.Running).ToNot(BeNil())
