@@ -59,6 +59,16 @@ var _ = Describe("VpDeployment conversion", func() {
 								Kind:   "JAR",
 								JarURI: "https://jars.com/peanut-butter",
 							},
+							Kubernetes: &VpKubernetesOptions{
+								Pods: &VpPodSpec{
+									EnvVars: []core.EnvVar{
+										{
+											Name: "TEST_ENV",
+											Value: "TEST_VALUE",
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -93,6 +103,16 @@ var _ = Describe("VpDeployment conversion", func() {
 							Artifact: &v1beta1.VpArtifact{
 								Kind:   "JAR",
 								JarURI: "https://jars.com/peanut-butter",
+							},
+							Kubernetes: &v1beta1.VpKubernetesOptions{
+								Pods: &v1beta1.VpPodSpec{
+									EnvVars: []core.EnvVar{
+										{
+											Name: "TEST_ENV",
+											Value: "TEST_VALUE",
+										},
+									},
+								},
 							},
 						},
 					},
@@ -341,5 +361,7 @@ var _ = Describe("VpDeployment conversion", func() {
 		Expect(v2.Spec.Spec.MaxJobCreationAttempts).To(BeEquivalentTo(v2Clone.Spec.Spec.MaxJobCreationAttempts))
 		Expect(v2.Spec.Spec.Template.Metadata).To(BeEquivalentTo(v2Clone.Spec.Spec.Template.Metadata))
 		Expect(v2.Spec.Spec.Template.Spec).To(BeEquivalentTo(v2Clone.Spec.Spec.Template.Spec))
+		k8sSpec := v2.Spec.Spec.Template.Spec.Kubernetes
+		Expect(k8sSpec.Pods.EnvVars).To(BeEquivalentTo(v2Clone.Spec.Spec.Template.Spec.Kubernetes.Pods.EnvVars))
 	})
 })

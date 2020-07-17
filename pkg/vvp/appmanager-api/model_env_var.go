@@ -10,8 +10,10 @@
 
 package appmanagerapi
 
+import core "k8s.io/api/core/v1"
+
 type EnvVar struct {
 	Name      string    `json:"name,omitempty"`
 	Value     string    `json:"value,omitempty"`
-	ValueFrom *JsonNode `json:"valueFrom,omitempty"`
+	ValueFrom *core.EnvVarSource `json:"valueFrom,omitempty"`
 }
