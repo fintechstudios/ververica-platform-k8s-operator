@@ -1,5 +1,5 @@
 /*
-Copyright 2019 FinTech Studios, Inc.
+Copyright 2020 FinTech Studios, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -236,6 +236,9 @@ type VpDeploymentStatus struct {
 
 	// +optional
 	State VpDeploymentState `json:"state,omitempty"`
+
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 
 	// see: https://docs.ververica.com/user_guide/deployments/index.html#running
 	// +optional

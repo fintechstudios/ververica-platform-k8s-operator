@@ -21,6 +21,7 @@ import (
 	"errors"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
 	"time"
 
@@ -266,6 +267,12 @@ func (r *VpDeploymentReconciler) updateResource(resource *v1beta2.VpDeployment, 
 
 	if resource.Status, err = nativeconverters.DeploymentStatusToNative(deployment.Status); err != nil {
 		return err
+	}
+
+	// attach start time if none is set and the deployment is now running
+	if resource.Status.StartTime == nil && resource.Status.State == v1beta2.RunningState {
+		now := metav1.Now()
+		resource.Status.StartTime = &now
 	}
 
 	if err := r.Status().Update(ctx, resource); err != nil {

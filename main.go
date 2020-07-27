@@ -19,6 +19,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/scheduling"
 	"os"
 	"runtime"
 
@@ -33,6 +34,7 @@ import (
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	ververicaplatformv1beta2 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/controllers"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
@@ -83,6 +85,7 @@ var (
 func init() {
 	_ = v1beta1.AddToScheme(scheme)
 	_ = v1beta2.AddToScheme(scheme)
+	_ = ververicaplatformv1beta2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -217,6 +220,14 @@ func main() {
 	}
 	if err = (&v1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeploymentTarget")
+		os.Exit(1)
+	}
+	if err = (&controllers.VpCronDeploymentReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("VpCronDeployment"),
+		Clock:  scheduling.NewClock(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "VpCronDeployment")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

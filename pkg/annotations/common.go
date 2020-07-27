@@ -1,5 +1,7 @@
 package annotations
 
+import "fmt"
+
 // AnnotationName is a convenience type
 type AnnotationName string
 
@@ -12,21 +14,27 @@ type AnnotationPair struct {
 	val  string
 }
 
-const baseAnnotation = "ververicaplatform.fintechstudios.com/"
+const baseAnnotationName = "ververicaplatform.fintechstudios.com"
 
-const (
-	ID                 = AnnotationName(baseAnnotation + "id")
-	Namespace          = AnnotationName(baseAnnotation + "namespace")
-	ResourceVersion    = AnnotationName(baseAnnotation + "resource-version")
-	DeploymentTargetID = AnnotationName(baseAnnotation + "deployment-target-id")
-	DeploymentID       = AnnotationName(baseAnnotation + "deployment-id")
-	JobID              = AnnotationName(baseAnnotation + "job-id")
+var (
+	ID                 = NewAnnotationName("id")
+	Namespace          = NewAnnotationName("namespace")
+	ResourceVersion    = NewAnnotationName("resource-version")
+	DeploymentTargetID = NewAnnotationName("deployment-target-id")
+	DeploymentID       = NewAnnotationName("deployment-id")
+	JobID              = NewAnnotationName("job-id")
 )
 
 // NewAnnotationName creates a new annotation name with a given suffix
 // with the common base "ververicaplatform.fintechstudios.com/"
 func NewAnnotationName(key string) AnnotationName {
-	return AnnotationName(baseAnnotation + key)
+	return AnnotationName(fmt.Sprintf("%s/%s", baseAnnotationName, key))
+}
+
+// NewNamespacedAnnotationName creates a new annotation name with a given suffix
+// with the common base "NAMESPACE.ververicaplatform.fintechstudios.com"
+func NewNamespacedAnnotationName(subdomain, key string) AnnotationName {
+	return AnnotationName(fmt.Sprintf("%s.%s/%s", subdomain, baseAnnotationName, key))
 }
 
 // Pair creates a new AnnotationPair
@@ -84,4 +92,16 @@ func EnsureExist(annotations Annotations) Annotations {
 		return annotations
 	}
 	return Create()
+}
+
+// Copy creates a copy of the passed annotation set
+func Copy(annotations Annotations) Annotations {
+	if annotations == nil {
+		return nil
+	}
+	target := Create()
+	for k, v := range annotations {
+		target[k] = v
+	}
+	return target
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 FinTech Studios, Inc.
+Copyright 2020 FinTech Studios, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ var _ = Describe("VpDeployment conversion", func() {
 								Pods: &VpPodSpec{
 									EnvVars: []core.EnvVar{
 										{
-											Name: "TEST_ENV",
+											Name:  "TEST_ENV",
 											Value: "TEST_VALUE",
 										},
 									},
@@ -108,7 +108,7 @@ var _ = Describe("VpDeployment conversion", func() {
 								Pods: &v1beta1.VpPodSpec{
 									EnvVars: []core.EnvVar{
 										{
-											Name: "TEST_ENV",
+											Name:  "TEST_ENV",
 											Value: "TEST_VALUE",
 										},
 									},
