@@ -31,6 +31,7 @@ import (
 	"k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
 	"github.com/robfig/cron/v3"
@@ -76,6 +77,8 @@ func isVpDeploymentFinished(vpdeployment *v1beta2.VpDeployment) (bool, v1beta2.V
 	}
 }
 
+// getScheduledTimeForDeployment parses the annotation storing when the next scheduled
+// time for this deployment should be, or nil if it has not yet been set
 func getScheduledTimeForDeployment(vpdeployment *v1beta2.VpDeployment) (*time.Time, error) {
 	if !annotations.Has(vpdeployment.Annotations, scheduledTimeAnnotation) {
 		return nil, nil
@@ -152,6 +155,59 @@ func getNextSchedule(cronDep *v1beta2.VpCronDeployment, now time.Time) (lastMiss
 	return lastMissed, sched.Next(now), nil
 }
 
+// splitDeploymentList takes a list of deployments and categorizes them into sublists of
+// active, successful(ly finished), and failed. It also calculates the most recently scheduled time.
+func splitDeploymentList(ctx context.Context, childDeployments *v1beta2.VpDeploymentList) (activeDeps, successfulDeps, failedDeps []*v1beta2.VpDeployment, mostRecentTime *time.Time) {
+	logger := log.FromContext(ctx)
+	for _, dep := range childDeployments.Items {
+		finished, finishType := isVpDeploymentFinished(&dep)
+		if !finished {
+			activeDeps = append(activeDeps, &dep)
+		} else {
+			switch finishType {
+			case v1beta2.FailedState:
+				failedDeps = append(failedDeps, &dep)
+			case v1beta2.FinishedState:
+				successfulDeps = append(successfulDeps, &dep)
+			}
+		}
+
+		scheduledTime, err := getScheduledTimeForDeployment(&dep)
+		if err != nil {
+			logger.Error(err, "unable to parse scheduled time for deployment", "deployment", &dep)
+			continue
+		}
+		if scheduledTime != nil {
+			if mostRecentTime == nil {
+				mostRecentTime = scheduledTime
+			} else if mostRecentTime.Before(*scheduledTime) {
+				mostRecentTime = scheduledTime
+			}
+		}
+	}
+
+	return
+}
+
+// getDeploymentsToDeleteByAge calculates the sublist of deployments to delete, keeping the youngest, given a max limit to keep.
+func getDeploymentsToDeleteByAge(deployments []*v1beta2.VpDeployment, limit int32) []*v1beta2.VpDeployment {
+	var toDelete []*v1beta2.VpDeployment
+	// fifo queue, delete oldest first
+	fifoSortDeploymentSlice(deployments)
+
+	maxIndexToKeep := int32(len(deployments)) - limit
+	for i, dep := range deployments {
+		if int32(i) >= maxIndexToKeep {
+			break
+		}
+		toDelete = append(toDelete, dep)
+	}
+
+	return toDelete
+}
+
+// buildVpDeploymentForCronDep creates the fully-formed deployment from the template, including the labels and
+// the controller reference
 func (r *VpCronDeploymentReconciler) buildVpDeploymentForCronDep(cronDep *v1beta2.VpCronDeployment, scheduledTime time.Time) (*v1beta2.VpDeployment, error) {
 	// We want job names for a given nominal start time to have a deterministic name
 	// to avoid the same job being created twice
@@ -191,44 +247,10 @@ func (r *VpCronDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpcrondeployment", req.NamespacedName)
 }
 
-func (r *VpCronDeploymentReconciler) splitDeploymentList(childDeployments *v1beta2.VpDeploymentList) (activeDeps, successfulDeps, failedDeps []*v1beta2.VpDeployment, mostRecentTime *time.Time) {
-
-}
-
-func (r *VpCronDeploymentReconciler) runScheduling(req ctrl.Request, vpCronDep *v1beta2.VpCronDeployment, childDeployments *v1beta2.VpDeploymentList) (ctrl.Result, error) {
-	ctx := context.Background()
-	logger := r.getLogger(req)
-	var activeDeps []*v1beta2.VpDeployment
-	var successfulDeps []*v1beta2.VpDeployment
-	var failedDeps []*v1beta2.VpDeployment
-	var mostRecentTime *time.Time // find the last run so we can update the status
-
-	for _, dep := range childDeployments.Items {
-		finished, finishType := isVpDeploymentFinished(&dep)
-		if !finished {
-			activeDeps = append(activeDeps, &dep)
-		} else {
-			switch finishType {
-			case v1beta2.FailedState:
-				failedDeps = append(failedDeps, &dep)
-			case v1beta2.FinishedState:
-				successfulDeps = append(successfulDeps, &dep)
-			}
-		}
-
-		scheduledTime, err := getScheduledTimeForDeployment(&dep)
-		if err != nil {
-			logger.Error(err, "unable to parse scheduled time for deployment", "deployment", &dep)
-			continue
-		}
-		if scheduledTime != nil {
-			if mostRecentTime == nil {
-				mostRecentTime = scheduledTime
-			} else if mostRecentTime.Before(*scheduledTime) {
-				mostRecentTime = scheduledTime
-			}
-		}
-	}
+// runScheduling
+func (r *VpCronDeploymentReconciler) runScheduling(ctx context.Context, vpCronDep *v1beta2.VpCronDeployment, childDeployments *v1beta2.VpDeploymentList) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	activeDeps, successfulDeps, failedDeps, mostRecentTime := splitDeploymentList(ctx, childDeployments)
 
 	if mostRecentTime != nil {
 		vpCronDep.Status.LastScheduleTime = &metav1.Time{Time: *mostRecentTime}
@@ -264,14 +286,8 @@ func (r *VpCronDeploymentReconciler) runScheduling(req ctrl.Request, vpCronDep *
 	deletePropPolicy := client.PropagationPolicy(metav1.DeletePropagationBackground)
 
 	if vpCronDep.Spec.FailedDeploymentsHistoryLimit != nil {
-		// fifo queue, delete oldest first
-		fifoSortDeploymentSlice(failedDeps)
-
-		maxIndexToKeep := int32(len(failedDeps)) - *vpCronDep.Spec.FailedDeploymentsHistoryLimit
-		for i, dep := range failedDeps {
-			if int32(i) >= maxIndexToKeep {
-				break
-			}
+		depsToDelete := getDeploymentsToDeleteByAge(failedDeps, *vpCronDep.Spec.FailedDeploymentsHistoryLimit)
+		for _, dep := range depsToDelete {
 			if err := r.Delete(ctx, dep, deletePropPolicy); err != nil {
 				logger.Error(err, "unable to delete old failed deployment", "deployment", dep)
 			} else {
@@ -281,18 +297,12 @@ func (r *VpCronDeploymentReconciler) runScheduling(req ctrl.Request, vpCronDep *
 	}
 
 	if vpCronDep.Spec.SuccessfulDeploymentsHistoryLimit != nil {
-		// fifo queue, delete oldest first
-		fifoSortDeploymentSlice(successfulDeps)
-
-		maxIndexToKeep := int32(len(successfulDeps)) - *vpCronDep.Spec.SuccessfulDeploymentsHistoryLimit
-		for i, dep := range successfulDeps {
-			if int32(i) >= maxIndexToKeep {
-				break
-			}
+		depsToDelete := getDeploymentsToDeleteByAge(successfulDeps, *vpCronDep.Spec.SuccessfulDeploymentsHistoryLimit)
+		for _, dep := range depsToDelete {
 			if err := r.Delete(ctx, dep, deletePropPolicy); err != nil {
-				logger.Error(err, "unable to delete old successful deployment", "deployment", dep)
+				logger.Error(err, "unable to delete old failed deployment", "deployment", dep)
 			} else {
-				logger.V(0).Info("deleted old successful deployment", "deployment", dep)
+				logger.V(0).Info("deleted old failed deployment", "deployment", dep)
 			}
 		}
 	}
@@ -367,8 +377,8 @@ func (r *VpCronDeploymentReconciler) runScheduling(req ctrl.Request, vpCronDep *
 // +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get
 
 func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
 	logger := r.getLogger(req)
+	ctx := log.IntoContext(context.Background(), logger)
 
 	var vpCronDep v1beta2.VpCronDeployment
 	// If it's gone, it's gone!
@@ -390,7 +400,7 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 		return ctrl.Result{}, err
 	}
 
-	return r.runScheduling(req, &vpCronDep, &childDeployments)
+	return r.runScheduling(ctx, &vpCronDep, &childDeployments)
 }
 
 func (r *VpCronDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
