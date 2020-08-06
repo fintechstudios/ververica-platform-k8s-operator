@@ -1,0 +1,28 @@
+{{/*
+Generate certificates
+see: https://masterminds.github.io/sprig/crypto.html
+see: https://medium.com/nuvo-group-tech/move-your-certs-to-helm-4f5f61338aca
+see: https://github.com/networkservicemesh/networkservicemesh/blob/804ad5026bb5dbd285c220f15395fe25e46f5edb/deployments/helm/nsm/charts/admission-webhook/templates/admission-webhook-secret.tpl
+*/}}
+{{- $serviceName := printf "%s-webhook-service" (include "vp-k8s-operator.fullname" . ) }}
+{{- $altNames := list (printf "%s.%s" $serviceName .Release.Namespace) (printf "%s.%s.svc" $serviceName .Release.Namespace) -}}
+{{- $certTTL := 3650 -}}
+{{- $ca := genCA "kuma-cp-ca" $certTTL -}}
+
+{{- $admGenCert := genSignedCert $serviceName nil $altNames $certTTL $ca -}}
+{{- $admissionCert := $admGenCert.Cert }}
+{{- $admissionKey := $admGenCert.Key }}
+{{- $admissionCaBundle := ($ca.Cert | b64enc) -}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name:
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    control-plane: {{ include "vp-k8s-operator.name" . }}-controller-manager

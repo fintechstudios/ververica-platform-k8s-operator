@@ -1,0 +1,14 @@
+name: trigger gitlab job
+on: [push]
+jobs:
+  trigger:
+    name: Trigger
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger GitLab CI
+        uses: appleboy/gitlab-ci-action@master
+        with:
+          url: "https://gitlab.com/fintechstudios/ververica-platform-k8s-operator"
+          token: ${{ secrets.TOKEN }}
+          debug: ${{ debug }}
+          project_id: 13397337

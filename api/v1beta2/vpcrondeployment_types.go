@@ -94,6 +94,11 @@ type VpCronDeploymentStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Schedule",type="string",JSONPath=".spec.schedule"
+// +kubebuilder:printcolumn:name="Suspend",type="boolean",JSONPath=".spec.suspend"
+// +kubebuilder:printcolumn:name="Last Schedule",type="date",JSONPath=".status.lastScheduleTime"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // VpCronDeployment is the Schema for the vpcrondeployments API
 type VpCronDeployment struct {

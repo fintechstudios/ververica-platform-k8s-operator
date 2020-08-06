@@ -191,35 +191,13 @@ func (r *VpCronDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 	return r.Log.WithValues("vpcrondeployment", req.NamespacedName)
 }
 
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpcrondeployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpcrondeployments/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get
+func (r *VpCronDeploymentReconciler) splitDeploymentList(childDeployments *v1beta2.VpDeploymentList) (activeDeps, successfulDeps, failedDeps []*v1beta2.VpDeployment, mostRecentTime *time.Time) {
 
-func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+}
+
+func (r *VpCronDeploymentReconciler) runScheduling(req ctrl.Request, vpCronDep *v1beta2.VpCronDeployment, childDeployments *v1beta2.VpDeploymentList) (ctrl.Result, error) {
 	ctx := context.Background()
-	log := r.getLogger(req)
-
-	var vpCronDep v1beta2.VpCronDeployment
-	// If it's gone, it's gone!
-	if err := r.Get(ctx, req.NamespacedName, &vpCronDep); err != nil {
-		log.Error(err, "unable to fetch VpCronDeployment")
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	// list all active deployments
-	var childDeployments v1beta2.VpDeploymentList
-	err := r.List(
-		ctx,
-		&childDeployments,
-		client.InNamespace(req.Namespace),
-		client.MatchingFields{deploymentOwnerKey: req.Name})
-
-	if err != nil {
-		log.Error(err, "unable to list child Jobs")
-		return ctrl.Result{}, err
-	}
-
+	logger := r.getLogger(req)
 	var activeDeps []*v1beta2.VpDeployment
 	var successfulDeps []*v1beta2.VpDeployment
 	var failedDeps []*v1beta2.VpDeployment
@@ -240,7 +218,7 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 
 		scheduledTime, err := getScheduledTimeForDeployment(&dep)
 		if err != nil {
-			log.Error(err, "unable to parse scheduled time for deployment", "deployment", &dep)
+			logger.Error(err, "unable to parse scheduled time for deployment", "deployment", &dep)
 			continue
 		}
 		if scheduledTime != nil {
@@ -263,20 +241,20 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 	for _, activeDep := range activeDeps {
 		depRef, err := reference.GetReference(r.Scheme, activeDep)
 		if err != nil {
-			log.Error(err, "unable to make reference to active deployment", "deployment", activeDep)
+			logger.Error(err, "unable to make reference to active deployment", "deployment", activeDep)
 			continue
 		}
 		vpCronDep.Status.Active = append(vpCronDep.Status.Active, *depRef)
 	}
-	log.V(1).Info(
+	logger.V(1).Info(
 		"deployment count",
 		"active", len(activeDeps),
 		"failed", len(failedDeps),
 		"successful", len(successfulDeps))
 
 	// update the crondep
-	if err := r.Status().Update(ctx, &vpCronDep); err != nil {
-		log.Error(err, "unable to update VpCronDeployment status")
+	if err := r.Status().Update(ctx, vpCronDep); err != nil {
+		logger.Error(err, "unable to update VpCronDeployment status")
 		return ctrl.Result{}, err
 	}
 
@@ -295,9 +273,9 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 				break
 			}
 			if err := r.Delete(ctx, dep, deletePropPolicy); err != nil {
-				log.Error(err, "unable to delete old failed deployment", "deployment", dep)
+				logger.Error(err, "unable to delete old failed deployment", "deployment", dep)
 			} else {
-				log.V(0).Info("deleted old failed deployment", "deployment", dep)
+				logger.V(0).Info("deleted old failed deployment", "deployment", dep)
 			}
 		}
 	}
@@ -312,49 +290,51 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 				break
 			}
 			if err := r.Delete(ctx, dep, deletePropPolicy); err != nil {
-				log.Error(err, "unable to delete old successful deployment", "deployment", dep)
+				logger.Error(err, "unable to delete old successful deployment", "deployment", dep)
 			} else {
-				log.V(0).Info("deleted old successful deployment", "deployment", dep)
+				logger.V(0).Info("deleted old successful deployment", "deployment", dep)
 			}
 		}
 	}
 
+	// Scheduling phase
+
 	// check if this cron deployment is currently suspended
 	if vpCronDep.Spec.Suspend != nil && *vpCronDep.Spec.Suspend {
-		log.V(1).Info("skipping suspended", "crondeployment", vpCronDep)
+		logger.V(1).Info("skipping suspended", "crondeployment", vpCronDep)
 		return ctrl.Result{}, nil
 	}
 
 	// get the next scheduled run
-	missedRunTime, nextRunTime, err := getNextSchedule(&vpCronDep, r.Now())
+	missedRunTime, nextRunTime, err := getNextSchedule(vpCronDep, r.Now())
 	if err != nil {
-		log.Error(err, "unable to determine schedule", "crondeployment", vpCronDep)
+		logger.Error(err, "unable to determine schedule", "crondeployment", vpCronDep)
 		// non-recoverable error, needs an external update before it can be processed
 		return ctrl.Result{}, nil
 	}
 	// let the k8s schedule requeue this until the next run
 	scheduledResult := ctrl.Result{RequeueAfter: nextRunTime.Sub(r.Now())}
-	log = log.WithValues("now", r.Now(), "next run", nextRunTime)
+	logger = logger.WithValues("now", r.Now(), "next run", nextRunTime)
 
 	// if there's a deployment scheduled and within the deadline, deploy it!
 	if missedRunTime.IsZero() {
-		log.V(1).Info("no upcoming scheduled times, sleeping until next", "next", nextRunTime)
+		logger.V(1).Info("no upcoming scheduled times, sleeping until next", "next", nextRunTime)
 		return scheduledResult, nil
 	}
 	// make sure we're not too late to start the run
-	log = log.WithValues("current run", missedRunTime)
+	logger = logger.WithValues("current run", missedRunTime)
 	isTooLate := false
 	if vpCronDep.Spec.StartingDeadlineSeconds != nil {
 		deadlineDur := time.Second * time.Duration(*vpCronDep.Spec.StartingDeadlineSeconds)
 		isTooLate = missedRunTime.Add(deadlineDur).Before(r.Now())
 	}
 	if isTooLate {
-		log.V(1).Info("missed starting deadline for last run, sleeping until next")
+		logger.V(1).Info("missed starting deadline for last run, sleeping until next")
 		return scheduledResult, nil
 	}
 	// handle the concurrency policy
 	if vpCronDep.Spec.ConcurrencyPolicy == v1beta2.ForbidConcurrent && len(activeDeps) > 0 {
-		log.V(1).Info("concurrency policy blocks concurrent runs, skipping", "num active", len(activeDeps))
+		logger.V(1).Info("concurrency policy blocks concurrent runs, skipping", "num active", len(activeDeps))
 		return scheduledResult, nil
 	}
 
@@ -362,23 +342,55 @@ func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, e
 	if vpCronDep.Spec.ConcurrencyPolicy == v1beta2.ReplaceConcurrent {
 		for _, activeDep := range activeDeps {
 			if err := r.Delete(ctx, activeDep, deletePropPolicy); client.IgnoreNotFound(err) != nil {
-				log.Error(err, "unable to delete active deployment", "deployment", activeDep)
+				logger.Error(err, "unable to delete active deployment", "deployment", activeDep)
 				return ctrl.Result{}, err
 			}
 		}
 	}
 
 	// create the new deployment
-	dep, err := r.buildVpDeploymentForCronDep(&vpCronDep, missedRunTime)
+	dep, err := r.buildVpDeploymentForCronDep(vpCronDep, missedRunTime)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 	if err := r.Create(ctx, dep); err != nil {
-		log.Error(err, "unable to create VpDeployment for VpCronDeployment", "deployment", dep)
+		logger.Error(err, "unable to create VpDeployment for VpCronDeployment", "deployment", dep)
 	}
-	log.V(1).Info("created VpDeployment for VpCronDeployment", "deployment", dep)
+	logger.V(1).Info("created VpDeployment for VpCronDeployment", "deployment", dep)
 
 	return scheduledResult, nil
+}
+
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpcrondeployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpcrondeployments/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=ververicaplatform.fintechstudios.com,resources=vpdeployments,verbs=get
+
+func (r *VpCronDeploymentReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx := context.Background()
+	logger := r.getLogger(req)
+
+	var vpCronDep v1beta2.VpCronDeployment
+	// If it's gone, it's gone!
+	if err := r.Get(ctx, req.NamespacedName, &vpCronDep); err != nil {
+		logger.Error(err, "unable to fetch VpCronDeployment")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// list all active deployments
+	var childDeployments v1beta2.VpDeploymentList
+	err := r.List(
+		ctx,
+		&childDeployments,
+		client.InNamespace(req.Namespace),
+		client.MatchingFields{deploymentOwnerKey: req.Name})
+
+	if err != nil {
+		logger.Error(err, "unable to list child Jobs")
+		return ctrl.Result{}, err
+	}
+
+	return r.runScheduling(req, &vpCronDep, &childDeployments)
 }
 
 func (r *VpCronDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {

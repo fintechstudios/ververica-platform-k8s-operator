@@ -1,0 +1,7 @@
+apiVersion: ververicaplatform.fintechstudios.com/v1beta2
+kind: VpCronDeployment
+metadata:
+  name: vpcrondeployment-sample
+spec:
+  # Add fields here
+  foo: bar
