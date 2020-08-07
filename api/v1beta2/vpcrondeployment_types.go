@@ -50,6 +50,12 @@ type DeploymentTemplateSpec struct {
 	Spec VpDeploymentObjectSpec `json:"spec,omitempty"`
 }
 
+// VpDeploymentSpecTemplate is the wrapper for defining VpDeployment templates
+type VpDeploymentSpecTemplate struct {
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              VpDeploymentObjectSpec `json:"spec"`
+}
+
 // VpCronDeploymentSpec defines the desired state of VpCronDeployment
 type VpCronDeploymentSpec struct {
 	// +kubebuilder:validation:MinLength=0
@@ -58,7 +64,7 @@ type VpCronDeploymentSpec struct {
 	Schedule string `json:"schedule"`
 
 	// The template for all created deployments
-	VpDeploymentTemplate VpDeploymentObjectSpec `json:"vpDeploymentTemplate"`
+	VpDeploymentTemplate VpDeploymentSpecTemplate `json:"vpDeploymentTemplate"`
 
 	// Optional deadline in seconds for starting the job if it misses scheduled
 	// time for any reason.  Missed deployment executions will be counted as failed ones.

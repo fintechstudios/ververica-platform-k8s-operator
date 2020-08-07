@@ -27,7 +27,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta1"
-	ververicaplatformv1beta2 "github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -71,9 +70,6 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 
 	err = v1beta2.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = ververicaplatformv1beta2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

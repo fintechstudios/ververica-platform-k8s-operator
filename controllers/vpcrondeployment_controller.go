@@ -1,5 +1,5 @@
 /*
-Copyright 2019 FinTech Studios, Inc.
+Copyright 2020 FinTech Studios, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,20 +92,9 @@ func getScheduledTimeForDeployment(vpdeployment *v1beta2.VpDeployment) (*time.Ti
 	return &parsed, nil
 }
 
-// fifoSortDeploymentSlice sorts a slice of VpDeployments based on their start time
-// into a FIFO list, newest to oldest
-func fifoSortDeploymentSlice(vpdeployments []*v1beta2.VpDeployment) {
-	sort.Slice(vpdeployments, func(i, j int) bool {
-		if vpdeployments[i].Status.StartTime != nil {
-			return vpdeployments[j].Status.StartTime == nil
-		}
-		return vpdeployments[i].Status.StartTime.Before(vpdeployments[j].Status.StartTime)
-	})
-}
-
-// getNextSchedule calculates when the next scheduled deployment run should be
+// getNextCronSchedule calculates when the next scheduled deployment run should be
 // and if there is one that has yet to be processed
-func getNextSchedule(cronDep *v1beta2.VpCronDeployment, now time.Time) (lastMissed time.Time, next time.Time, err error) {
+func getNextCronSchedule(cronDep *v1beta2.VpCronDeployment, now time.Time) (lastMissed time.Time, next time.Time, err error) {
 	sched, err := cron.ParseStandard(cronDep.Spec.Schedule)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
@@ -155,23 +144,34 @@ func getNextSchedule(cronDep *v1beta2.VpCronDeployment, now time.Time) (lastMiss
 	return lastMissed, sched.Next(now), nil
 }
 
-// splitDeploymentList takes a list of deployments and categorizes them into sublists of
-// active, successful(ly finished), and failed. It also calculates the most recently scheduled time.
-func splitDeploymentList(ctx context.Context, childDeployments *v1beta2.VpDeploymentList) (activeDeps, successfulDeps, failedDeps []*v1beta2.VpDeployment, mostRecentTime *time.Time) {
-	logger := log.FromContext(ctx)
-	for _, dep := range childDeployments.Items {
+// splitDeploymentList takes a list of deployments and categorizes them into 3 sublists of
+// active, successful(ly finished), and failed.
+func splitDeploymentList(childDeps *v1beta2.VpDeploymentList) (activeDeps, successfulDeps, failedDeps []*v1beta2.VpDeployment) {
+	for i, dep := range childDeps.Items {
 		finished, finishType := isVpDeploymentFinished(&dep)
+		depPtr := &childDeps.Items[i]
 		if !finished {
-			activeDeps = append(activeDeps, &dep)
+			activeDeps = append(activeDeps, depPtr)
 		} else {
 			switch finishType {
-			case v1beta2.FailedState:
-				failedDeps = append(failedDeps, &dep)
 			case v1beta2.FinishedState:
-				successfulDeps = append(successfulDeps, &dep)
+				successfulDeps = append(successfulDeps, depPtr)
+			// treat all non-finished states as failed
+			default:
+				failedDeps = append(failedDeps, depPtr)
 			}
 		}
+	}
 
+	return
+}
+
+// getMostRecentExecTime calculates the most recently scheduled time for a list of deployments. Will return nil
+// if no dep has been scheduled or no time is valid
+func getMostRecentScheduledTime(ctx context.Context, childDeployments *v1beta2.VpDeploymentList) *time.Time {
+	logger := log.FromContext(ctx)
+	var mostRecentTime *time.Time
+	for _, dep := range childDeployments.Items {
 		scheduledTime, err := getScheduledTimeForDeployment(&dep)
 		if err != nil {
 			logger.Error(err, "unable to parse scheduled time for deployment", "deployment", &dep)
@@ -185,16 +185,20 @@ func splitDeploymentList(ctx context.Context, childDeployments *v1beta2.VpDeploy
 			}
 		}
 	}
-
-	return
+	return mostRecentTime
 }
 
 // getDeploymentsToDeleteByAge calculates the sublist of deployments to delete, keeping the youngest, given a max limit to keep.
 func getDeploymentsToDeleteByAge(deployments []*v1beta2.VpDeployment, limit int32) []*v1beta2.VpDeployment {
-	var toDelete []*v1beta2.VpDeployment
 	// fifo queue, delete oldest first
-	fifoSortDeploymentSlice(deployments)
+	sort.Slice(deployments, func(i, j int) bool {
+		if deployments[i].Status.StartTime == nil {
+			return deployments[j].Status.StartTime != nil
+		}
+		return deployments[i].Status.StartTime.Before(deployments[j].Status.StartTime)
+	})
 
+	var toDelete []*v1beta2.VpDeployment
 	maxIndexToKeep := int32(len(deployments)) - limit
 	for i, dep := range deployments {
 		if int32(i) >= maxIndexToKeep {
@@ -215,12 +219,12 @@ func (r *VpCronDeploymentReconciler) buildVpDeploymentForCronDep(cronDep *v1beta
 
 	// copy all annotations and labels
 	annotationSet := annotations.Set(
-		annotations.EnsureExist(annotations.Copy(cronDep.Spec.VpDeploymentTemplate.Metadata.Annotations)),
+		annotations.EnsureExist(annotations.Copy(cronDep.Spec.VpDeploymentTemplate.Annotations)),
 		annotations.Pair(scheduledTimeAnnotation, scheduledTime.Format(scheduledTimeFormat)))
 
 	labelSet := make(map[string]string)
-	if cronDep.Spec.VpDeploymentTemplate.Metadata.Labels != nil {
-		for k, v := range cronDep.Spec.VpDeploymentTemplate.Metadata.Labels {
+	if cronDep.Spec.VpDeploymentTemplate.Labels != nil {
+		for k, v := range cronDep.Spec.VpDeploymentTemplate.Labels {
 			labelSet[k] = v
 		}
 	}
@@ -232,7 +236,7 @@ func (r *VpCronDeploymentReconciler) buildVpDeploymentForCronDep(cronDep *v1beta
 			Name:        name,
 			Namespace:   cronDep.Namespace,
 		},
-		Spec: *cronDep.Spec.VpDeploymentTemplate.DeepCopy(),
+		Spec: *cronDep.Spec.VpDeploymentTemplate.Spec.DeepCopy(),
 	}
 
 	if err := ctrl.SetControllerReference(cronDep, dep, r.Scheme); err != nil {
@@ -250,7 +254,8 @@ func (r *VpCronDeploymentReconciler) getLogger(req ctrl.Request) logr.Logger {
 // runScheduling
 func (r *VpCronDeploymentReconciler) runScheduling(ctx context.Context, vpCronDep *v1beta2.VpCronDeployment, childDeployments *v1beta2.VpDeploymentList) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	activeDeps, successfulDeps, failedDeps, mostRecentTime := splitDeploymentList(ctx, childDeployments)
+	activeDeps, successfulDeps, failedDeps := splitDeploymentList(childDeployments)
+	mostRecentTime := getMostRecentScheduledTime(ctx, childDeployments)
 
 	if mostRecentTime != nil {
 		vpCronDep.Status.LastScheduleTime = &metav1.Time{Time: *mostRecentTime}
@@ -316,7 +321,7 @@ func (r *VpCronDeploymentReconciler) runScheduling(ctx context.Context, vpCronDe
 	}
 
 	// get the next scheduled run
-	missedRunTime, nextRunTime, err := getNextSchedule(vpCronDep, r.Now())
+	missedRunTime, nextRunTime, err := getNextCronSchedule(vpCronDep, r.Now())
 	if err != nil {
 		logger.Error(err, "unable to determine schedule", "crondeployment", vpCronDep)
 		// non-recoverable error, needs an external update before it can be processed

@@ -25,6 +25,10 @@ func timeMustParse(layout, value string) *time.Time {
 	return &date
 }
 
+func metaTimeMustParse(layout, value string) *metav1.Time {
+	return &metav1.Time{Time: *timeMustParse(layout, value)}
+}
+
 var _ = Describe("VpNamespace Controller", func() {
 	var reconciler VpNamespaceReconciler
 
