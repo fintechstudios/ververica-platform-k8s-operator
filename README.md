@@ -40,9 +40,12 @@ Look in [docs/mappings](docs/mappings) for information on each supported resourc
 Please have a look at the [`docs`](docs/README.md) for information on getting started using
 the operator.
 
+To deploying and using the operator look at [`deploying`](docs/guides/deployment.md)
+
 ### Editions
 
 This operator works with both the Community and Enterprise editions of the Ververica Platform, with the caveats:
+
 * `VpNamespaces` are not supported by the Community Edition, so the manager will not register those resources
 * The `spec.metadata.namespace` field must either be left unset or set explicitly to `default` for all `Vp` resources
 
@@ -53,6 +56,7 @@ Find out more about [the editions here](https://www.ververica.com/pricing-editio
 To run the binary directly, after building run `./bin/manager`.
 
 **Flags:**
+
 * `--help` prints usage
 * `--vvp-url=http://localhost:8081` the url, without trailing slash, for the Ververica Platform
 * `--vvp-edition=enterprise` the Ververica Platform Edition to support. See [Editions](#Editions) for more.
@@ -69,12 +73,14 @@ for each namespace that resources are managed in.
 Specifying in the environment is a good way to integrate with namespaces that aren't defined in Kubernetes.
 
 **Environment:**
+
 * `APPMANAGER_API_TOKEN_{NAMESPACE}` a token to use for resources in a specific Ververica Platform namespace, upper-cased
 * `APPMANAGER_API_TOKEN` if no namespace-specific token can be found, this value will be used. 
 
 ## Docker
 
 Images are published to [Docker Hub](https://hub.docker.com/r/fintechstudios/ververica-platform-k8s-operator).
+
 *  The `latest` tag always refers to the current HEAD in the master branch.
 * Each master commit hash is also tagged and published.
 * Git tags are published with the same tag. 
@@ -100,6 +106,7 @@ in [docs/design.md](docs/design.md).
 Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
+
 - `go` >= `1.14.x`
 - `make` >= `4`
 - `kubebuilder` == [`v2.2.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.2.0)
@@ -155,19 +162,20 @@ The `optional` package is missing from many of the imports in the generated code
 package ververicaplatformapi
 
 import (
-	// ...
+    // ...
     "github.com/antihax/optional"
     // ...
 )
 ```
 
 Affected files:
+
 - `api_event_resource.go`
 - `api_job_resource.go`
 - `api_savepoint_resource.go`
 
-
 Type Changes:
+
 * `model_pods.go` needs to be updated with the proper Kubernetes types
 * `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
 
@@ -188,6 +196,7 @@ You'll also have to change any usages of this type in `structs` to be embedded, 
 ### Building Images
 
 The images are built in two steps:
+
 1. The [`build.Dockerfile`](build.Dockerfile) image is a full development environment for running tests, linting,
 and building the source with the correct tooling. This can also be used for development if you so like,
 just override the entrypoint.
@@ -198,6 +207,7 @@ the manager binary and copies it over into an image for distribution.
 ## Acknowledgements
 
 Other OSS that influenced this project:
+
 * [Kong Ingress Controller](https://github.com/Kong/kubernetes-ingress-controller)
 
 ## License
