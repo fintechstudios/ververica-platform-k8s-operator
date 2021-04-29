@@ -1,0 +1,61 @@
+version: 2
+registries:
+  docker-registry-516380634521-dkr-ecr-us-east-1-amazonaws-com:
+    type: docker-registry
+    url: https://516380634521.dkr.ecr.us-east-1.amazonaws.com
+    username: AKIAXQOVPFWMZBIBZTCA
+    password: "${{secrets.DOCKER_REGISTRY_516380634521_DKR_ECR_US_EAST_1_AMAZONAWS_COM_PASSWORD}}"
+
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "06:00"
+    timezone: US/Eastern
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: github.com/onsi/ginkgo
+    versions:
+    - 1.14.2
+    - 1.15.0
+    - 1.15.1
+  - dependency-name: k8s.io/apimachinery
+    versions:
+    - 0.20.2
+    - 0.20.3
+  - dependency-name: k8s.io/client-go
+    versions:
+    - 0.20.2
+    - 0.20.3
+  - dependency-name: k8s.io/api
+    versions:
+    - 0.20.2
+    - 0.20.3
+  - dependency-name: sigs.k8s.io/controller-runtime
+    versions:
+    - 0.8.1
+    - 0.8.2
+  - dependency-name: github.com/onsi/gomega
+    versions:
+    - 1.10.4
+    - 1.10.5
+  rebase-strategy: disabled
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "06:00"
+    timezone: US/Eastern
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: golang
+    versions:
+    - 1.14.14.pre.stretch
+    - 1.14.15.pre.stretch
+    - 1.16.0.pre.stretch
+    - 1.16.1.pre.stretch
+    - 1.16.2.pre.stretch
+  rebase-strategy: disabled
+  registries:
+  - docker-registry-516380634521-dkr-ecr-us-east-1-amazonaws-com
