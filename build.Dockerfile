@@ -19,7 +19,7 @@ RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.s
 # Install kubebuilder + dependencies
 RUN echo "installing kubebuilder@$KUBEBUILDER_VERSION, kustomize@$KUSTOMIZE_VERSION" && \
     mkdir -p ${KUBEBUILDER_DIR} && \
-    curl -sL https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${GOOS}/${GOARCH} | tar -xz -C ${KUBEBUILDER_DIR} && \
+    curl -sL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${KUBEBUILDER_VERSION}_${GOOS}_${GOARCH}.tar.gz | tar -xz -C ${KUBEBUILDER_DIR} && \
     DL_NAME=kubebuilder_${KUBEBUILDER_VERSION}_${GOOS}_${GOARCH} && \
     mv $KUBEBUILDER_DIR/${DL_NAME}/bin $KUBEBUILDER_DIR/bin && \
     rm -rf ${KUBEBUILDER_DIR}/${DL_NAME}
