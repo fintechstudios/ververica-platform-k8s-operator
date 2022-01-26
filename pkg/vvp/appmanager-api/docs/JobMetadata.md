@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **ModifiedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
 **Namespace** | **string** |  | [optional] [default to null]
 **ResourceVersion** | **int32** |  | [optional] [default to null]
+**SessionClusterName** | **string** |  | [optional] [default to null]
 **TerminatedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

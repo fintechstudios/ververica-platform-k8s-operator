@@ -1,6 +1,6 @@
 # \EventResourceApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -17,16 +17,17 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
   **namespace** | **string**| namespace | 
- **optional** | ***GetEventsUsingGETOpts** | optional parameters | nil if no parameters
+ **optional** | ***EventResourceApiGetEventsUsingGETOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
-Optional parameters are passed through a pointer to a GetEventsUsingGETOpts struct
+Optional parameters are passed through a pointer to a EventResourceApiGetEventsUsingGETOpts struct
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **deploymentId** | [**optional.Interface of string**](.md)| deploymentId | 
  **jobId** | [**optional.Interface of string**](.md)| jobId | 
+ **sessionClusterId** | [**optional.Interface of string**](.md)| sessionClusterId | 
 
 ### Return type
 
@@ -34,7 +35,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

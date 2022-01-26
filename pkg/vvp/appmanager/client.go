@@ -139,7 +139,7 @@ func (s *eventsService) GetEvents(ctx context.Context, namespaceName string, opt
 	if err != nil {
 		return nil, err
 	}
-	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, &appmanagerapi.GetEventsUsingGETOpts{
+	eventsList, res, err := s.client.apiClient.EventResourceApi.GetEventsUsingGET(ctx, namespaceName, &appmanagerapi.EventResourceApiGetEventsUsingGETOpts{
 		DeploymentId: opts.DeploymentID,
 		JobId:        opts.JobID,
 	})

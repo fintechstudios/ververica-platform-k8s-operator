@@ -1,6 +1,6 @@
 # \DeploymentTargetResourceApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**DeleteDeploymentTargetUsingDELETE**](DeploymentTargetResourceApi.md#DeleteDeploymentTargetUsingDELETE) | **Delete** /api/v1/namespaces/{namespace}/deployment-targets/{name} | Delete a deployment target
 [**GetDeploymentTargetUsingGET**](DeploymentTargetResourceApi.md#GetDeploymentTargetUsingGET) | **Get** /api/v1/namespaces/{namespace}/deployment-targets/{name} | Get a deployment target by name
 [**GetDeploymentTargetsUsingGET**](DeploymentTargetResourceApi.md#GetDeploymentTargetsUsingGET) | **Get** /api/v1/namespaces/{namespace}/deployment-targets | List all deployment targets
+[**UpsertDeploymentTargetUsingPUT**](DeploymentTargetResourceApi.md#UpsertDeploymentTargetUsingPUT) | **Put** /api/v1/namespaces/{namespace}/deployment-targets/{name} | Create or update a deployment target
 
 
 # **CreateDeploymentTargetUsingPOST**
@@ -28,7 +29,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -55,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -82,7 +83,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -108,7 +109,35 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json, application/yaml
+ - **Accept**: application/json, application/yaml
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **UpsertDeploymentTargetUsingPUT**
+> DeploymentTarget UpsertDeploymentTargetUsingPUT(ctx, deploymentTarget, name, namespace)
+Create or update a deployment target
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **deploymentTarget** | [**DeploymentTarget**](DeploymentTarget.md)| deploymentTarget | 
+  **name** | **string**| name | 
+  **namespace** | **string**| namespace | 
+
+### Return type
+
+[**DeploymentTarget**](DeploymentTarget.md)
+
+### Authorization
+
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

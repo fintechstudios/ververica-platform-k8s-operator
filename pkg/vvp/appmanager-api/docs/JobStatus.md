@@ -4,6 +4,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Failure** | [***Failure**](Failure.md) |  | [optional] [default to null]
+**SinkTables** | [**[]JobTable**](JobTable.md) |  | [optional] [default to null]
+**SourceTables** | [**[]JobTable**](JobTable.md) |  | [optional] [default to null]
 **Started** | [***JobStatusStarted**](JobStatusStarted.md) |  | [optional] [default to null]
 **State** | **string** |  | [optional] [default to null]
 

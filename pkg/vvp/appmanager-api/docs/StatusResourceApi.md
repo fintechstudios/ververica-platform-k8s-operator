@@ -1,6 +1,6 @@
 # \StatusResourceApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -17,11 +17,11 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**interface{}**](interface{}.md)
+**interface{}**
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -43,7 +43,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

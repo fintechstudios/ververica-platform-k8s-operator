@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **Parallelism** | **int32** |  | [optional] [default to null]
 **Resources** | [**map[string]ResourceSpec**](ResourceSpec.md) |  | [optional] [default to null]
 **SavepointLocation** | **string** |  | [optional] [default to null]
+**UserFlinkConfiguration** | **map[string]string** |  | [optional] [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

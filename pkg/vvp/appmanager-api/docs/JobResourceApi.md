@@ -1,6 +1,6 @@
 # \JobResourceApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -26,7 +26,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -45,10 +45,10 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
   **namespace** | **string**| namespace | 
- **optional** | ***GetJobsUsingGETOpts** | optional parameters | nil if no parameters
+ **optional** | ***JobResourceApiGetJobsUsingGETOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
-Optional parameters are passed through a pointer to a GetJobsUsingGETOpts struct
+Optional parameters are passed through a pointer to a JobResourceApiGetJobsUsingGETOpts struct
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
@@ -61,7 +61,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

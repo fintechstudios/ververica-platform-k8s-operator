@@ -5,6 +5,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Annotations** | **map[string]string** |  | [optional] [default to null]
 **CreatedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
+**DisplayName** | **string** |  | [optional] [default to null]
 **Id** | **string** |  | [optional] [default to null]
 **Labels** | **map[string]string** |  | [optional] [default to null]
 **ModifiedAt** | [**time.Time**](time.Time.md) |  | [optional] [default to null]
