@@ -15,7 +15,7 @@ type V1StorageOsVolumeSource struct {
 	// Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.
 	FsType string `json:"fsType,omitempty"`
 	// Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.
-	ReadOnly bool `json:"readOnly,omitempty"`
+	ReadOnly  bool                    `json:"readOnly,omitempty"`
 	SecretRef *V1LocalObjectReference `json:"secretRef,omitempty"`
 	// VolumeName is the human-readable name of the StorageOS volume.  Volume names are only unique within a namespace.
 	VolumeName string `json:"volumeName,omitempty"`

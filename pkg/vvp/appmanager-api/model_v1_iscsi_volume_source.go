@@ -29,7 +29,7 @@ type V1IscsiVolumeSource struct {
 	// iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port is other than default (typically TCP ports 860 and 3260).
 	Portals []string `json:"portals,omitempty"`
 	// ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false.
-	ReadOnly bool `json:"readOnly,omitempty"`
+	ReadOnly  bool                    `json:"readOnly,omitempty"`
 	SecretRef *V1LocalObjectReference `json:"secretRef,omitempty"`
 	// iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port is other than default (typically TCP ports 860 and 3260).
 	TargetPortal string `json:"targetPortal"`

@@ -13,34 +13,34 @@ package appmanagerapi
 // Volume represents a named volume in a pod that may be accessed by any container in the pod.
 type V1Volume struct {
 	AwsElasticBlockStore *V1AwsElasticBlockStoreVolumeSource `json:"awsElasticBlockStore,omitempty"`
-	AzureDisk *V1AzureDiskVolumeSource `json:"azureDisk,omitempty"`
-	AzureFile *V1AzureFileVolumeSource `json:"azureFile,omitempty"`
-	Cephfs *V1CephFsVolumeSource `json:"cephfs,omitempty"`
-	Cinder *V1CinderVolumeSource `json:"cinder,omitempty"`
-	ConfigMap *V1ConfigMapVolumeSource `json:"configMap,omitempty"`
-	Csi *V1CsiVolumeSource `json:"csi,omitempty"`
-	DownwardAPI *V1DownwardApiVolumeSource `json:"downwardAPI,omitempty"`
-	EmptyDir *V1EmptyDirVolumeSource `json:"emptyDir,omitempty"`
-	Ephemeral *V1EphemeralVolumeSource `json:"ephemeral,omitempty"`
-	Fc *V1FcVolumeSource `json:"fc,omitempty"`
-	FlexVolume *V1FlexVolumeSource `json:"flexVolume,omitempty"`
-	Flocker *V1FlockerVolumeSource `json:"flocker,omitempty"`
-	GcePersistentDisk *V1GcePersistentDiskVolumeSource `json:"gcePersistentDisk,omitempty"`
-	GitRepo *V1GitRepoVolumeSource `json:"gitRepo,omitempty"`
-	Glusterfs *V1GlusterfsVolumeSource `json:"glusterfs,omitempty"`
-	HostPath *V1HostPathVolumeSource `json:"hostPath,omitempty"`
-	Iscsi *V1IscsiVolumeSource `json:"iscsi,omitempty"`
+	AzureDisk            *V1AzureDiskVolumeSource            `json:"azureDisk,omitempty"`
+	AzureFile            *V1AzureFileVolumeSource            `json:"azureFile,omitempty"`
+	Cephfs               *V1CephFsVolumeSource               `json:"cephfs,omitempty"`
+	Cinder               *V1CinderVolumeSource               `json:"cinder,omitempty"`
+	ConfigMap            *V1ConfigMapVolumeSource            `json:"configMap,omitempty"`
+	Csi                  *V1CsiVolumeSource                  `json:"csi,omitempty"`
+	DownwardAPI          *V1DownwardApiVolumeSource          `json:"downwardAPI,omitempty"`
+	EmptyDir             *V1EmptyDirVolumeSource             `json:"emptyDir,omitempty"`
+	Ephemeral            *V1EphemeralVolumeSource            `json:"ephemeral,omitempty"`
+	Fc                   *V1FcVolumeSource                   `json:"fc,omitempty"`
+	FlexVolume           *V1FlexVolumeSource                 `json:"flexVolume,omitempty"`
+	Flocker              *V1FlockerVolumeSource              `json:"flocker,omitempty"`
+	GcePersistentDisk    *V1GcePersistentDiskVolumeSource    `json:"gcePersistentDisk,omitempty"`
+	GitRepo              *V1GitRepoVolumeSource              `json:"gitRepo,omitempty"`
+	Glusterfs            *V1GlusterfsVolumeSource            `json:"glusterfs,omitempty"`
+	HostPath             *V1HostPathVolumeSource             `json:"hostPath,omitempty"`
+	Iscsi                *V1IscsiVolumeSource                `json:"iscsi,omitempty"`
 	// Volume's name. Must be a DNS_LABEL and unique within the pod. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	Name string `json:"name"`
-	Nfs *V1NfsVolumeSource `json:"nfs,omitempty"`
+	Name                  string                               `json:"name"`
+	Nfs                   *V1NfsVolumeSource                   `json:"nfs,omitempty"`
 	PersistentVolumeClaim *V1PersistentVolumeClaimVolumeSource `json:"persistentVolumeClaim,omitempty"`
-	PhotonPersistentDisk *V1PhotonPersistentDiskVolumeSource `json:"photonPersistentDisk,omitempty"`
-	PortworxVolume *V1PortworxVolumeSource `json:"portworxVolume,omitempty"`
-	Projected *V1ProjectedVolumeSource `json:"projected,omitempty"`
-	Quobyte *V1QuobyteVolumeSource `json:"quobyte,omitempty"`
-	Rbd *V1RbdVolumeSource `json:"rbd,omitempty"`
-	ScaleIO *V1ScaleIoVolumeSource `json:"scaleIO,omitempty"`
-	Secret *V1SecretVolumeSource `json:"secret,omitempty"`
-	Storageos *V1StorageOsVolumeSource `json:"storageos,omitempty"`
-	VsphereVolume *V1VsphereVirtualDiskVolumeSource `json:"vsphereVolume,omitempty"`
+	PhotonPersistentDisk  *V1PhotonPersistentDiskVolumeSource  `json:"photonPersistentDisk,omitempty"`
+	PortworxVolume        *V1PortworxVolumeSource              `json:"portworxVolume,omitempty"`
+	Projected             *V1ProjectedVolumeSource             `json:"projected,omitempty"`
+	Quobyte               *V1QuobyteVolumeSource               `json:"quobyte,omitempty"`
+	Rbd                   *V1RbdVolumeSource                   `json:"rbd,omitempty"`
+	ScaleIO               *V1ScaleIoVolumeSource               `json:"scaleIO,omitempty"`
+	Secret                *V1SecretVolumeSource                `json:"secret,omitempty"`
+	Storageos             *V1StorageOsVolumeSource             `json:"storageos,omitempty"`
+	VsphereVolume         *V1VsphereVirtualDiskVolumeSource    `json:"vsphereVolume,omitempty"`
 }

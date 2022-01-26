@@ -54,7 +54,7 @@ type namespacesService struct {
 }
 
 func (n *namespacesService) GetNamespace(ctx context.Context, namespaceName string) (*platformapi.Namespace, error) {
-	namespaceRes, res, err := n.client.apiClient.NamespacesApi.GetNamespace(ctx, namespaceName)
+	namespaceRes, res, err := n.client.apiClient.NamespacesApi.GetNamespaceUsingGET(ctx, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -72,7 +72,7 @@ func (n *namespacesService) CreateNamespace(ctx context.Context, namespace platf
 		namespace.Name = "namespaces/" + namespace.Name
 	}
 
-	namespaceRes, res, err := n.client.apiClient.NamespacesApi.CreateNamespace(ctx, namespace)
+	namespaceRes, res, err := n.client.apiClient.NamespacesApi.CreateNamespaceUsingPOST(ctx, namespace)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -90,7 +90,7 @@ func (n *namespacesService) UpdateNamespace(ctx context.Context, namespaceName s
 		namespace.Name = "namespaces/" + namespace.Name
 	}
 
-	namespaceRes, res, err := n.client.apiClient.NamespacesApi.UpdateNamespace(ctx, namespace, namespaceName)
+	namespaceRes, res, err := n.client.apiClient.NamespacesApi.UpdateNamespaceUsingPUT(ctx, namespace, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -103,7 +103,7 @@ func (n *namespacesService) UpdateNamespace(ctx context.Context, namespaceName s
 }
 
 func (n *namespacesService) DeleteNamespace(ctx context.Context, namespaceName string) (*platformapi.Namespace, error) {
-	namespaceRes, res, err := n.client.apiClient.NamespacesApi.DeleteNamespace(ctx, namespaceName)
+	namespaceRes, res, err := n.client.apiClient.NamespacesApi.DeleteNamespaceUsingDELETE(ctx, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -138,7 +138,7 @@ type apiTokensService struct {
 }
 
 func (s *apiTokensService) GetAPIToken(ctx context.Context, namespaceName, name string) (*platformapi.ApiToken, error) {
-	tokenRes, res, err := s.client.apiClient.ApiTokensApi.GetApiToken(ctx, name, namespaceName)
+	tokenRes, res, err := s.client.apiClient.ApiTokensApi.GetApiTokenUsingGET(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -154,7 +154,7 @@ func (s *apiTokensService) CreateAPIToken(ctx context.Context, namespaceName str
 	// name must be prefixed on creation
 	apiToken.Name = formatTokenName(namespaceName, apiToken.Name)
 
-	tokenRes, res, err := s.client.apiClient.ApiTokensApi.CreateApiToken(ctx, apiToken, namespaceName)
+	tokenRes, res, err := s.client.apiClient.ApiTokensApi.CreateApiTokenUsingPOST(ctx, apiToken, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return nil, vvperrors.FormatResponseError(res, err)
 	}
@@ -167,7 +167,7 @@ func (s *apiTokensService) CreateAPIToken(ctx context.Context, namespaceName str
 }
 
 func (s *apiTokensService) DeleteAPIToken(ctx context.Context, namespaceName, name string) error {
-	_, res, err := s.client.apiClient.ApiTokensApi.DeleteApiToken(ctx, name, namespaceName)
+	_, res, err := s.client.apiClient.ApiTokensApi.DeleteApiTokenUsingDELETE(ctx, name, namespaceName)
 	if vvperrors.IsResponseError(res) {
 		return vvperrors.FormatResponseError(res, err)
 	}

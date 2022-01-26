@@ -13,13 +13,13 @@ package appmanagerapi
 // PodSpec is a description of a pod.
 type V1PodSpec struct {
 	// Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer.
-	ActiveDeadlineSeconds int64 `json:"activeDeadlineSeconds,omitempty"`
-	Affinity *V1Affinity `json:"affinity,omitempty"`
+	ActiveDeadlineSeconds int64       `json:"activeDeadlineSeconds,omitempty"`
+	Affinity              *V1Affinity `json:"affinity,omitempty"`
 	// AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.
 	AutomountServiceAccountToken bool `json:"automountServiceAccountToken,omitempty"`
 	// List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod. Cannot be updated.
-	Containers []V1Container `json:"containers"`
-	DnsConfig *V1PodDnsConfig `json:"dnsConfig,omitempty"`
+	Containers []V1Container   `json:"containers"`
+	DnsConfig  *V1PodDnsConfig `json:"dnsConfig,omitempty"`
 	// Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet', 'ClusterFirst', 'Default' or 'None'. DNS parameters given in DNSConfig will be merged with the policy selected with DNSPolicy. To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'.
 	DnsPolicy string `json:"dnsPolicy,omitempty"`
 	// EnableServiceLinks indicates whether information about services should be injected into pod's environment variables, matching the syntax of Docker links. Optional: Defaults to true.
@@ -35,8 +35,8 @@ type V1PodSpec struct {
 	// Use the host's pid namespace. Optional: Default to false.
 	HostPID bool `json:"hostPID,omitempty"`
 	// Specifies the hostname of the Pod If not specified, the pod's hostname will be set to a system-defined value.
-	Hostname string `json:"hostname,omitempty"`
-	HostnameAsFQDN bool `json:"hostnameAsFQDN,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	HostnameAsFQDN bool   `json:"hostnameAsFQDN,omitempty"`
 	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. For example, in the case of docker, only DockerConfig type secrets are honored. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
 	ImagePullSecrets []V1LocalObjectReference `json:"imagePullSecrets,omitempty"`
 	// List of initialization containers belonging to the pod. Init containers are executed in order prior to containers being started. If any init container fails, the pod is considered to have failed and is handled according to its restartPolicy. The name for an init container or normal container must be unique among all containers. Init containers may not have Lifecycle actions, Readiness probes, Liveness probes, or Startup probes. The resourceRequirements of an init container are taken into account during scheduling by finding the highest request/limit for each resource type, and then using the max of of that value or the sum of the normal containers. Limits are applied to init containers in a similar fashion. Init containers cannot currently be added or removed. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -60,7 +60,7 @@ type V1PodSpec struct {
 	// RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the \"legacy\" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/runtime-class.md This is a beta feature as of Kubernetes v1.14.
 	RuntimeClassName string `json:"runtimeClassName,omitempty"`
 	// If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler.
-	SchedulerName string `json:"schedulerName,omitempty"`
+	SchedulerName   string                `json:"schedulerName,omitempty"`
 	SecurityContext *V1PodSecurityContext `json:"securityContext,omitempty"`
 	// DeprecatedServiceAccount is a depreciated alias for ServiceAccountName. Deprecated: Use serviceAccountName instead.
 	ServiceAccount string `json:"serviceAccount,omitempty"`

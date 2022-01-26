@@ -15,7 +15,7 @@ type V1CsiVolumeSource struct {
 	// Driver is the name of the CSI driver that handles this volume. Consult with your admin for the correct name as registered in the cluster.
 	Driver string `json:"driver"`
 	// Filesystem type to mount. Ex. \"ext4\", \"xfs\", \"ntfs\". If not provided, the empty value is passed to the associated CSI driver which will determine the default filesystem to apply.
-	FsType string `json:"fsType,omitempty"`
+	FsType               string                  `json:"fsType,omitempty"`
 	NodePublishSecretRef *V1LocalObjectReference `json:"nodePublishSecretRef,omitempty"`
 	// Specifies a read-only configuration for the volume. Defaults to false (read/write).
 	ReadOnly bool `json:"readOnly,omitempty"`

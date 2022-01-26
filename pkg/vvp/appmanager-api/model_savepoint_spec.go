@@ -12,5 +12,5 @@ package appmanagerapi
 
 type SavepointSpec struct {
 	SavepointLocation string `json:"savepointLocation,omitempty"`
-	FlinkSavepointId string `json:"flinkSavepointId,omitempty"`
+	FlinkSavepointId  string `json:"flinkSavepointId,omitempty"`
 }

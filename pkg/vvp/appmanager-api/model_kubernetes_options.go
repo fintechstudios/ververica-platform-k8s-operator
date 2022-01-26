@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type KubernetesOptions struct {
-	Pods *Pods `json:"pods,omitempty"`
-	JobManagerPodTemplate *V1PodTemplateSpec `json:"jobManagerPodTemplate,omitempty"`
+	Pods                   *Pods              `json:"pods,omitempty"`
+	JobManagerPodTemplate  *V1PodTemplateSpec `json:"jobManagerPodTemplate,omitempty"`
 	TaskManagerPodTemplate *V1PodTemplateSpec `json:"taskManagerPodTemplate,omitempty"`
 }

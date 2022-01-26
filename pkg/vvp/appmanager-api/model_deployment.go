@@ -11,9 +11,9 @@
 package appmanagerapi
 
 type Deployment struct {
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Kind string `json:"kind,omitempty"`
-	Metadata *DeploymentMetadata `json:"metadata,omitempty"`
-	Spec *DeploymentSpec `json:"spec,omitempty"`
-	Status *DeploymentStatus `json:"status,omitempty"`
+	ApiVersion string              `json:"apiVersion,omitempty"`
+	Kind       string              `json:"kind,omitempty"`
+	Metadata   *DeploymentMetadata `json:"metadata,omitempty"`
+	Spec       *DeploymentSpec     `json:"spec,omitempty"`
+	Status     *DeploymentStatus   `json:"status,omitempty"`
 }

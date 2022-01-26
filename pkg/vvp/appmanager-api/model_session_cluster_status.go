@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type SessionClusterStatus struct {
-	State string `json:"state,omitempty"`
-	Failure *Failure `json:"failure,omitempty"`
+	State   string                       `json:"state,omitempty"`
+	Failure *Failure                     `json:"failure,omitempty"`
 	Running *SessionClusterStatusRunning `json:"running,omitempty"`
 }

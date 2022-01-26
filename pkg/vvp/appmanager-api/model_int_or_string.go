@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type IntOrString struct {
-	IntValue int32 `json:"intValue,omitempty"`
-	Integer bool `json:"integer,omitempty"`
+	IntValue int32  `json:"intValue,omitempty"`
+	Integer  bool   `json:"integer,omitempty"`
 	StrValue string `json:"strValue,omitempty"`
 }

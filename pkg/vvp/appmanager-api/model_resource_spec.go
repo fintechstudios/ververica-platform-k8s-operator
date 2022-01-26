@@ -11,6 +11,6 @@
 package appmanagerapi
 
 type ResourceSpec struct {
-	Cpu float64 `json:"cpu,omitempty"`
-	Memory string `json:"memory,omitempty"`
+	Cpu    float64 `json:"cpu,omitempty"`
+	Memory string  `json:"memory,omitempty"`
 }

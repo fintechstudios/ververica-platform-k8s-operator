@@ -15,6 +15,6 @@ import (
 )
 
 type SessionClusterStatusRunning struct {
-	StartedAt time.Time `json:"startedAt,omitempty"`
+	StartedAt      time.Time `json:"startedAt,omitempty"`
 	LastUpdateTime time.Time `json:"lastUpdateTime,omitempty"`
 }

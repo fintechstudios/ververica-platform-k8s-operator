@@ -35,7 +35,7 @@ func DeploymentFromNative(vpDeployment v1beta2.VpDeployment) (appmanagerapi.Depl
 		return deployment, err
 	}
 
-	if len(vpDeployment.Status.State) > 0 {
+	if vpDeployment.Status != nil && len(vpDeployment.Status.State) > 0 {
 		// we've got some state
 		state, err := DeploymentStateFromNative(vpDeployment.Status.State)
 		if err != nil {

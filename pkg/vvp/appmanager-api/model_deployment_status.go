@@ -12,5 +12,5 @@ package appmanagerapi
 
 type DeploymentStatus struct {
 	Running *DeploymentStatusRunning `json:"running,omitempty"`
-	State string `json:"state,omitempty"`
+	State   string                   `json:"state,omitempty"`
 }

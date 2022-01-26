@@ -1,18 +1,20 @@
 # \NamespacesApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateNamespace**](NamespacesApi.md#CreateNamespace) | **Post** /namespaces/v1/namespaces | createNamespace
-[**DeleteNamespace**](NamespacesApi.md#DeleteNamespace) | **Delete** /namespaces/v1/namespaces/{ns} | deleteNamespace
-[**GetNamespace**](NamespacesApi.md#GetNamespace) | **Get** /namespaces/v1/namespaces/{ns} | getNamespace
-[**ListNamespaces**](NamespacesApi.md#ListNamespaces) | **Get** /namespaces/v1/namespaces | listNamespaces
-[**UpdateNamespace**](NamespacesApi.md#UpdateNamespace) | **Put** /namespaces/v1/namespaces/{ns} | updateNamespace
+[**CreateNamespaceUsingPOST**](NamespacesApi.md#CreateNamespaceUsingPOST) | **Post** /namespaces/v1/namespaces | createNamespace
+[**DeleteNamespaceUsingDELETE**](NamespacesApi.md#DeleteNamespaceUsingDELETE) | **Delete** /namespaces/v1/namespaces/{ns} | deleteNamespace
+[**GetNamespaceUsingGET**](NamespacesApi.md#GetNamespaceUsingGET) | **Get** /namespaces/v1/namespaces/{ns} | getNamespace
+[**ListNamespacesUsingGET**](NamespacesApi.md#ListNamespacesUsingGET) | **Get** /namespaces/v1/namespaces | listNamespaces
+[**PatchNamespaceUsingPATCH**](NamespacesApi.md#PatchNamespaceUsingPATCH) | **Patch** /namespaces/v1/namespaces/{ns} | patchNamespace
+[**SetPreviewSessionClusterUsingPOST**](NamespacesApi.md#SetPreviewSessionClusterUsingPOST) | **Post** /namespaces/v1/namespaces/{ns}:setPreviewSessionCluster | setPreviewSessionCluster
+[**UpdateNamespaceUsingPUT**](NamespacesApi.md#UpdateNamespaceUsingPUT) | **Put** /namespaces/v1/namespaces/{ns} | updateNamespace
 
 
-# **CreateNamespace**
-> CreateNamespaceResponse CreateNamespace(ctx, namespace)
+# **CreateNamespaceUsingPOST**
+> CreateNamespaceResponse CreateNamespaceUsingPOST(ctx, namespace)
 createNamespace
 
 ### Required Parameters
@@ -28,7 +30,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -37,8 +39,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **DeleteNamespace**
-> DeleteNamespaceResponse DeleteNamespace(ctx, ns)
+# **DeleteNamespaceUsingDELETE**
+> DeleteNamespaceResponse DeleteNamespaceUsingDELETE(ctx, ns)
 deleteNamespace
 
 ### Required Parameters
@@ -54,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -63,8 +65,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetNamespace**
-> GetNamespaceResponse GetNamespace(ctx, ns)
+# **GetNamespaceUsingGET**
+> GetNamespaceResponse GetNamespaceUsingGET(ctx, ns)
 getNamespace
 
 ### Required Parameters
@@ -80,7 +82,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -89,8 +91,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **ListNamespaces**
-> ListNamespacesResponse ListNamespaces(ctx, )
+# **ListNamespacesUsingGET**
+> ListNamespacesResponse ListNamespacesUsingGET(ctx, )
 listNamespaces
 
 ### Required Parameters
@@ -102,7 +104,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -111,8 +113,62 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **UpdateNamespace**
-> UpdateNamespaceResponse UpdateNamespace(ctx, namespace, ns)
+# **PatchNamespaceUsingPATCH**
+> UpdateNamespaceResponse PatchNamespaceUsingPATCH(ctx, namespacePatch, ns)
+patchNamespace
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **namespacePatch** | [**Namespace**](Namespace.md)| namespacePatch | 
+  **ns** | **string**| ns | 
+
+### Return type
+
+[**UpdateNamespaceResponse**](UpdateNamespaceResponse.md)
+
+### Authorization
+
+[apiKey](../README.md#apiKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **SetPreviewSessionClusterUsingPOST**
+> SetPreviewSessionClusterResponse SetPreviewSessionClusterUsingPOST(ctx, ns, request)
+setPreviewSessionCluster
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **ns** | **string**| ns | 
+  **request** | [**SetPreviewSessionClusterRequest**](SetPreviewSessionClusterRequest.md)| request | 
+
+### Return type
+
+[**SetPreviewSessionClusterResponse**](SetPreviewSessionClusterResponse.md)
+
+### Authorization
+
+[apiKey](../README.md#apiKey)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **UpdateNamespaceUsingPUT**
+> UpdateNamespaceResponse UpdateNamespaceUsingPUT(ctx, namespace, ns)
 updateNamespace
 
 ### Required Parameters
@@ -129,7 +185,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

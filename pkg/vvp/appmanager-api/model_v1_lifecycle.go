@@ -13,5 +13,5 @@ package appmanagerapi
 // Lifecycle describes actions that the management system should take in response to container lifecycle events. For the PostStart and PreStop lifecycle handlers, management of the container blocks until the action is complete, unless the container process fails, in which case the handler is aborted.
 type V1Lifecycle struct {
 	PostStart *V1Handler `json:"postStart,omitempty"`
-	PreStop *V1Handler `json:"preStop,omitempty"`
+	PreStop   *V1Handler `json:"preStop,omitempty"`
 }

@@ -11,6 +11,6 @@
 package appmanagerapi
 
 type JobTableColumn struct {
-	Name string `json:"name,omitempty"`
+	Name  string `json:"name,omitempty"`
 	Type_ string `json:"type,omitempty"`
 }

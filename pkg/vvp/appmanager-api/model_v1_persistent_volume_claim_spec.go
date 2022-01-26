@@ -13,10 +13,10 @@ package appmanagerapi
 // PersistentVolumeClaimSpec describes the common attributes of storage devices and allows a Source for provider-specific attributes
 type V1PersistentVolumeClaimSpec struct {
 	// AccessModes contains the desired access modes the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1
-	AccessModes []string `json:"accessModes,omitempty"`
-	DataSource *V1TypedLocalObjectReference `json:"dataSource,omitempty"`
-	Resources *V1ResourceRequirements `json:"resources,omitempty"`
-	Selector *V1LabelSelector `json:"selector,omitempty"`
+	AccessModes []string                     `json:"accessModes,omitempty"`
+	DataSource  *V1TypedLocalObjectReference `json:"dataSource,omitempty"`
+	Resources   *V1ResourceRequirements      `json:"resources,omitempty"`
+	Selector    *V1LabelSelector             `json:"selector,omitempty"`
 	// Name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
 	StorageClassName string `json:"storageClassName,omitempty"`
 	// volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not included in claim spec.

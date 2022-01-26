@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "The Ververica Platform APIs, excluding Application Manager.",
-    "version": "2.0.0",
+    "version": "2.4.3",
     "title": "Ververica Platform API",
     "contact": {
       "name": "Ververica GmbH",
@@ -13,7 +13,7 @@
       "name": "Proprietary"
     }
   },
-  "host": "localhost:8081",
+  "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
@@ -21,8 +21,32 @@
       "description": "Api Tokens"
     },
     {
+      "name": "autopilot",
+      "description": "Autopilot"
+    },
+    {
+      "name": "catalog",
+      "description": "Catalog"
+    },
+    {
+      "name": "connector",
+      "description": "Connector"
+    },
+    {
+      "name": "job-graph",
+      "description": "Job Graph"
+    },
+    {
       "name": "namespaces",
       "description": "Namespaces"
+    },
+    {
+      "name": "sql",
+      "description": "Sql"
+    },
+    {
+      "name": "udf-artifacts",
+      "description": "Udf Artifacts"
     }
   ],
   "paths": {
@@ -62,6 +86,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       },
       "post": {
@@ -114,6 +143,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       }
     },
@@ -160,6 +194,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       },
       "delete": {
@@ -204,6 +243,722 @@
             "description": "Forbidden"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/autopilot/v1alpha1/namespaces/{ns}": {
+      "get": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "listAutopilotPolicies",
+        "operationId": "listAutopilotPoliciesUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListAutopilotPoliciesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/autopilot/v1alpha1/namespaces/{ns}/deployments/{deploymentId}/autopilotpolicy": {
+      "get": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "getAutopilotPolicy",
+        "operationId": "getAutopilotPolicyUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetAutopilotPolicyResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "updateAutopilotPolicy",
+        "operationId": "updateAutopilotPolicyUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "policy",
+            "description": "policy",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AutopilotPolicy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateAutopilotPolicyResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/autopilot/v1alpha1/namespaces/{ns}/deployments/{deploymentId}/autopilotpolicy:recommendation": {
+      "get": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "getAutopilotPolicyRecommendation",
+        "operationId": "getAutopilotPolicyRecommendationUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetAutopilotPolicyRecommendationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/autopilot/v1alpha1/namespaces/{ns}/deployments/{deploymentId}/autopilotpolicy:status": {
+      "get": {
+        "tags": [
+          "autopilot"
+        ],
+        "summary": "getAutopilotPolicyStatus",
+        "operationId": "getAutopilotPolicyStatusUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentId",
+            "in": "path",
+            "description": "deploymentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetAutopilotPolicyStatusResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "listCatalogs",
+        "operationId": "listCatalogsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListCatalogsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "getCatalog",
+        "operationId": "getCatalogUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetCatalogResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:getDatabase": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "getDatabase",
+        "operationId": "getDatabaseUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetDatabaseResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:getFunction": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "getFunction",
+        "operationId": "getFunctionUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "function",
+            "in": "query",
+            "description": "function",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetFunctionResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:getTable": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "getTable",
+        "operationId": "getTableUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "description": "table",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetTableResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:listDatabases": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "listDatabases",
+        "operationId": "listDatabasesUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListDatabasesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:listFunctions": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "listFunctions",
+        "operationId": "listFunctionsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListFunctionsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/catalog/v1beta2/namespaces/{ns}/catalogs/{cat}:listTables": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "listTables",
+        "operationId": "listTablesUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cat",
+            "in": "path",
+            "description": "cat",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListTablesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       }
     },
@@ -234,6 +989,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       },
       "post": {
@@ -279,6 +1039,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       }
     },
@@ -318,6 +1083,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       },
       "put": {
@@ -370,6 +1140,11 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       },
       "delete": {
@@ -407,8 +1182,1781 @@
             "description": "Forbidden"
           }
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "patchNamespace",
+        "operationId": "patchNamespaceUsingPATCH",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "namespacePatch",
+            "description": "namespacePatch",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Namespace"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateNamespaceResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "deprecated": false
       }
+    },
+    "/namespaces/v1/namespaces/{ns}:setPreviewSessionCluster": {
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "summary": "setPreviewSessionCluster",
+        "operationId": "setPreviewSessionClusterUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "request",
+            "description": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetPreviewSessionClusterRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SetPreviewSessionClusterResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/connectors": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "listConnectors",
+        "operationId": "listConnectorsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListConnectorsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "createConnector",
+        "operationId": "createConnectorUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "connector",
+            "description": "connector",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Connector"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateConnectorResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/connectors/{name}": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "getConnector",
+        "operationId": "getConnectorUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "connectorResourceId",
+            "in": "path",
+            "description": "connectorResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetConnectorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "updateConnector",
+        "operationId": "updateConnectorUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "connector",
+            "description": "connector",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Connector"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateConnectorResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "deleteConnector",
+        "operationId": "deleteConnectorUsingDELETE",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteConnectorResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/connectors/{name}:list-tables": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "listTablesReferencingConnector",
+        "operationId": "listTablesReferencingConnectorUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListTablesReferencingConnectorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/deployments/{deploymentId}:create-jobgraph": {
+      "post": {
+        "tags": [
+          "job-graph"
+        ],
+        "summary": "createJobGraph",
+        "operationId": "createJobGraphUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentName",
+            "in": "path",
+            "description": "deploymentName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "jobGraphSpec",
+            "description": "jobGraphSpec",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JobGraphSpec"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateJobGraphResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/deployments/{deploymentName}:delete-jobgraphs": {
+      "delete": {
+        "tags": [
+          "job-graph"
+        ],
+        "summary": "deleteJobGraphs",
+        "operationId": "deleteJobGraphsUsingDELETE",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "deploymentName",
+            "in": "path",
+            "description": "deploymentName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteJobGraphsResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/deployments/{deploymentName}:validate-config-change": {
+      "post": {
+        "tags": [
+          "job-graph"
+        ],
+        "summary": "validateConfigChange",
+        "operationId": "validateConfigChangeUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "configSpec",
+            "description": "configSpec",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConfigSpec"
+            }
+          },
+          {
+            "name": "deploymentName",
+            "in": "path",
+            "description": "deploymentName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ValidateConfigChangeResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/formats": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "listFormats",
+        "operationId": "listFormatsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListFormatsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "createFormat",
+        "operationId": "createFormatUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "format",
+            "description": "format",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Format"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateFormatResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/formats/{name}": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "getFormat",
+        "operationId": "getFormatUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "formatResourceId",
+            "in": "path",
+            "description": "formatResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetFormatResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "updateFormat",
+        "operationId": "updateFormatUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "format",
+            "description": "format",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Format"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateFormatResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "deleteFormat",
+        "operationId": "deleteFormatUsingDELETE",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteFormatResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/formats/{name}:list-tables": {
+      "get": {
+        "tags": [
+          "connector"
+        ],
+        "summary": "listTablesReferencingFormat",
+        "operationId": "listTablesReferencingFormatUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListTablesReferencingFormatResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts": {
+      "get": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "listSqlScripts",
+        "operationId": "listSqlScriptsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListSqlScriptsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "createSqlScript",
+        "operationId": "createSqlScriptUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "sqlScript",
+            "description": "sqlScript",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SqlScript"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateSqlScriptResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts/{sqlScriptName}": {
+      "get": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "getSqlScript",
+        "operationId": "getSqlScriptUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sqlScriptName",
+            "in": "path",
+            "description": "sqlScriptName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetSqlScriptResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "updateSqlScript",
+        "operationId": "updateSqlScriptUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "sqlScript",
+            "description": "sqlScript",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SqlScript"
+            }
+          },
+          {
+            "name": "sqlScriptName",
+            "in": "path",
+            "description": "sqlScriptName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateSqlScriptResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "deleteSqlScript",
+        "operationId": "deleteSqlScriptUsingDELETE",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sqlScriptName",
+            "in": "path",
+            "description": "sqlScriptName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteSqlScriptResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts:execute": {
+      "post": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "executeStatement",
+        "operationId": "executeStatementUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "catalog",
+            "in": "query",
+            "description": "catalog",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "statement",
+            "description": "statement",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Statement"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ExecuteStatementResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts:execute-multi": {
+      "post": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "executeStatements",
+        "operationId": "executeStatementsUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "catalog",
+            "in": "query",
+            "description": "catalog",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "statements",
+            "description": "statements",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "stopOnError",
+            "in": "query",
+            "description": "stopOnError",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ExecuteStatementsResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts:suggest": {
+      "post": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "suggestSqlScriptCompletions",
+        "operationId": "suggestSqlScriptCompletionsUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "details",
+            "description": "details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuggestSqlScriptCompletionsDetails"
+            }
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuggestSqlScriptCompletionsResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/sqlscripts:validate": {
+      "post": {
+        "tags": [
+          "sql"
+        ],
+        "summary": "validateStatement",
+        "operationId": "validateStatementUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "catalog",
+            "in": "query",
+            "description": "catalog",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "database",
+            "in": "query",
+            "description": "database",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "statement",
+            "description": "statement",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Statement"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ValidateStatementResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/udfartifacts": {
+      "get": {
+        "tags": [
+          "udf-artifacts"
+        ],
+        "summary": "listUdfArtifacts",
+        "operationId": "listUdfArtifactsUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "requireFunctionNames",
+            "in": "query",
+            "description": "requireFunctionNames",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListUdfArtifactsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "udf-artifacts"
+        ],
+        "summary": "createUdfArtifact",
+        "operationId": "createUdfArtifactUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "udfArtifact",
+            "description": "udfArtifact",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UdfArtifact"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateUdfArtifactResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/sql/v1beta1/namespaces/{ns}/udfartifacts/{udfArtifactName}": {
+      "get": {
+        "tags": [
+          "udf-artifacts"
+        ],
+        "summary": "getUdfArtifact",
+        "operationId": "getUdfArtifactUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "requireFunctionNames",
+            "in": "query",
+            "description": "requireFunctionNames",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "udfArtifactName",
+            "in": "path",
+            "description": "udfArtifactName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetUdfArtifactResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "udf-artifacts"
+        ],
+        "summary": "updateUdfArtifact",
+        "operationId": "updateUdfArtifactUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "udfArtifact",
+            "description": "udfArtifact",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UdfArtifact"
+            }
+          },
+          {
+            "name": "udfArtifactName",
+            "in": "path",
+            "description": "udfArtifactName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateUdfArtifactResponse"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "udf-artifacts"
+        ],
+        "summary": "deleteUdfArtifact",
+        "operationId": "deleteUdfArtifactUsingDELETE",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ns",
+            "in": "path",
+            "description": "ns",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "udfArtifactName",
+            "in": "path",
+            "description": "udfArtifactName",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteUdfArtifactResponse"
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   },
   "definitions": {
@@ -431,6 +2979,230 @@
       },
       "title": "ApiToken"
     },
+    "AutopilotPolicy": {
+      "type": "object",
+      "properties": {
+        "autoscalerConfig": {
+          "$ref": "#/definitions/AutoscalerConfig"
+        },
+        "libraConfig": {
+          "$ref": "#/definitions/LibraConfig"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "AUTOPILOT_MODE_INVALID",
+            "AUTOPILOT_MODE_DISABLED",
+            "AUTOPILOT_MODE_MONITORING",
+            "AUTOPILOT_MODE_ACTIVE",
+            "UNRECOGNIZED"
+          ]
+        },
+        "modifyTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "AutopilotPolicy"
+    },
+    "AutopilotPolicyRecommendation": {
+      "type": "object",
+      "properties": {
+        "deploymentPatch": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "lastUpdateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "AutopilotPolicyRecommendation"
+    },
+    "AutopilotPolicyStatus": {
+      "type": "object",
+      "properties": {
+        "autoscalerStatus": {
+          "$ref": "#/definitions/AutoscalerStatus"
+        },
+        "libraStatus": {
+          "$ref": "#/definitions/LibraStatus"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "POLICY_STATUS_INVALID",
+            "POLICY_STATUS_OK",
+            "POLICY_STATUS_ERROR",
+            "UNRECOGNIZED"
+          ]
+        }
+      },
+      "title": "AutopilotPolicyStatus"
+    },
+    "AutoscalerConfig": {
+      "type": "object",
+      "properties": {
+        "cooldownMinutes": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "extraConfig": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "maxParallelism": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minParallelism": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "targetUtilization": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "AutoscalerConfig"
+    },
+    "AutoscalerStatus": {
+      "type": "object",
+      "properties": {
+        "lastActionTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "message": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "string"
+        },
+        "sourceStatus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AutoscalingSourceStatus"
+          }
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "AutoscalerStatus"
+    },
+    "AutoscalingSourceStatus": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "number",
+          "format": "double"
+        },
+        "estimatedCatchUpSeconds": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "estimatedLagSeconds": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "target": {
+          "type": "number",
+          "format": "double"
+        },
+        "taskName": {
+          "type": "string"
+        },
+        "throughput": {
+          "type": "number",
+          "format": "double"
+        },
+        "vertexId": {
+          "type": "string"
+        }
+      },
+      "title": "AutoscalingSourceStatus"
+    },
+    "Catalog": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Catalog"
+    },
+    "ConfigSpec": {
+      "type": "object",
+      "properties": {
+        "flinkVersion": {
+          "type": "string"
+        },
+        "newConfig": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "ConfigSpec"
+    },
+    "Connector": {
+      "type": "object",
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lookup": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "packaged": {
+          "type": "boolean"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Property"
+          }
+        },
+        "sink": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "boolean"
+        },
+        "supportedFormats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "Connector"
+    },
     "CreateApiTokenResponse": {
       "type": "object",
       "properties": {
@@ -439,6 +3211,33 @@
         }
       },
       "title": "CreateApiTokenResponse"
+    },
+    "CreateConnectorResponse": {
+      "type": "object",
+      "properties": {
+        "connector": {
+          "$ref": "#/definitions/Connector"
+        }
+      },
+      "title": "CreateConnectorResponse"
+    },
+    "CreateFormatResponse": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "$ref": "#/definitions/Format"
+        }
+      },
+      "title": "CreateFormatResponse"
+    },
+    "CreateJobGraphResponse": {
+      "type": "object",
+      "properties": {
+        "jobgraph": {
+          "$ref": "#/definitions/JobGraph"
+        }
+      },
+      "title": "CreateJobGraphResponse"
     },
     "CreateNamespaceResponse": {
       "type": "object",
@@ -449,9 +3248,99 @@
       },
       "title": "CreateNamespaceResponse"
     },
+    "CreateSqlScriptResponse": {
+      "type": "object",
+      "properties": {
+        "sqlScript": {
+          "$ref": "#/definitions/SqlScript"
+        }
+      },
+      "title": "CreateSqlScriptResponse"
+    },
+    "CreateUdfArtifactResponse": {
+      "type": "object",
+      "properties": {
+        "collidingClasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfClass"
+          }
+        },
+        "udfArtifact": {
+          "$ref": "#/definitions/UdfArtifact"
+        }
+      },
+      "title": "CreateUdfArtifactResponse"
+    },
+    "Database": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Database"
+    },
     "DeleteApiTokenResponse": {
       "type": "object",
       "title": "DeleteApiTokenResponse"
+    },
+    "DeleteConnectorResponse": {
+      "type": "object",
+      "properties": {
+        "affectedTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        }
+      },
+      "title": "DeleteConnectorResponse"
+    },
+    "DeleteFormatResponse": {
+      "type": "object",
+      "properties": {
+        "affectedTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        }
+      },
+      "title": "DeleteFormatResponse"
+    },
+    "DeleteJobGraphResponse": {
+      "type": "object",
+      "properties": {
+        "notDeletedFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "DeleteJobGraphResponse"
+    },
+    "DeleteJobGraphsResponse": {
+      "type": "object",
+      "properties": {
+        "deletedJobGraphs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DeleteJobGraphResponse"
+          }
+        }
+      },
+      "title": "DeleteJobGraphsResponse"
     },
     "DeleteNamespaceResponse": {
       "type": "object",
@@ -462,6 +3351,150 @@
       },
       "title": "DeleteNamespaceResponse"
     },
+    "DeleteSqlScriptResponse": {
+      "type": "object",
+      "title": "DeleteSqlScriptResponse"
+    },
+    "DeleteUdfArtifactResponse": {
+      "type": "object",
+      "properties": {
+        "referencedClasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfClass"
+          }
+        }
+      },
+      "title": "DeleteUdfArtifactResponse"
+    },
+    "ErrorDetails": {
+      "type": "object",
+      "properties": {
+        "columnNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "endColumnNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "endLineNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lineNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "ErrorDetails"
+    },
+    "ExecuteStatementResponse": {
+      "type": "object",
+      "properties": {
+        "errorMessage": {
+          "$ref": "#/definitions/ErrorDetails"
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "RESULT_INVALID",
+            "RESULT_SUCCESS",
+            "RESULT_SUCCESS_WITH_ROWS",
+            "RESULT_ERROR_WITH_ROWS",
+            "RESULT_ERROR_WITH_DETAILS",
+            "RESULT_SKIPPED",
+            "UNRECOGNIZED"
+          ]
+        },
+        "resultTable": {
+          "$ref": "#/definitions/ResultTable"
+        }
+      },
+      "title": "ExecuteStatementResponse"
+    },
+    "ExecuteStatementsResponse": {
+      "type": "object",
+      "properties": {
+        "responses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExecuteStatementResponse"
+          }
+        }
+      },
+      "title": "ExecuteStatementsResponse"
+    },
+    "Format": {
+      "type": "object",
+      "properties": {
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "packaged": {
+          "type": "boolean"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Property"
+          }
+        },
+        "sink": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "Format"
+    },
+    "Function": {
+      "type": "object",
+      "properties": {
+        "className": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "functionLanguage": {
+          "type": "string",
+          "enum": [
+            "FUNCTION_LANGUAGE_INVALID",
+            "FUNCTION_LANGUAGE_JAVA",
+            "FUNCTION_LANGUAGE_SCALA",
+            "FUNCTION_LANGUAGE_PYTHON",
+            "UNRECOGNIZED"
+          ]
+        },
+        "functionType": {
+          "type": "string",
+          "enum": [
+            "FUNCTION_TYPE_INVALID",
+            "FUNCTION_TYPE_FLINK",
+            "FUNCTION_TYPE_UNKNOWN_EXTERNAL",
+            "UNRECOGNIZED"
+          ]
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "Function"
+    },
     "GetApiTokenResponse": {
       "type": "object",
       "properties": {
@@ -471,6 +3504,78 @@
       },
       "title": "GetApiTokenResponse"
     },
+    "GetAutopilotPolicyRecommendationResponse": {
+      "type": "object",
+      "properties": {
+        "recommendation": {
+          "$ref": "#/definitions/AutopilotPolicyRecommendation"
+        }
+      },
+      "title": "GetAutopilotPolicyRecommendationResponse"
+    },
+    "GetAutopilotPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "$ref": "#/definitions/AutopilotPolicy"
+        }
+      },
+      "title": "GetAutopilotPolicyResponse"
+    },
+    "GetAutopilotPolicyStatusResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/AutopilotPolicyStatus"
+        }
+      },
+      "title": "GetAutopilotPolicyStatusResponse"
+    },
+    "GetCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "catalog": {
+          "$ref": "#/definitions/Catalog"
+        }
+      },
+      "title": "GetCatalogResponse"
+    },
+    "GetConnectorResponse": {
+      "type": "object",
+      "properties": {
+        "connector": {
+          "$ref": "#/definitions/Connector"
+        }
+      },
+      "title": "GetConnectorResponse"
+    },
+    "GetDatabaseResponse": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "$ref": "#/definitions/Database"
+        }
+      },
+      "title": "GetDatabaseResponse"
+    },
+    "GetFormatResponse": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "$ref": "#/definitions/Format"
+        }
+      },
+      "title": "GetFormatResponse"
+    },
+    "GetFunctionResponse": {
+      "type": "object",
+      "properties": {
+        "function": {
+          "$ref": "#/definitions/Function"
+        }
+      },
+      "title": "GetFunctionResponse"
+    },
     "GetNamespaceResponse": {
       "type": "object",
       "properties": {
@@ -479,6 +3584,174 @@
         }
       },
       "title": "GetNamespaceResponse"
+    },
+    "GetSqlScriptResponse": {
+      "type": "object",
+      "properties": {
+        "sqlScript": {
+          "$ref": "#/definitions/SqlScript"
+        }
+      },
+      "title": "GetSqlScriptResponse"
+    },
+    "GetTableResponse": {
+      "type": "object",
+      "properties": {
+        "table": {
+          "$ref": "#/definitions/Table"
+        }
+      },
+      "title": "GetTableResponse"
+    },
+    "GetUdfArtifactResponse": {
+      "type": "object",
+      "properties": {
+        "udfArtifact": {
+          "$ref": "#/definitions/UdfArtifact"
+        }
+      },
+      "title": "GetUdfArtifactResponse"
+    },
+    "JobGraph": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "errorDetails": {
+          "$ref": "#/definitions/ErrorDetails"
+        },
+        "flinkVersion": {
+          "type": "string"
+        },
+        "fullFlinkConfiguration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "jarUris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jobgraphPath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sinkTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferencedTable"
+          }
+        },
+        "sourceTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferencedTable"
+          }
+        },
+        "sqlStatement": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "JOBGRAPH_STATE_INVALID",
+            "JOBGRAPH_STATE_TRANSLATING",
+            "JOBGRAPH_STATE_COMPLETED",
+            "JOBGRAPH_STATE_FAILED",
+            "UNRECOGNIZED"
+          ]
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userFlinkConfiguration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "JobGraph"
+    },
+    "JobGraphSpec": {
+      "type": "object",
+      "properties": {
+        "allowNonRestoredState": {
+          "type": "boolean"
+        },
+        "flinkVersion": {
+          "type": "string"
+        },
+        "fullFlinkConfiguration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "savepointLocation": {
+          "type": "string"
+        },
+        "sqlStatement": {
+          "type": "string"
+        },
+        "userFlinkConfiguration": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "JobGraphSpec"
+    },
+    "LibraConfig": {
+      "type": "object",
+      "properties": {
+        "cooldownMinutes": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "extraConfig": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "policies": {
+          "type": "string"
+        }
+      },
+      "title": "LibraConfig"
+    },
+    "LibraStatus": {
+      "type": "object",
+      "properties": {
+        "lastActionTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "message": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "LibraStatus"
     },
     "ListApiTokensResponse": {
       "type": "object",
@@ -492,6 +3765,78 @@
       },
       "title": "ListApiTokensResponse"
     },
+    "ListAutopilotPoliciesResponse": {
+      "type": "object",
+      "properties": {
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AutopilotPolicy"
+          }
+        }
+      },
+      "title": "ListAutopilotPoliciesResponse"
+    },
+    "ListCatalogsResponse": {
+      "type": "object",
+      "properties": {
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Catalog"
+          }
+        }
+      },
+      "title": "ListCatalogsResponse"
+    },
+    "ListConnectorsResponse": {
+      "type": "object",
+      "properties": {
+        "connectors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Connector"
+          }
+        }
+      },
+      "title": "ListConnectorsResponse"
+    },
+    "ListDatabasesResponse": {
+      "type": "object",
+      "properties": {
+        "databases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Database"
+          }
+        }
+      },
+      "title": "ListDatabasesResponse"
+    },
+    "ListFormatsResponse": {
+      "type": "object",
+      "properties": {
+        "formats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Format"
+          }
+        }
+      },
+      "title": "ListFormatsResponse"
+    },
+    "ListFunctionsResponse": {
+      "type": "object",
+      "properties": {
+        "functions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Function"
+          }
+        }
+      },
+      "title": "ListFunctionsResponse"
+    },
     "ListNamespacesResponse": {
       "type": "object",
       "properties": {
@@ -503,6 +3848,78 @@
         }
       },
       "title": "ListNamespacesResponse"
+    },
+    "ListSqlScriptsResponse": {
+      "type": "object",
+      "properties": {
+        "sqlScripts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SqlScript"
+          }
+        }
+      },
+      "title": "ListSqlScriptsResponse"
+    },
+    "ListTablesReferencingConnectorResponse": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        }
+      },
+      "title": "ListTablesReferencingConnectorResponse"
+    },
+    "ListTablesReferencingFormatResponse": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        }
+      },
+      "title": "ListTablesReferencingFormatResponse"
+    },
+    "ListTablesResponse": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Table"
+          }
+        }
+      },
+      "title": "ListTablesResponse"
+    },
+    "ListUdfArtifactsResponse": {
+      "type": "object",
+      "properties": {
+        "udfArtifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfArtifact"
+          }
+        }
+      },
+      "title": "ListUdfArtifactsResponse"
+    },
+    "MetadataColumnInformation": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "virtual": {
+          "type": "boolean"
+        }
+      },
+      "title": "MetadataColumnInformation"
     },
     "Namespace": {
       "type": "object",
@@ -523,6 +3940,9 @@
         "name": {
           "type": "string"
         },
+        "previewSessionClusterName": {
+          "type": "string"
+        },
         "roleBindings": {
           "type": "array",
           "items": {
@@ -531,6 +3951,63 @@
         }
       },
       "title": "Namespace"
+    },
+    "Property": {
+      "type": "object",
+      "properties": {
+        "defaultValue": {
+          "type": "string"
+        },
+        "definesFormat": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "title": "Property"
+    },
+    "ReferencedTable": {
+      "type": "object",
+      "properties": {
+        "catalogName": {
+          "type": "string"
+        },
+        "databaseName": {
+          "type": "string"
+        },
+        "table": {
+          "$ref": "#/definitions/Table"
+        },
+        "temporary": {
+          "type": "boolean"
+        }
+      },
+      "title": "ReferencedTable"
+    },
+    "ResultTable": {
+      "type": "object",
+      "properties": {
+        "headers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableHeader"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableRow"
+          }
+        }
+      },
+      "title": "ResultTable"
     },
     "RoleBinding": {
       "type": "object",
@@ -547,6 +4024,337 @@
       },
       "title": "RoleBinding"
     },
+    "SetPreviewSessionClusterRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "previewSessionClusterName": {
+          "type": "string"
+        }
+      },
+      "title": "SetPreviewSessionClusterRequest"
+    },
+    "SetPreviewSessionClusterResponse": {
+      "type": "object",
+      "title": "SetPreviewSessionClusterResponse"
+    },
+    "SqlScript": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "SqlScript"
+    },
+    "SqlScriptCompletion": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "HINT_TYPE_INVALID",
+            "HINT_TYPE_UNKNOWN",
+            "HINT_TYPE_COLUMN",
+            "HINT_TYPE_TABLE",
+            "HINT_TYPE_VIEW",
+            "HINT_TYPE_SCHEMA",
+            "HINT_TYPE_CATALOG",
+            "HINT_TYPE_REPOSITORY",
+            "HINT_TYPE_FUNCTION",
+            "HINT_TYPE_KEYWORD",
+            "UNRECOGNIZED"
+          ]
+        }
+      },
+      "title": "SqlScriptCompletion"
+    },
+    "Statement": {
+      "type": "object",
+      "properties": {
+        "statement": {
+          "type": "string"
+        }
+      },
+      "title": "Statement"
+    },
+    "SuggestSqlScriptCompletionsDetails": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sqlScript": {
+          "type": "string"
+        }
+      },
+      "title": "SuggestSqlScriptCompletionsDetails"
+    },
+    "SuggestSqlScriptCompletionsResponse": {
+      "type": "object",
+      "properties": {
+        "completions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SqlScriptCompletion"
+          }
+        }
+      },
+      "title": "SuggestSqlScriptCompletionsResponse"
+    },
+    "Table": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "schema": {
+          "$ref": "#/definitions/TableSchema"
+        }
+      },
+      "title": "Table"
+    },
+    "TableCell": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      },
+      "title": "TableCell"
+    },
+    "TableColumn": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string"
+        },
+        "meta": {
+          "$ref": "#/definitions/MetadataColumnInformation"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "TableColumn"
+    },
+    "TableHeader": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "TableHeader"
+    },
+    "TableReference": {
+      "type": "object",
+      "properties": {
+        "catalogName": {
+          "type": "string"
+        },
+        "databaseName": {
+          "type": "string"
+        },
+        "tableName": {
+          "type": "string"
+        }
+      },
+      "title": "TableReference"
+    },
+    "TableRow": {
+      "type": "object",
+      "properties": {
+        "cells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableCell"
+          }
+        }
+      },
+      "title": "TableRow"
+    },
+    "TableSchema": {
+      "type": "object",
+      "properties": {
+        "column": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableColumn"
+          }
+        },
+        "primaryKey": {
+          "$ref": "#/definitions/UniqueConstraint"
+        },
+        "watermarkSpec": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WatermarkSpec"
+          }
+        }
+      },
+      "title": "TableSchema"
+    },
+    "UdfArtifact": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "jarUpdateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "jarUrl": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "udfClasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfClass"
+          }
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "UdfArtifact"
+    },
+    "UdfClass": {
+      "type": "object",
+      "properties": {
+        "className": {
+          "type": "string"
+        },
+        "classType": {
+          "type": "string",
+          "enum": [
+            "UDF_TYPE_INVALID",
+            "UDF_TYPE_SCALAR",
+            "UDF_TYPE_TABLE",
+            "UDF_TYPE_AGGREGATE",
+            "UDF_TYPE_TABLE_AGGREGATE",
+            "UNRECOGNIZED"
+          ]
+        },
+        "functionNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "udfArtifactName": {
+          "type": "string"
+        }
+      },
+      "title": "UdfClass"
+    },
+    "UniqueConstraint": {
+      "type": "object",
+      "properties": {
+        "column": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "enforced": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "CONSTRAINT_TYPE_INVALID",
+            "CONSTRAINT_TYPE_PRIMARY_KEY",
+            "CONSTRAINT_TYPE_UNIQUE",
+            "UNRECOGNIZED"
+          ]
+        }
+      },
+      "title": "UniqueConstraint"
+    },
+    "UpdateAutopilotPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "$ref": "#/definitions/AutopilotPolicy"
+        }
+      },
+      "title": "UpdateAutopilotPolicyResponse"
+    },
+    "UpdateConnectorResponse": {
+      "type": "object",
+      "properties": {
+        "affectedTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        },
+        "connector": {
+          "$ref": "#/definitions/Connector"
+        }
+      },
+      "title": "UpdateConnectorResponse"
+    },
+    "UpdateFormatResponse": {
+      "type": "object",
+      "properties": {
+        "affectedTables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TableReference"
+          }
+        },
+        "format": {
+          "$ref": "#/definitions/Format"
+        }
+      },
+      "title": "UpdateFormatResponse"
+    },
     "UpdateNamespaceResponse": {
       "type": "object",
       "properties": {
@@ -555,6 +4363,86 @@
         }
       },
       "title": "UpdateNamespaceResponse"
+    },
+    "UpdateSqlScriptResponse": {
+      "type": "object",
+      "properties": {
+        "sqlScript": {
+          "$ref": "#/definitions/SqlScript"
+        }
+      },
+      "title": "UpdateSqlScriptResponse"
+    },
+    "UpdateUdfArtifactResponse": {
+      "type": "object",
+      "properties": {
+        "collidingClasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfClass"
+          }
+        },
+        "missingClasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UdfClass"
+          }
+        },
+        "udfArtifact": {
+          "$ref": "#/definitions/UdfArtifact"
+        }
+      },
+      "title": "UpdateUdfArtifactResponse"
+    },
+    "ValidateConfigChangeResponse": {
+      "type": "object",
+      "properties": {
+        "unsupportedConfigOptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "ValidateConfigChangeResponse"
+    },
+    "ValidateStatementResponse": {
+      "type": "object",
+      "properties": {
+        "errorDetails": {
+          "$ref": "#/definitions/ErrorDetails"
+        },
+        "validationResult": {
+          "type": "string",
+          "enum": [
+            "VALIDATION_RESULT_INVALID",
+            "VALIDATION_RESULT_INVALID_QUERY",
+            "VALIDATION_RESULT_UNSUPPORTED_QUERY",
+            "VALIDATION_RESULT_INVALID_CONNECTOR_CONFIG",
+            "VALIDATION_RESULT_VALID_INSERT_QUERY",
+            "VALIDATION_RESULT_VALID_SELECT_QUERY",
+            "VALIDATION_RESULT_VALID_DDL_STATEMENT",
+            "VALIDATION_RESULT_VALID_COMMAND_STATEMENT",
+            "UNRECOGNIZED"
+          ]
+        }
+      },
+      "title": "ValidateStatementResponse"
+    },
+    "WatermarkSpec": {
+      "type": "object",
+      "properties": {
+        "timeColumn": {
+          "type": "string"
+        },
+        "watermarkExpression": {
+          "type": "string"
+        },
+        "watermarkType": {
+          "type": "string"
+        }
+      },
+      "title": "WatermarkSpec"
     }
   }
 }

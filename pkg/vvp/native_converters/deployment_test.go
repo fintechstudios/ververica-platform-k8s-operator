@@ -22,12 +22,12 @@ var _ = Describe("Deployment", func() {
 					Spec: v1beta2.VpDeploymentSpec{
 						Template: &v1beta2.VpDeploymentTemplate{
 							Metadata: &v1beta2.VpDeploymentTemplateMetadata{},
-							Spec:     &v1beta2.VpDeploymentTemplateSpec{
+							Spec: &v1beta2.VpDeploymentTemplateSpec{
 								Kubernetes: &v1beta2.VpKubernetesOptions{
 									Pods: &v1beta2.VpPodSpec{
 										EnvVars: []core.EnvVar{
 											{
-												Name: "TEST_ENV",
+												Name:  "TEST_ENV",
 												Value: "TEST_VALUE",
 											},
 											{

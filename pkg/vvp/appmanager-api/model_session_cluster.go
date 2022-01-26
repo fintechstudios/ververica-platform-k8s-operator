@@ -11,9 +11,9 @@
 package appmanagerapi
 
 type SessionCluster struct {
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Kind string `json:"kind,omitempty"`
-	Metadata *SessionClusterMetadata `json:"metadata,omitempty"`
-	Spec *SessionClusterSpec `json:"spec,omitempty"`
-	Status *SessionClusterStatus `json:"status,omitempty"`
+	ApiVersion string                  `json:"apiVersion,omitempty"`
+	Kind       string                  `json:"kind,omitempty"`
+	Metadata   *SessionClusterMetadata `json:"metadata,omitempty"`
+	Spec       *SessionClusterSpec     `json:"spec,omitempty"`
+	Status     *SessionClusterStatus   `json:"status,omitempty"`
 }

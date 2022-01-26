@@ -11,8 +11,8 @@
 package appmanagerapi
 
 type ResourceListOfDeploymentTarget struct {
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Items []DeploymentTarget `json:"items,omitempty"`
-	Kind string `json:"kind,omitempty"`
-	Metadata *ResourceListMetadata `json:"metadata,omitempty"`
+	ApiVersion string                `json:"apiVersion,omitempty"`
+	Items      []DeploymentTarget    `json:"items,omitempty"`
+	Kind       string                `json:"kind,omitempty"`
+	Metadata   *ResourceListMetadata `json:"metadata,omitempty"`
 }

@@ -11,15 +11,15 @@
 package appmanagerapi
 
 type JobSpec struct {
-	AllowNonRestoredState bool `json:"allowNonRestoredState,omitempty"`
-	Artifact *Artifact `json:"artifact,omitempty"`
-	DeploymentTarget *JobDeploymentTarget `json:"deploymentTarget,omitempty"`
-	FlinkConfiguration map[string]string `json:"flinkConfiguration,omitempty"`
-	Kubernetes *KubernetesOptions `json:"kubernetes,omitempty"`
-	Logging *Logging `json:"logging,omitempty"`
-	NumberOfTaskManagers int32 `json:"numberOfTaskManagers,omitempty"`
-	Parallelism int32 `json:"parallelism,omitempty"`
-	Resources map[string]ResourceSpec `json:"resources,omitempty"`
-	SavepointLocation string `json:"savepointLocation,omitempty"`
-	UserFlinkConfiguration map[string]string `json:"userFlinkConfiguration,omitempty"`
+	AllowNonRestoredState  bool                    `json:"allowNonRestoredState,omitempty"`
+	Artifact               *Artifact               `json:"artifact,omitempty"`
+	DeploymentTarget       *JobDeploymentTarget    `json:"deploymentTarget,omitempty"`
+	FlinkConfiguration     map[string]string       `json:"flinkConfiguration,omitempty"`
+	Kubernetes             *KubernetesOptions      `json:"kubernetes,omitempty"`
+	Logging                *Logging                `json:"logging,omitempty"`
+	NumberOfTaskManagers   int32                   `json:"numberOfTaskManagers,omitempty"`
+	Parallelism            int32                   `json:"parallelism,omitempty"`
+	Resources              map[string]ResourceSpec `json:"resources,omitempty"`
+	SavepointLocation      string                  `json:"savepointLocation,omitempty"`
+	UserFlinkConfiguration map[string]string       `json:"userFlinkConfiguration,omitempty"`
 }

@@ -17,7 +17,6 @@ var _ = Describe("DeploymentSpec", func() {
 	var deploymentMaxCreationAttempts = int32(2)
 	var deploymentUpgradeStrategy = "STATELESS"
 	var deploymentRestoreStrategy = "NONE"
-	var deploymentRestoreAllowNonRestored = false
 	var deploymentParallelism = int32(1)
 	var deploymentNumTaskManagers = int32(2)
 	var artifactKind = "JAR"
@@ -64,8 +63,7 @@ var _ = Describe("DeploymentSpec", func() {
 					Kind: deploymentUpgradeStrategy,
 				},
 				RestoreStrategy: &appmanagerapi.DeploymentRestoreStrategy{
-					Kind:                  deploymentRestoreStrategy,
-					AllowNonRestoredState: deploymentRestoreAllowNonRestored,
+					Kind: deploymentRestoreStrategy,
 				},
 				Template: &appmanagerapi.DeploymentTemplate{
 					Metadata: &appmanagerapi.DeploymentTemplateMetadata{
@@ -102,7 +100,6 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(vpSpec.RestoreStrategy.Kind).To(Equal(deploymentRestoreStrategy))
-			Expect(vpSpec.RestoreStrategy.AllowNonRestoredState).To(Equal(deploymentRestoreAllowNonRestored))
 
 			Expect(vpSpec.UpgradeStrategy.Kind).To(Equal(deploymentUpgradeStrategy))
 
@@ -183,8 +180,7 @@ var _ = Describe("DeploymentSpec", func() {
 					Kind: deploymentUpgradeStrategy,
 				},
 				RestoreStrategy: &v1beta2.VpDeploymentRestoreStrategy{
-					Kind:                  deploymentRestoreStrategy,
-					AllowNonRestoredState: deploymentRestoreAllowNonRestored,
+					Kind: deploymentRestoreStrategy,
 				},
 				Template: &v1beta2.VpDeploymentTemplate{
 					Metadata: &v1beta2.VpDeploymentTemplateMetadata{
@@ -221,7 +217,6 @@ var _ = Describe("DeploymentSpec", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(spec.RestoreStrategy.Kind).To(Equal(deploymentRestoreStrategy))
-			Expect(spec.RestoreStrategy.AllowNonRestoredState).To(Equal(deploymentRestoreAllowNonRestored))
 
 			Expect(spec.UpgradeStrategy.Kind).To(Equal(deploymentUpgradeStrategy))
 

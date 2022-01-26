@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type SystemInformation struct {
-	ApiVersion string `json:"apiVersion,omitempty"`
-	Kind string `json:"kind,omitempty"`
-	Status *SystemInformationStatus `json:"status,omitempty"`
+	ApiVersion string                   `json:"apiVersion,omitempty"`
+	Kind       string                   `json:"kind,omitempty"`
+	Status     *SystemInformationStatus `json:"status,omitempty"`
 }

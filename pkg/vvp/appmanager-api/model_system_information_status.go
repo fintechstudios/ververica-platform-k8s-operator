@@ -11,7 +11,7 @@
 package appmanagerapi
 
 type SystemInformationStatus struct {
-	JvmVersion string `json:"jvmVersion,omitempty"`
-	ResourceQuota *ResourceQuota `json:"resourceQuota,omitempty"`
+	JvmVersion          string               `json:"jvmVersion,omitempty"`
+	ResourceQuota       *ResourceQuota       `json:"resourceQuota,omitempty"`
 	RevisionInformation *RevisionInformation `json:"revisionInformation,omitempty"`
 }

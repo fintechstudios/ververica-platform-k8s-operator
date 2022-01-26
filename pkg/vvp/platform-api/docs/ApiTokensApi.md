@@ -1,17 +1,17 @@
 # \ApiTokensApi
 
-All URIs are relative to *https://localhost:8081*
+All URIs are relative to *https://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateApiToken**](ApiTokensApi.md#CreateApiToken) | **Post** /apitokens/v1/namespaces/{ns}/apitokens | createApiToken
-[**DeleteApiToken**](ApiTokensApi.md#DeleteApiToken) | **Delete** /apitokens/v1/namespaces/{ns}/apitokens/{apiTokenName} | deleteApiToken
-[**GetApiToken**](ApiTokensApi.md#GetApiToken) | **Get** /apitokens/v1/namespaces/{ns}/apitokens/{apiTokenName} | getApiToken
-[**ListApiTokens**](ApiTokensApi.md#ListApiTokens) | **Get** /apitokens/v1/namespaces/{ns}/apitokens | listApiTokens
+[**CreateApiTokenUsingPOST**](ApiTokensApi.md#CreateApiTokenUsingPOST) | **Post** /apitokens/v1/namespaces/{ns}/apitokens | createApiToken
+[**DeleteApiTokenUsingDELETE**](ApiTokensApi.md#DeleteApiTokenUsingDELETE) | **Delete** /apitokens/v1/namespaces/{ns}/apitokens/{apiTokenName} | deleteApiToken
+[**GetApiTokenUsingGET**](ApiTokensApi.md#GetApiTokenUsingGET) | **Get** /apitokens/v1/namespaces/{ns}/apitokens/{apiTokenName} | getApiToken
+[**ListApiTokensUsingGET**](ApiTokensApi.md#ListApiTokensUsingGET) | **Get** /apitokens/v1/namespaces/{ns}/apitokens | listApiTokens
 
 
-# **CreateApiToken**
-> CreateApiTokenResponse CreateApiToken(ctx, apiToken, ns)
+# **CreateApiTokenUsingPOST**
+> CreateApiTokenResponse CreateApiTokenUsingPOST(ctx, apiToken, ns)
 createApiToken
 
 ### Required Parameters
@@ -28,7 +28,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -37,8 +37,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **DeleteApiToken**
-> DeleteApiTokenResponse DeleteApiToken(ctx, apiTokenName, ns)
+# **DeleteApiTokenUsingDELETE**
+> DeleteApiTokenResponse DeleteApiTokenUsingDELETE(ctx, apiTokenName, ns)
 deleteApiToken
 
 ### Required Parameters
@@ -55,7 +55,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -64,8 +64,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **GetApiToken**
-> GetApiTokenResponse GetApiToken(ctx, apiTokenName, ns)
+# **GetApiTokenUsingGET**
+> GetApiTokenResponse GetApiTokenUsingGET(ctx, apiTokenName, ns)
 getApiToken
 
 ### Required Parameters
@@ -82,7 +82,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 
@@ -91,8 +91,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **ListApiTokens**
-> ListApiTokensResponse ListApiTokens(ctx, ns)
+# **ListApiTokensUsingGET**
+> ListApiTokensResponse ListApiTokensUsingGET(ctx, ns)
 listApiTokens
 
 ### Required Parameters
@@ -108,7 +108,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKey](../README.md#apiKey)
 
 ### HTTP request headers
 

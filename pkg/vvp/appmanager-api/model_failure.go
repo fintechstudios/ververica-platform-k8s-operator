@@ -15,7 +15,7 @@ import (
 )
 
 type Failure struct {
-	Message string `json:"message,omitempty"`
-	Reason string `json:"reason,omitempty"`
+	Message  string    `json:"message,omitempty"`
+	Reason   string    `json:"reason,omitempty"`
 	FailedAt time.Time `json:"failedAt,omitempty"`
 }

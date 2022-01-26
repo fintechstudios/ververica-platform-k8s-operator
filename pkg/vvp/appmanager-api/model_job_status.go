@@ -11,9 +11,9 @@
 package appmanagerapi
 
 type JobStatus struct {
-	Failure *Failure `json:"failure,omitempty"`
-	SinkTables []JobTable `json:"sinkTables,omitempty"`
-	SourceTables []JobTable `json:"sourceTables,omitempty"`
-	Started *JobStatusStarted `json:"started,omitempty"`
-	State string `json:"state,omitempty"`
+	Failure      *Failure          `json:"failure,omitempty"`
+	SinkTables   []JobTable        `json:"sinkTables,omitempty"`
+	SourceTables []JobTable        `json:"sourceTables,omitempty"`
+	Started      *JobStatusStarted `json:"started,omitempty"`
+	State        string            `json:"state,omitempty"`
 }

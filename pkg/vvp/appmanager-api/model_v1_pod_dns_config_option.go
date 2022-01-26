@@ -13,6 +13,6 @@ package appmanagerapi
 // PodDNSConfigOption defines DNS resolver options of a pod.
 type V1PodDnsConfigOption struct {
 	// Required.
-	Name string `json:"name,omitempty"`
+	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }

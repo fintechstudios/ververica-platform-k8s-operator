@@ -11,6 +11,6 @@
 package appmanagerapi
 
 type Quantity struct {
-	Format string `json:"format,omitempty"`
+	Format string  `json:"format,omitempty"`
 	Number float32 `json:"number,omitempty"`
 }

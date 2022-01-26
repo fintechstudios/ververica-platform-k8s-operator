@@ -15,12 +15,12 @@ import (
 )
 
 type DeploymentDefaultsMetadata struct {
-	Annotations map[string]string `json:"annotations,omitempty"`
-	CreatedAt time.Time `json:"createdAt,omitempty"`
-	Id string `json:"id,omitempty"`
-	Labels map[string]string `json:"labels,omitempty"`
-	ModifiedAt time.Time `json:"modifiedAt,omitempty"`
-	Name string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	ResourceVersion int32 `json:"resourceVersion,omitempty"`
+	Annotations     map[string]string `json:"annotations,omitempty"`
+	CreatedAt       time.Time         `json:"createdAt,omitempty"`
+	Id              string            `json:"id,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty"`
+	ModifiedAt      time.Time         `json:"modifiedAt,omitempty"`
+	Name            string            `json:"name,omitempty"`
+	Namespace       string            `json:"namespace,omitempty"`
+	ResourceVersion int32             `json:"resourceVersion,omitempty"`
 }
