@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run w/o webhook" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="ververica-platform-k8s-operator" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="ENABLE_WEBHOOK" value="true" />
+    </envs>
+    <kind value="FILE" />
+    <package value="github.com/fintechstudios/ververica-platform-k8s-operator" />
+    <directory value="$PROJECT_DIR$/" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
