@@ -63,7 +63,7 @@ var _ = Describe("VpDeployment conversion", func() {
 								Pods: &VpPodSpec{
 									EnvVars: []core.EnvVar{
 										{
-											Name: "TEST_ENV",
+											Name:  "TEST_ENV",
 											Value: "TEST_VALUE",
 										},
 									},
@@ -108,7 +108,7 @@ var _ = Describe("VpDeployment conversion", func() {
 								Pods: &v1beta1.VpPodSpec{
 									EnvVars: []core.EnvVar{
 										{
-											Name: "TEST_ENV",
+											Name:  "TEST_ENV",
 											Value: "TEST_VALUE",
 										},
 									},

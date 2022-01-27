@@ -136,6 +136,8 @@ System Pre-requisites:
 
 To use the default test cluster, you'll need to store a `KUBECONFIG` env var pointed to it.
 
+Setting `DISABLE_WEBHOOKS` to any value does what you think it will.
+
 [`godotenv`](https://github.com/joho/godotenv) automatically loads this when running `main`.
 
 ### AppManager + Platform APIs
@@ -170,6 +172,7 @@ Affected files:
 Type Changes:
 * `model_pods.go` needs to be updated with the proper Kubernetes types
 * `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
+* `model_env_var.go` needs to be updated with the proper Kubernetes types
 
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so

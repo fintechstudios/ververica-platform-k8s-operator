@@ -2,10 +2,10 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeploymentTarget
 metadata:
   name: top-speed-v2
-  namespace: top-speed
+  namespace: vvp-jobs
 spec:
   metadata:
     namespace: default
   spec:
     kubernetes:
-      namespace: top-speed
+      namespace: vvp-jobs

@@ -2,7 +2,7 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta2
 kind: VpDeployment
 metadata:
   name: top-speed-v2
-  namespace: top-speed
+  namespace: vvp-jobs
 spec:
   deploymentTargetName: top-speed-v2
   metadata:
@@ -23,13 +23,13 @@ spec:
       spec:
         artifact:
           kind: JAR
-          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.10.0/flink-examples-streaming_2.12-1.10.0-TopSpeedWindowing.jar
+          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.12.0/flink-examples-streaming_2.12-1.12.0-TopSpeedWindowing.jar
           mainArgs: --windowSize 10 --windowUnit minutes
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
-          flinkVersion: "1.10"
-          flinkImageRegistry: registry.platform.data-artisans.net/v2.1
-          flinkImageRepository: flink
-          flinkImageTag: 1.10.0-stream1-scala_2.12
+          flinkVersion: "1.12"
+          # flinkImageRegistry: registry.platform.data-artisans.net/v2.1
+          # flinkImageRepository: flink
+          # flinkImageTag: 1.10.0-stream1-scala_2.12
         parallelism: 2
         numberOfTaskManagers: 2
         resources:
@@ -39,13 +39,13 @@ spec:
           taskmanager:
             memory: 1.5g
         flinkConfiguration:
-          high-availability.storageDir:  s3://flink/haState
+          # high-availability.storageDir:  s3://flink/haState
           # Should replace these with a distributed file system URI
           state.savepoints.dir: file:///flink/state/savepoints
           state.checkpoints.dir: file:///flink/state/checkpoints
-        logging:
-          log4jLoggers:
-            "com.fintechstudios": DEBUG
+        # logging:
+        #   log4jLoggers:
+        #     "com.fintechstudios": DEBUG
         kubernetes:
           pods:
             #            volumeMounts:

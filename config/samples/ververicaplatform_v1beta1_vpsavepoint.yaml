@@ -2,9 +2,9 @@ apiVersion: ververicaplatform.fintechstudios.com/v1beta1
 kind: VpSavepoint
 metadata:
   name: top-speed-savepoint-1
-  namespace: top-speed
+  namespace: vvp-jobs
 spec:
-  deploymentName: top-speed
+  deploymentName: top-speed-v2
   metadata:
     # must be `default` for the Community Edition
     namespace: default

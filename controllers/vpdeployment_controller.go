@@ -353,6 +353,10 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, err
 	}
 
+	if vpDeployment.Status == nil {
+		vpDeployment.Status = &v1beta2.VpDeploymentStatus{}
+	}
+
 	vpDeployment.Status.State, err = nativeconverters.DeploymentStateToNative(updatedDep.Status.State)
 
 	if err != nil {

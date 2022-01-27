@@ -211,14 +211,18 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "VpSavepoint")
 		os.Exit(1)
 	}
-	if err = (&v1beta1.VpDeployment{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeployment")
-		os.Exit(1)
+
+	if _, ok := os.LookupEnv("DISABLE_WEBHOOK"); !ok {
+		if err = (&v1beta1.VpDeployment{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VpDeployment")
+			os.Exit(1)
+		}
+		if err = (&v1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VpDeploymentTarget")
+			os.Exit(1)
+		}
 	}
-	if err = (&v1beta1.VpDeploymentTarget{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "VpDeploymentTarget")
-		os.Exit(1)
-	}
+
 	// +kubebuilder:scaffold:builder
 
 	// after the manager has quit, make sure to clean up created resources

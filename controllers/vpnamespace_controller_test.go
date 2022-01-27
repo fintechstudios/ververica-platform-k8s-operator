@@ -16,13 +16,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func timeMustParse(layout, value string) *time.Time {
+func timeMustParse(layout, value string) time.Time {
 	date, err := time.Parse(layout, value)
 	if err != nil {
 		panic(err)
 	}
 
-	return &date
+	return date
 }
 
 var _ = Describe("VpNamespace Controller", func() {

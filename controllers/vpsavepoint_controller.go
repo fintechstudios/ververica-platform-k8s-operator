@@ -135,7 +135,7 @@ func (r *VpSavepointReconciler) handleCreate(req ctrl.Request, vpSavepoint v1bet
 		deployment, err := r.AppManagerClient.Deployments().GetDeploymentByName(context.Background(), nsName, depName)
 
 		if utils.IsNotFoundError(err) {
-			log.Info("No deployment by name %s", depName)
+			log.Info("No deployment", "name", depName)
 			return ctrl.Result{}, err
 		}
 
