@@ -212,7 +212,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if _, ok := os.LookupEnv("DISABLE_WEBHOOK"); !ok {
+	if _, ok := os.LookupEnv("DISABLE_WEBHOOKS"); !ok {
 		if err = (&v1beta1.VpDeployment{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "VpDeployment")
 			os.Exit(1)
