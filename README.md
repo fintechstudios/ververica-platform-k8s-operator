@@ -174,6 +174,12 @@ Type Changes:
 * `model_volume_and_mount.go` needs to be updated with the proper Kubernetes types
 * `model_env_var.go` needs to be updated with the proper Kubernetes types
 
+Type additions:
+* `model_deployment_restore_stragegy.go` needs:
+  ```go 
+    AllowNonRestoredState bool   `json:"allowNonRestoredState,omitempty"`
+  ```
+
 
 There is also a bug that cannot handle an empty Swagger type to represent the `any` type, so
 you must manually change [`model_any.go`](pkg/vvp/appmanager-api/model_any.go) to:

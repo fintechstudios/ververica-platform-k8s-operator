@@ -11,5 +11,6 @@
 package appmanagerapi
 
 type DeploymentRestoreStrategy struct {
-	Kind string `json:"kind,omitempty"`
+	Kind                  string `json:"kind,omitempty"`
+	AllowNonRestoredState bool   `json:"allowNonRestoredState,omitempty"`
 }
