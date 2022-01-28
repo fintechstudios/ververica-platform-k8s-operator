@@ -100,7 +100,7 @@ in [docs/design.md](docs/design.md).
 Also built as a Go module - no vendor files here.
 
 System Pre-requisites:
-- `go` >= `1.14.x`
+- `go` >= `1.17.x`
 - `make` >= `4`
 - `kubebuilder` == [`v2.2.0`](https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v2.2.0)
 - `docker` >= `19`
