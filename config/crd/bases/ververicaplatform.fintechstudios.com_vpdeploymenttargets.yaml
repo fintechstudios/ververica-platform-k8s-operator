@@ -1,6 +1,6 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
@@ -8,13 +8,6 @@ metadata:
   creationTimestamp: null
   name: vpdeploymenttargets.ververicaplatform.fintechstudios.com
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .spec.metadata.namespace
-    name: Namespace
-    type: string
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpDeploymentTarget
@@ -22,10 +15,16 @@ spec:
     plural: vpdeploymenttargets
     singular: vpdeploymenttarget
   scope: Namespaced
-  subresources: {}
-  version: v1beta1
   versions:
   - name: v1beta1
+    subresources: {}
+    additionalPrinterColumns:
+    - jsonPath: .spec.metadata.namespace
+      name: Namespace
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     schema:
       openAPIV3Schema:
         description: VpDeploymentTarget is the Schema for the vpdeploymenttargets
@@ -97,6 +96,14 @@ spec:
     served: true
     storage: true
   - name: v1beta2
+    subresources: {}
+    additionalPrinterColumns:
+    - jsonPath: .spec.metadata.namespace
+      name: Namespace
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     schema:
       openAPIV3Schema:
         description: VpDeploymentTarget is the Schema for the vpdeploymenttargets
