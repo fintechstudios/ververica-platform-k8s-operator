@@ -23,13 +23,13 @@ spec:
       spec:
         artifact:
           kind: JAR
-          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.10.0/flink-examples-streaming_2.12-1.10.0-TopSpeedWindowing.jar
+          jarUri: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.14.4/flink-examples-streaming_2.12-1.14.4-TopSpeedWindowing.jar
           mainArgs: --windowSize 10 --windowUnit minutes
           entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
-          flinkVersion: "1.10"
-          flinkImageRegistry: registry.platform.data-artisans.net/v2.1
-          flinkImageRepository: flink
-          flinkImageTag: 1.10.0-stream1-scala_2.12
+          flinkVersion: "1.14"
+          flinkImageRegistry: registry.ververica.com
+          flinkImageRepository: v2.6/flink
+          flinkImageTag: 1.14.4-stream1-scala_2.12-java11
         parallelism: 2
         numberOfTaskManagers: 2
         resources:
