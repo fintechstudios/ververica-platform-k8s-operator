@@ -1,5 +1,5 @@
 {{- if .Values.certs.enabled }}
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ template "vp-k8s-operator.fullname" . }}-serving-cert
@@ -16,7 +16,7 @@ spec:
     name: {{ template "vp-k8s-operator.fullname" . }}-selfsigned-issuer
   secretName: {{ template "vp-k8s-operator.fullname" . }}-webhook-server-cert
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ template "vp-k8s-operator.fullname" . }}-selfsigned-issuer

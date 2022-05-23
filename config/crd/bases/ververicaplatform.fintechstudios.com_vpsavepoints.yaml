@@ -1,6 +1,6 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
@@ -8,13 +8,6 @@ metadata:
   creationTimestamp: null
   name: vpsavepoints.ververicaplatform.fintechstudios.com
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
-  - JSONPath: .status.state
-    name: State
-    type: string
   group: ververicaplatform.fintechstudios.com
   names:
     kind: VpSavepoint
@@ -22,83 +15,89 @@ spec:
     plural: vpsavepoints
     singular: vpsavepoint
   scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      description: VpSavepoint is the Schema for the vpsavepoints API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: VpSavepointSpec defines the desired state of VpSavepoint
-          properties:
-            deploymentName:
-              description: DeploymentName is an extension on the VP API Must provide
-                a spec.metadata.deploymentId if not set
-              type: string
-            metadata:
-              properties:
-                annotations:
-                  additionalProperties:
-                    type: string
-                  type: object
-                deploymentId:
-                  description: Can be specified through the .spec.deploymentName
-                  type: string
-                labels:
-                  additionalProperties:
-                    type: string
-                  type: object
-                namespace:
-                  type: string
-              type: object
-            spec:
-              properties:
-                flinkSavepointId:
-                  type: string
-                savepointLocation:
-                  type: string
-              required:
-              - flinkSavepointId
-              - savepointLocation
-              type: object
-          type: object
-        status:
-          description: VpSavepointStatus defines the observed state of VpSavepoint
-          properties:
-            failure:
-              properties:
-                failedAt:
-                  type: string
-                message:
-                  type: string
-                reason:
-                  type: string
-              type: object
-            state:
-              enum:
-              - STARTED
-              - COMPLETED
-              - FAILED
-              type: string
-          required:
-          - state
-          type: object
-      type: object
-  version: v1beta1
   versions:
   - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: VpSavepoint is the Schema for the vpsavepoints API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VpSavepointSpec defines the desired state of VpSavepoint
+            properties:
+              deploymentName:
+                description: DeploymentName is an extension on the VP API Must provide
+                  a spec.metadata.deploymentId if not set
+                type: string
+              metadata:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  deploymentId:
+                    description: Can be specified through the .spec.deploymentName
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  namespace:
+                    type: string
+                type: object
+              spec:
+                properties:
+                  flinkSavepointId:
+                    type: string
+                  savepointLocation:
+                    type: string
+                required:
+                - flinkSavepointId
+                - savepointLocation
+                type: object
+            type: object
+          status:
+            description: VpSavepointStatus defines the observed state of VpSavepoint
+            properties:
+              failure:
+                properties:
+                  failedAt:
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                type: object
+              state:
+                enum:
+                - STARTED
+                - COMPLETED
+                - FAILED
+                type: string
+            required:
+            - state
+            type: object
+        type: object
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .status.state
+      name: State
+      type: string
     served: true
     storage: true
 status:
