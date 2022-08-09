@@ -17,6 +17,12 @@ spec:
     metadata:
       labels:
         control-plane: {{ template "vp-k8s-operator.name" . }}-controller-manager
+    {{- if .Values.podAnnotations }}
+      annotations:
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+    {{- end }}
     spec:
       containers:
           {{- if .Values.rbacProxy.enabled }}

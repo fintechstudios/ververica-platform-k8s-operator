@@ -48,3 +48,6 @@ resources:
 
 # Extra arguments to pass to the manager
 # extraArgs: []
+
+# Annotations to be added to pods
+podAnnotations: {}
