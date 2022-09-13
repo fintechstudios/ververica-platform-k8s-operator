@@ -46,6 +46,17 @@ resources:
     cpu: 100m
     memory: 20Mi
 
+# Liveness Probe (metrics endpoint can be used for that)
+livenessProbe: {}
+# livenessProbe:
+#   httpGet:
+#     path: /metrics
+#     port: 8080
+#   failureThreshold: 3
+#   successThreshold: 1
+#   initialDelaySeconds: 30
+#   periodSeconds: 10
+
 # Extra arguments to pass to the manager
 # extraArgs: []
 

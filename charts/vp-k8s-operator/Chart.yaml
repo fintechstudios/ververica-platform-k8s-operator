@@ -2,4 +2,4 @@ apiVersion: v1
 appVersion: "latest"
 description: A Helm chart for the Ververica Platform K8s Operator
 name: vp-k8s-operator
-version: 0.13.0
+version: 0.14.0
