@@ -3,7 +3,7 @@ package nativeconverters
 import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
+	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
 )
 
 // DeploymentFromNative converts a native K8s VpDeployment to the Ververica Platform's representation
@@ -35,7 +35,7 @@ func DeploymentFromNative(vpDeployment v1beta2.VpDeployment) (appmanagerapi.Depl
 		return deployment, err
 	}
 
-	if len(vpDeployment.Status.State) > 0 {
+	if vpDeployment.Status != nil && len(vpDeployment.Status.State) > 0 {
 		// we've got some state
 		state, err := DeploymentStateFromNative(vpDeployment.Status.State)
 		if err != nil {

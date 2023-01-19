@@ -19,10 +19,11 @@ package controllers
 import (
 	"context"
 	"errors"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
-	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 	"strconv"
 	"time"
+
+	"github.com/fintechstudios/ververica-platform-k8s-operator/api/v1beta2"
+	vvperrors "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/errors"
 
 	"github.com/antihax/optional"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/annotations"
@@ -30,7 +31,7 @@ import (
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/utils"
 	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager"
 	appmanagerapi "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/appmanager-api"
-	"github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
+	nativeconverters "github.com/fintechstudios/ververica-platform-k8s-operator/pkg/vvp/native_converters"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -374,6 +375,11 @@ func (r *VpDeploymentReconciler) handleUpdate(req ctrl.Request, vpDeployment v1b
 func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1beta2.VpDeployment) (ctrl.Result, error) {
 	log := r.getLogger(req)
 
+	if true {
+		log.Info("This operator will not delete job in Ververica platform. Please do that manually")
+		return ctrl.Result{}, nil
+	}
+
 	// First must make sure the deployment is canceled, then must delete it.
 	nsName := utils.GetNamespaceOrDefault(vpDeployment.Spec.Metadata.Namespace)
 	var err error
@@ -422,7 +428,7 @@ func (r *VpDeploymentReconciler) handleDelete(req ctrl.Request, vpDeployment v1b
 		return ctrl.Result{}, utils.IgnoreNotFoundError(err)
 	}
 
-	log.Info("Deleting Deployment", "name", deployment.Metadata.Name)
+	log.Info("(Would have) Deleted Deployment", "name", deployment.Metadata.Name)
 	r.removePollers(req)
 	return ctrl.Result{}, nil
 }
